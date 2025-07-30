@@ -1,0 +1,76 @@
+#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+server:
+  port: 1106
+  #tomcat 请求设置
+  tomcat:
+    uri-encoding: UTF-8
+    max-connections: 3000
+    max-threads: 1000
+  max-http-header-size: 1024000
+spring:
+  profiles:
+    active: dev
+  application:
+    name: 账户管理接口
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1024000
+  jackson:
+    default-property-inclusion: non_null
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  jpa:
+    show-sql: true
+    hibernate:
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        dialect: kc.database.core.CustomSqlServer2012Dialect
+        format_sql: true
+        hbm2ddl:
+          auto: update
+        multiTenancy: SCHEMA
+        multi_tenant_connection_provider: kc.database.multitenancy.MsSqlMultiTenantConnectionProviderImpl
+        tenant_identifier_resolver: kc.database.multitenancy.MultiTenantIdentifierResolver
+        globally_quoted_identifiers: true
+        # 解决单元测试中的 LAZY on session 问题
+        enable_lazy_load_no_trans: true
+        # 解决hibernate multiple merge问题
+        event:
+          merge:
+            entity_copy_observer: allow
+  devtools:
+    restart:
+      enabled: true
+      #exclude: WEB-INF/**
+  output:
+    ansi:
+      enabled: DETECT
+  liquibase:
+    enabled: false
+logging:
+  level:
+    org.springframework.boot.autoconfigure: ERROR
+swagger:
+  clientId: Y0RiYQ==
+  clientSecret: MmJmNWIyM2Q5ZjY4OWU5YzFmYWVkZTUwNzY2ZWJkNTg=
+  title: 应用管理接口
+  description: 企业应用管理相关接口
+GlobalConfig:
+  ApplicationId: 1F301943-268F-4940-8BFB-900E0E6E0D35
+
+  ClientId: CFWinAPP
+  ClientSecret: app_password
+  TempFilePath: d:\\tmp,
+  WeixinAppKey:
+  WeixinAppSecret:
+  WeixinAppToken:
+  UploadConfig:
+    ImageMaxSize: 20
+    ImageExt: jpg,jpeg,png,gif,bmp
+    FileMaxSize: 20
+    FileExt: txt,doc,docx,xls,xlsx,ppt,pptx,pdf

@@ -1,0 +1,40 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+### VS Code ###
+.vscode/
+
+target/*
+surefire-reports/*
+
+target/surefire-reports/kc.webapi.config.AppTest.txt
+surefire-reports/TEST-kc.webapi.config.AppTest.xml
+target/surefire-reports/kc.webapi.config.AppTest.txt
+target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+target/kc.webapi.config-1.0.0.1.jar.original

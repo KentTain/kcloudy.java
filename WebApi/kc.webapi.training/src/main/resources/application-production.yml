@@ -1,0 +1,18 @@
+#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+spring:
+  datasource: #数据库连接
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://rm-8vb7ip9632ck1tt4l.mssql.zhangbei.rds.aliyuncs.com:3433;databaseName=MSSqlKCContext;
+    username: sqlserver_admin
+    password: NG6lJCNxSxZHrihmlyXS
+logging:
+  level:
+    org.springframework.boot.autoconfigure: ERROR
+    
+GlobalConfig:
+  EncryptKey: KCloudy-Microsoft-EncryptKey
+
+  SSOWebDomain: http://sso.kcloudy.com/
+  ResWebDomain: http://resource.kcloudy.com/
+  CfgWebDomain: http://subdomain.cfg.kcloudy.com/
