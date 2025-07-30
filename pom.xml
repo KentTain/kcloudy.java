@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.6.2</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>kcloudy.business</groupId>
+	<artifactId>kcloudy.business</artifactId>
+	<version>1.0.0.1</version>
+	<name>kcloudy.business</name>
+	<packaging>pom</packaging>
+
+	<description>kcloudy project for Spring Boot</description>
+
+	<modules>
+		<module>Common/kc.component</module>
+		<module>Common/kc.framework</module>
+		<module>Common/kc.storage</module>
+		<module>Common/kc.thirdparty</module>
+		<module>Common/kc.database</module>
+		<module>Common/kc.service</module>
+		<module>Common/kc.web</module>
+
+		<module>Domain/kc.dataaccess.account</module>
+		<module>Domain/kc.dataaccess.app</module>
+		<module>Domain/kc.dataaccess.codegenerate</module>
+		<module>Domain/kc.dataaccess.config</module>
+		<module>Domain/kc.dataaccess.dict</module>
+		<module>Domain/kc.dataaccess.training</module>
+		<module>Domain/kc.dataaccess.offering</module>
+		<module>Domain/kc.dataaccess.portal</module>
+
+		<module>Service/kc.service.account</module>
+		<module>Service/kc.service.app</module>
+		<module>Service/kc.service.codegenerate</module>
+		<module>Service/kc.service.config</module>
+		<module>Service/kc.service.dict</module>
+		<module>Service/kc.service.training</module>
+		<module>Service/kc.service.offering</module>
+		<module>Service/kc.service.portal</module>
+
+		<module>Web/kc.web.account</module>
+		<module>Web/kc.web.app</module>
+		<module>Web/kc.web.codegenerate</module>
+		<module>Web/kc.web.config</module>
+		<module>Web/kc.web.dict</module>
+		<module>Web/kc.web.training</module>
+		<module>Web/kc.web.offering</module>
+		<module>Web/kc.web.portal</module>
+
+		<module>WebApi/kc.webapi.account</module>
+		<module>WebApi/kc.webapi.app</module>
+		<module>WebApi/kc.webapi.codegenerate</module>
+		<module>WebApi/kc.webapi.config</module>
+		<module>WebApi/kc.webapi.dict</module>
+		<module>WebApi/kc.webapi.training</module>
+		<module>WebApi/kc.webapi.offering</module>
+		<module>WebApi/kc.webapi.portal</module>
+	</modules>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<argLine>-Dfile.encoding=UTF-8</argLine>
+		<org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
+		<org.projectlombok.version>1.18.22</org.projectlombok.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${org.mapstruct.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>kcloudy.business</groupId>
+				<artifactId>kc.framework</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>kcloudy.business</groupId>
+				<artifactId>kc.thirdparty</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>kcloudy.business</groupId>
+				<artifactId>kc.database</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>kcloudy.business</groupId>
+				<artifactId>kc.storage</artifactId>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<!-- nexus私服配置 -->
+	<repositories>
+		<repository>
+			<id>kcloudy-repo</id>
+			<name>kcloudy-repo</name>
+			<url>http://nexus.kcloudy.com/repository/maven-public/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>kcloudy-repo</id>
+			<name>kcloudy-repo</name>
+			<url>http://nexus.kcloudy.com/repository/maven-public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<!-- See https://maven.apache.org/plugins/maven-compiler-plugin/compile-mojo.html -->
+					<!-- Classpath elements to supply as annotation processor path. If specified,
+                        the compiler will detect annotation processors only in those classpath elements.
+                        If omitted, the default classpath is used to detect annotation processors.
+                        The detection itself depends on the configuration of annotation Processors. -->
+					<!-- -->
+					<!-- According to this documentation, the provided dependency processor
+                        is not considered! -->
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${org.projectlombok.version}</version>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${org.mapstruct.version}</version>
+						</path>
+					</annotationProcessorPaths>
+					<compilerArgs>
+						<compilerArg>
+							-Amapstruct.suppressGeneratorTimestamp=true
+						</compilerArg>
+						<compilerArg>
+							-Amapstruct.suppressGeneratorVersionInfoComment=true
+						</compilerArg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

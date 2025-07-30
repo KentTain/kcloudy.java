@@ -1,0 +1,130 @@
+HELP.md
+/target/
+/bin/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+/build/
+
+### VS Code ###
+.vscode/
+
+# Created by https://www.gitignore.io/api/eclipse
+# Edit at https://www.gitignore.io/?templates=eclipse
+
+### Eclipse ###
+.metadata
+bin/
+tmp/
+*.class
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+*.jar
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# PyDev specific (Python IDE for Eclipse)
+*.pydevproject
+
+# CDT-specific (C/C++ Development Tooling)
+.cproject
+
+# CDT- autotools
+.autotools
+
+# Java annotation processor (APT)
+.factorypath
+
+# PDT-specific (PHP Development Tools)
+.buildpath
+
+# sbteclipse plugin
+.target
+
+# Tern plugin
+.tern-project
+
+# TeXlipse plugin
+.texlipse
+
+# STS (Spring Tool Suite)
+.springBeans
+
+# Code Recommenders
+.recommenders/
+
+# Annotation Processing
+.apt_generated/
+
+# Scala IDE specific (Scala & Java development for Eclipse)
+.cache-main
+.scala_dependencies
+.worksheet
+
+### Eclipse Patch ###
+# Eclipse Core
+.project
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# Annotation Processing
+.apt_generated
+
+.sts4-cache/
+
+# End of https://www.gitignore.io/api/eclipse
+Common/kc.thirdparty/src/test/resources/Image/1-insert-2.jpg
+Common/kc.thirdparty/src/test/resources/Image/1-thumbnail-scale.jpg
+Common/kc.thirdparty/src/test/resources/Image/1-thumbnail-width-height.jpg
+Common/kc.thirdparty/src/test/resources/Image/1-watermark-context.jpg
+Common/kc.thirdparty/src/test/resources/Image/1-watermark-image.jpg
+Common/kc.thirdparty/src/test/resources/Image/qrcode-0.png
+Common/kc.thirdparty/src/test/resources/Image/qrcode-1.png
+Common/kc.thirdparty/src/test/resources/Pdf/1-wathermark.pdf
+Common/kc.thirdparty/src/test/resources/Pdf/htmlToPdf.pdf
+
+WebApi/kc.webapi.config/target/*
+WebApi/kc.webapi.config/target/surefire-reports/TEST-kc.webapi.config.AppTest.xml
+WebApi/kc.webapi.config/target/surefire-reports/kc.webapi.config.AppTest.txt
+WebApi/kc.webapi.config/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+WebApi/kc.webapi.config/target/kc.webapi.config-1.0.0.1.jar.original
+
+.idea/compiler.xml
+.idea/encodings.xml
+.idea/misc.xml
+.idea/vcs.xml
+.idea/workspace.xml
+
+!packages/**
+application.pid
