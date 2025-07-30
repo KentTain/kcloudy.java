@@ -1,0 +1,231 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="~{Main/layout}" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <title>帮助类别管理</title>
+</head>
+<body>
+<div layout:fragment="content" class="easyui-layout" style="width:100%;height:100%;">
+    <div id="toolbar">
+        <div>
+            <!--帮助类别管理-保存帮助类别-->
+            <a sec:authorize="hasAuthority('0EBCF1F7-3E2A-4A0E-AF90-36689ABB0AA3')" href="javascript:void(0)"
+               class="easyui-linkbutton" iconcls="fa fa-plus" onclick="addArticleCategory()">添加</a>
+            <!--帮助类别管理-保存帮助类别-->
+            <a sec:authorize="hasAuthority('0EBCF1F7-3E2A-4A0E-AF90-36689ABB0AA3')" href="javascript:void(0)"
+               class="easyui-linkbutton" iconcls="fa fa-pencil" onclick="editArticleCategory()">编辑</a>
+            <!--帮助类别管理-删除帮助类别-->
+            <a sec:authorize="hasAuthority('93F6DC06-6426-41DF-9DB8-C0FA0758FBB7')" href="javascript:void(0)"
+               class="easyui-linkbutton" iconcls="fa fa-trash" onclick="removeArticleCategory()">删除</a>
+        </div>
+
+        <div>
+            帮助类别名称：
+            <input id="txtSearchbox" class="easyui-textbox" placeholder="请输入帮助类别名称"
+                   style="width: 300px; height: 26px;"/>
+            <a href="javascript:void(0)" onclick="reloadDatagrid()" class="easyui-linkbutton"
+               data-options="iconCls:'fa fa-search'">查询</a>
+            <a href="javascript:void(0)" onclick="refreshSearch()" class="easyui-linkbutton"
+               data-options="iconCls:'fa fa-refresh'">刷新</a>
+        </div>
+    </div>
+    <table id="datagrid"></table>
+</div>
+<div layout:fragment="scripts">
+    <script th:inline="javascript">
+
+        $(function () {
+            InitTreeDataGrid();
+        });
+
+        //主表
+        var IsCheckFlag = false; //是否选中的标志
+        var rowIndexTo; //保存当前保存的是那条数据
+        var loadDataUrl = '/NewsManage/LoadArticleCategoryList';
+
+        function InitTreeDataGrid() {
+            $('#datagrid').treegrid({
+                url: loadDataUrl,
+                method: 'get',
+                idField: 'id',
+                treeField: 'text',
+                fitColumns: true,
+                rownumbers: true,
+                singleSelect: true,
+                checkOnSelect: true,
+                nowrap: false,
+                fit: true,
+                lines: true,
+                showFooter: false,
+                toolbar: "#toolbar",
+                //toolbar: [{ text: document.getElementById('toolbar') }],
+                columns: [
+                    [
+                        {field: 'id', title: '编号', width: 50, align: 'left', hidden: true},
+                        {field: 'text', title: '名称', width: 140, align: 'left'},
+                        {field: 'description', title: '描述', width: 240, align: 'left'},
+                        {field: 'isShow', title: '是否显示', width: 120, align: 'left', formatter: FormatterUtil.BoolFormatter},
+                        {field: 'level', title: '层级', width: 100, align: 'left'},
+                        {field: 'templates.index', title: '排序', width: 100, align: 'left'}
+                    ]
+                ],
+                onBeforeLoad: function (param) {
+
+                },
+                onLoadSuccess: function (data) {
+                    $(".btnContacts").linkbutton({plain: true, iconCls: 'fa fa-search'});
+                },
+                onLoadError: function () {
+                },
+                onSelect: function (rowIndex, rowData) {
+                    if (!IsCheckFlag) {
+                        IsCheckFlag = true;
+                        rowIndexTo = rowIndex;
+                    } else if (rowIndexTo == rowIndex) {
+                        IsCheckFlag = false;
+                        $('#datagrid').treegrid("unselectAll");
+                    } else {
+                        IsCheckFlag = false;
+                    }
+                }
+            });
+        }
+
+        function refreshSearch() {
+            $('#datagrid').datagrid('unselectAll');
+            $("#txtSearchbox").searchbox('setValue', '');
+            reloadDatagrid();
+        }
+
+        function reloadDatagrid() {
+            $('#datagrid').datagrid('unselectAll');
+            $("#datagrid").treegrid("load", {
+                name: $("#txtSearchbox").searchbox("getValue")
+            });
+        }
+
+        function addArticleCategory() {
+            var row = $('#datagrid').treegrid('getSelected');
+            if (row) {
+                opentForm(0, row.id);
+            } else {
+                opentForm(0, 0);
+            }
+        }
+
+        function editArticleCategory() {
+            var row = $('#datagrid').treegrid('getSelected');
+            if (row) {
+                opentForm(row.id, 0);
+
+            } else {
+                $.messager.showErrorCenter('系统提示', "请选择需要编辑的数据", 1000);
+            }
+        }
+
+        var getFormUrl = '/NewsManage/GetArticleCategoryForm';
+        var saveFormUrl = '/NewsManage/SaveArticleCategory';
+
+        function opentForm(id, parentId) {
+            $.easyui.showDialog({
+                title: id > 0 ? '编辑帮助类别' : '新增帮助类别',
+                width: 480,
+                height: 360,
+                href: getFormUrl + "?id=" + id + "&parentId=" + parentId,
+                modal: true,
+                topMost: false,
+                enableHeaderContextMenu: false,
+                enableApplyButton: false,
+                onSave: function (d) {
+                    var validate = d.form("enableValidation").form("validate");
+                    if (validate) {
+                        if ($("#level").val() == "4") {
+                            $.messager.showErrorCenter("系统提示", "此父级" + ' ' + $("#ParentId").val() + ' ' + "不能作为父级");
+                            $("#level").val(' ');
+                            return false;
+                        }
+
+                        $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                        $.ajax({
+                            async: true,
+                            type: "post",
+                            dataType: "json",
+                            url: saveFormUrl,
+                            data: d.form("getData"),
+                            success: function (data) {
+                                if (data.success) {
+                                    d.window('close');
+                                    if (data.result) {
+                                        $('#datagrid').treegrid('clearSelections');
+                                        $('#datagrid').treegrid('reload');
+                                        $.messager.showInfoCenter('系统提示', '保存数据成功。', 1000);
+                                    } else {
+                                        $.messager.showErrorCenter('错误消息', '保存数据失败。');
+                                    }
+                                } else {
+                                    $.messager.showErrorCenter('错误消息', data.message);
+                                }
+                            },
+                            complete: function () {
+                                $.easyui.loaded();
+                            }
+                        });
+                        return false;
+                    } else {
+                        return false;
+                    }
+                },
+                onLoad: function () {
+                    $('.textbox').bind('blur', function () {
+                        $(this).validatebox('enableValidation').validatebox('validate');
+                    });
+                }
+            });
+        }
+
+        var removeUrl = '/NewsManage/RemoveArticleCategory';
+
+        function removeArticleCategory() {
+            var row = $('#datagrid').treegrid('getSelected');
+            if (row) {
+                if (row.children.length > 0) {
+                    $.messager.showErrorCenter('错误消息', '无法删除有子部门的部门，请先删除子部门后再重试。', 1000);
+                    return;
+                }
+
+                $.messager.confirm('系统提示', '确认要删除选中行?', function (r) {
+                    if (r) {
+                        $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                        $.ajax({
+                            async: true,
+                            type: "get",
+                            dataType: "json",
+                            url: removeUrl,
+                            data: {id: row.id},
+                            success: function (data) {
+                                if (data.success) {
+                                    if (data.result) {
+                                        $('#datagrid').treegrid('clearSelections');
+                                        $('#datagrid').treegrid('reload');
+                                        $.messager.showInfoCenter('系统提示', '删除数据成功。', 1000);
+                                    } else {
+                                        $.messager.showErrorCenter('错误消息', '删除数据失败。');
+                                    }
+                                } else {
+                                    $.messager.showErrorCenter('错误消息', data.message);
+                                }
+                            },
+                            complete: function () {
+                                $.easyui.loaded();
+                            }
+                        });
+                    }
+                });
+            } else {
+                $.messager.showErrorCenter('系统提示', "请选择需要删除的数据", 1000);
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

@@ -1,0 +1,420 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout :: common_header(~{::title},~{::link},~{::style})">
+    <title>用户管理</title>
+    <link rel="stylesheet" th:href="@{/js/webuploader/webuploader.css}"/>
+    <link href="/css/upload.css" rel="stylesheet"/>
+    <style>
+        .webuploader-pick {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            padding: 0px 0px;
+            color: #2779AA;
+            text-align: center;
+            vertical-align: middle;
+            border-radius: 3px;
+            overflow: hidden;
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:100%;">
+<div id="toolbarUser">
+    <div>
+        <!--用户管理-保存用户-->
+        <a sec:authorize="hasAuthority('55BD23BA-D892-41A0-A2D3-5E773D832E79')" href="javascript:void(0)" class="easyui-linkbutton" iconcls="fa fa-plus" onclick="addUser()">添加</a>
+        <!--用户管理-保存用户-->
+        <a sec:authorize="hasAuthority('55BD23BA-D892-41A0-A2D3-5E773D832E79')" href="javascript:void(0)" class="easyui-linkbutton" iconcls="fa fa-pencil" onclick="editUser()">编辑</a>
+        <!--用户管理-下载用户Excel模板-->
+        <a sec:authorize="hasAuthority('15E50D59-D883-4D31-9382-F7517F0A16B9')" href="/User/DownLoadExcelTemplate" class="easyui-linkbutton" iconcls="fa fa-download">下载导入模板</a>
+    	<!--用户管理-导入用户数据-->
+        <a sec:authorize="hasAuthority('15E50D59-D883-4D31-9382-F7517F0A16B9')" id="uploadExcel" href="javascript:void(0)" class="easyui-linkbutton" iconcls="fa fa-upload">导入Excel数据</a>
+    </div>
+
+    <div>
+        <select class="easyui-combobox" id="PositionLevel" name="PositionLevel">
+	        <option value="">请选择岗位</option>
+	        <option th:each="Position : ${PositionLevels}"
+	                th:value="${Position.key}"
+	                th:text="${Position.value}"></option>
+	    </select>
+	    <select id="status" class="easyui-combobox" name="dept" style="width:140px;" data-options="editable: false,panelHeight:'auto',">
+            <option value="">请选择状态</option>
+            <option value="1">冻结</option>
+            <option value="0">激活</option>
+        </select>
+        <input id="name" class="easyui-textbox" data-options="prompt:'请输入姓名'" style="width:100px">
+        <input id="phone" class="easyui-textbox" data-options="prompt:'请输入手机号'" style="width:100px">
+        <input id="email" class="easyui-textbox" data-options="prompt:'请输入邮箱'" style="width:100px">
+        <a href="javascript:void(0)" onclick="reloadDgUser()" class="easyui-linkbutton" data-options="iconCls:'fa fa-search'">查询</a>
+        <a href="javascript:void(0)" onclick="refreshUserSearch()" class="easyui-linkbutton" data-options="iconCls:'fa fa-refresh'">刷新</a>
+    </div>
+</div>
+<table id="dgUser"></table>
+</div>
+
+<th:block th:replace="layout :: scripts"/>
+<script th:src="@{/js/webuploader/md5.js}"></script>
+<script th:src="@{/js/webuploader/webuploader.min.js}"></script>
+<script th:inline="javascript" type="text/javascript">
+    $.extend($.fn.validatebox.defaults.rules, {
+        repeatdisplayName: {
+            validator: function (value) {
+                let reg = /\d$/;
+
+                return !reg.test(value);
+            },
+            message: '请输入有效的姓名'
+        }
+    });
+    $.extend($.fn.validatebox.defaults.rules, {
+        repeatUserCode:{
+            validator: function (value) {
+                let reg = /^[0-9a-zA-Z]+$/;
+                return reg.test(value);
+            },
+            message: '请输入有效的用户编号'
+        }
+    });
+
+    const dgUser = '#dgUser';
+    let canDongJie = [[${canDongJie}]];
+    let canDeleteUser = [[${canDeleteUser}]];
+    let canRoleInUser = [[${canRoleInUser}]];
+    let canUserDetail = [[${canUserDetail}]];
+    let uploadExcelUrl = '/User/UploadExcelTemplate';
+    let docApiUrl = '[(${docWebApiDomain})]';
+    let fileSetting = {
+        fileNumLimit: 1,
+        postUrl: uploadExcelUrl,
+        fileMaxSize: [[${uploadConfig.FileMaxSize}]],
+        fileExt: [[${uploadConfig.FileExt}]],
+        downloadFileUrl: docApiUrl + 'Resources/DownloadFile?id=',
+        imageMaxSize: [[${uploadConfig.ImageMaxSize}]],
+        imageExt: [[${uploadConfig.ImageExt}]],
+        showImageUrl: docApiUrl + 'Resources/ShowImage?id='
+    };
+    $(function() {
+
+        InitDgUser();
+
+        defaultInitFileUploader(null, 'fileUploader', 'hiddenFileList', fileSetting, true);
+
+        $(".btnImport").hide();
+    });
+
+    function refreshUserSearch() {
+        $("#email").searchbox('setValue', '');
+        $("#phone").searchbox('setValue', '');
+        $("#name").searchbox('setValue', '');
+        $('#status').combobox("setValue", '');
+        $("#PositionLevel").combobox('setValue', '');
+        reloadDgUser();
+    }
+    function reloadDgUser() {
+        $(dgUser).datagrid("load", {
+            email: $("#email").searchbox("getValue"),
+            phone: $("#phone").searchbox("getValue"),
+            name: $("#name").searchbox("getValue"),
+            status: $('#status').combobox("getValue"),
+            position: $('#PositionLevel').combobox("getValue")
+        });
+    }
+
+    let loadUserDataUrl = '/User/LoadUserList';
+    function InitDgUser() {
+        let $dataGrid = $(dgUser).datagrid({
+            url: loadUserDataUrl,
+            method: 'get',
+            idField: 'userId',
+            striped: true,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            pagination: true,
+            nowrap: false,
+            fit: true,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            showFooter: false,
+            toolbar: "#toolbarUser",
+            columns: [
+                [
+                    { field: 'memberId', title: '用户编号', width: 80, align: 'left' },
+                    { field: 'userName', title: '用户名', width: 80, align: 'left',
+                        formatter: function (value, row, index) {
+                            let userId = row.userId;
+                            let userName = row.userName;
+                            let tdContext = userName;
+                            if (canUserDetail)
+                                tdContext = "<a style='cursor:pointer' onclick=openUserPage('" + userId + "','userdetail')>" + userName + "</a>";
+                            return tdContext;
+                        }
+                    },
+                    { field: 'displayName', title: '姓名', width: 80, align: 'left' },
+                    { field: 'email', title: '邮箱', width: 120, align: 'left' },
+                    { field: 'phoneNumber', title: '手机号', width: 80, align: 'left' },
+                    { field: 'organizationNames', title: '所属部门', width: 80, align: 'left',
+                        formatter: function (value, row, index) {
+                            if (value != undefined && value != "") {
+                                return value.substr(0, value.length - 1);
+                            }
+                            return value;
+                        }
+                    },
+                    { field: 'positionLevelName', title: '部门岗位', width: 60, align: 'left' },
+                    { field: 'status', title: '状态', width: 60,
+                        formatter: function (value, row, index) {
+                            if (value === "1") {
+                                return "<span style='color:rgb(255, 0, 0);'>已冻结</span>";
+                            }
+                            return "<span style='color:rgb(0, 0, 255);'>已激活</span>";
+                        }
+                    },
+                    { field: 'c', title: '激活/冻结', width: 60,
+                        formatter: function(value, row, index) {
+                            if (canDongJie) {
+                                if (row.status === 1) {
+                                    return "<a class='btnContacts' style='cursor: pointer' onclick=operateUser('" + row.userId + "','" + row.status + "')>激活</a>";
+                                } else {
+                                    return "<a class='btnContacts' style='cursor: pointer'  onclick=operateUser('" + row.userId + "','" + row.status + "')>冻结</a>";
+                                }
+                            }
+                        }
+                    },
+                    { field: 'oper', title: '操作', width: 160, align: 'left',
+                        formatter: function (value, row, index) {
+                            let userId = row.userId;
+                            let userName = row.userName;
+
+                            let tdContext = '';
+                            if (canRoleInUser) {
+                                tdContext += '<a class="btnContacts" style="cursor:pointer" onclick="openUserPage(\'' + userId + '\', \'roleinuser\')" >分配角色</a>';
+                            }
+                            if (canDeleteUser)
+                            {
+                                tdContext += '<a class="btnDelete" style="cursor:pointer" onclick="removeUser(\'' + userId + '\', \'roleinuser\')" >删除用户</a>';
+                            }
+                            return tdContext;
+                        }
+                    }
+                ]],
+            onBeforeLoad: function(param) {
+            },
+            onLoadSuccess: function(data) {
+                $(".btnContacts").linkbutton({ iconCls: 'fa fa-user' });
+                $(".btnDelete").linkbutton({ iconCls: 'fa fa-trash' });
+
+                $dataGrid.datagrid("fixRowHeight");
+            },
+            onLoadError: function() {
+            }
+        });
+    }
+
+    function addUser() {
+        let title = "新增用户";
+        opentUserForm('', title);
+    }
+    function editUser() {
+        let row = $(dgUser).datagrid('getSelected');
+        if (row) {
+            let title = "编辑用户";
+            opentUserForm(row.userId, title);
+        } else {
+            $.messager.showErrorTopCenter('系统提示', "请选择需要编辑的数据", 1000);
+        }
+    }
+
+    let roleInUser = '/User/RoleInUser';
+    let userDetailUrl = '/User/UserDetail';
+    function openUserPage(userId, type) {
+        let url = "";
+        let queryString = "id=" + userId;
+        if (type === "roleinuser") {
+            url = roleInUser;
+        } else if (type === "userdetail") {
+            url = userDetailUrl;
+        }
+        MainPage_PostMessage("openSubPage", url, queryString);
+    }
+
+    let getUserFormUrl = '/User/GetUserForm';
+    let saveUserFormUrl = '/User/SaveUser';
+    function opentUserForm(id, title) {
+        let dialog = $.easyui.showDialog({
+            title: title,
+            width: 500,
+            height: 420,
+            href: getUserFormUrl + "?userId=" + id,
+            modal: true,
+            topMost: false,
+            enableHeaderContextMenu: false,
+            enableApplyButton: false,
+            onSave: function(d) {
+                let organizationName = $('#OrganizationId').combotree('getValues');
+                let validate = d.form("enableValidation").form("validate");
+                let postData = d.form("getData");
+                postData['organizations'] = organizationName;
+
+                if (validate) {
+                    $.easyui.loading({ msg: '正在保存数据，请稍等...' });
+                    $.ajax({
+                        async: true,
+                        type: "post",
+                        dataType: "json",
+                        url: saveUserFormUrl,
+                        data: postData,
+                        success: function(data) {
+                            if (data.success) {
+                                d.window('close');
+                                if (data.Result) {
+                                    $.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+                                    $(dgUser).datagrid('reload');
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', data.message);
+                                }
+                            } else {
+                                $.messager.showInfoTopCenter('系统提示', data.message);
+                            }
+                        },
+                        complete: function() {
+                            $.easyui.loaded();
+                        }
+                    });
+                    return false;
+                } else {
+                    return false;
+                }
+            },
+            onLoad: function() {
+                let f = $(this), ret = $.fn.dialog.defaults.onLoad();
+                f.form("disableValidation").form("enableValidation");
+                return ret;
+            }
+        });
+    }
+
+    let adminUserId = [[${adminUserId}]];
+    let currentUserId = [[${meUserId}]];
+    let freezeOrActivationUrl = '/User/FreezeOrActivation';
+    function operateUser(id, stat) {
+        let adminUserId = adminUserId;
+        let meUserId = currentUserId;
+        if (id.contains(meUserId)) {
+            $.messager.showInfoTopCenter('系统提示', "无法更改用户自身的状态！", 1000);
+            return;
+        }
+        if (id.contains(adminUserId)) {
+            $.messager.showInfoTopCenter('系统提示', "无法更改系统管理员的状态！", 1000);
+            return;
+        }
+        let title = "";
+        if (stat === 0) {
+            title = "冻结之后将去除该用户所有角色且不可恢复,是否确认改变状态";
+        } else {
+            title = "是否确定激活该用户?";
+        }
+        $.messager.confirm("系统提示", title,
+            function(r) {
+                if (r) {
+                    $.ajax({
+                        url: freezeOrActivationUrl,
+                        async: true,
+                        type: 'post',
+                        dataType: 'json',
+                        data: { id: id },
+                        success: function(data) {
+                            if (data.success) {
+                                if (data.result) {
+                                    $(dgUser).datagrid('reload');
+                                    $.messager.showInfoTopCenter('系统提示', '操作成功！', 1000);
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', '操作失败！');
+                                }
+                            } else {
+                                $(dgUser).datagrid('reload');
+                                $.messager.showInfoTopCenter('系统提示', data.message);
+                            }
+                        },
+                        error: function(e) {
+                            //let error = JSON.parse(e.responseText).Message;
+                            $.easyui.loaded();
+                            $.messager.showInfoTopCenter('系统提示', '抱歉,你不具有当前操作的权限');
+                        }
+                    });
+                }
+            });
+    }
+
+    let removeUserUrl = '/User/RemoveUser';
+    function removeUser(userId) {
+        let row = $(dgUser).datagrid('getSelected');
+        if (row) {
+            $.messager.confirm('系统提示', '删除之后将去除该用户所有角色(所有系统)且不可恢复,是否确定删除选中数据?', function(r) {
+                if (r) {
+                    $.easyui.loading({ msg: '正在保存数据，请稍等...' });
+                    $.post(removeUserUrl, { id: userId }, function(data) {
+                        if (data.success) {
+                            if (data.result) {
+                                $(dgUser).datagrid('reload');
+                                $.messager.showInfoTopCenter('系统提示', '删除数据成功。', 1000);
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', '删除数据失败。');
+                            }
+                        } else {
+                            $.messager.showInfoTopCenter('系统提示', data.message);
+                        }
+                        $.easyui.loaded();
+                    }, 'json');
+                }
+            });
+        }
+    }
+
+    let existUserEmailUrl = '/User/ExistUserEmail';
+    function existUserEmail(id) {
+        $.post(existUserEmailUrl, { id: id, email: $("#Email").val() }, function(data) {
+            if (data === "result") {
+                $.messager.showInfoTopCenter('系统提示', '邮箱【' + $("#Email").val() + '】已存在,请重新输入。');
+                $("#Email").val("");
+            }
+            if (data === "result1") {
+                $.messager.showInfoTopCenter('系统提示', '邮箱【' + $("#Email").val() + '】正在审批中，请重新输入');
+                $("#Email").val("");
+
+            }
+        }, 'json');
+    }
+    let existUserPhoneUrl = '/User/ExistUserPhone';
+    function existUserPhone(id) {
+        $.post(existUserPhoneUrl, { id: id, phone: $("#PhoneNumber").val() }, function(data) {
+            if (data === "result") {
+                $.messager.showInfoTopCenter('系统提示', '手机号【' + $("#PhoneNumber").val() + '】已存在,请重新输入。');
+                $("#PhoneNumber").val("");
+            }
+            if (data === "result1") {
+                $.messager.showInfoTopCenter('系统提示', '手机号【' + $("#PhoneNumber").val() + '】正在审批中，请重新输入');
+                $("#PhoneNumber").val("");
+            }
+        }, 'json');
+    }
+    let existUserNameUrl = '/User/ExistUserName';
+    function existUserName(id) {
+        $.post(existUserNameUrl, { id: id, userName: $("#UserName").val() }, function(data) {
+                if (data === "result") {
+                    $.messager.showInfoTopCenter('系统提示', '用户名【' + $("#UserName").val() + '】已存在,请重新输入。');
+                    $("#UserName").val("");
+                }
+                if (data === "result1") {
+                    $.messager.showInfoTopCenter('系统提示', '用户名【' + $("#UserName").val() + '】正在审批中,请重新输入。');
+                    $("#UserName").val("");
+                }
+            },
+            'json');
+    }
+</script>
+</body>
+</html>

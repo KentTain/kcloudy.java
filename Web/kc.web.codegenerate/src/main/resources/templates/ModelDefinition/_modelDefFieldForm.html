@@ -1,0 +1,115 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="layout :: common_header(~{::title},~{},~{})">
+	<title>数据模型属性新增/编辑</title>
+</head>
+<body>
+	<form id="saveform" class="easyui-form" action="#" method="post"
+		th:action="@{/ModelDefinition/SaveModelDefField}" th:object="${ModelDefFieldVM}">
+		<input type="hidden" th:field="*{isEditMode}"/>
+		<input type="hidden" th:field="*{propertyAttributeId}" />
+		<input type="hidden" th:field="*{value}" />
+		<input type="hidden" th:field="*{getExt1}" />
+		<input type="hidden" th:field="*{getExt2}" />
+		<input type="hidden" th:field="*{canEdit}" />
+		<input type="hidden" th:field="*{getIsRequire}" />
+
+		<input type="hidden" th:field="*{isPrimaryKey}" />
+		<input type="hidden" th:field="*{primaryKeyType}" />
+		<input type="hidden" th:field="*{isNotNull}" />
+		<input type="hidden" th:field="*{isUnique}" />
+		<input type="hidden" th:field="*{isExecutor}" />
+		<input type="hidden" th:field="*{isCondition}" />
+		<input type="hidden" th:field="*{relateObjectId}" />
+		<input type="hidden" th:field="*{relateObject}" />
+		<input type="hidden" th:field="*{modelDefId}" />
+		<input type="hidden" th:field="*{modelDefName}" />
+
+		<input type="hidden" th:field="*{deleted}" />
+		<input type="hidden" th:field="*{createdBy}" />
+		<input type="hidden" th:field="*{createdName}" />
+		<input type="hidden" th:field="*{createdDate}" />
+		<input type="hidden" th:field="*{modifiedBy}" />
+		<input type="hidden" th:field="*{modifiedName}" />
+		<input type="hidden" th:field="*{modifiedDate}" />
+
+		<table class="dialog-form-table">
+			<tbody>
+				<tr>
+					<td><label class="required">*</label><label for="name">属性名：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,height:26,validType:'length[1,50]'"
+						th:field="*{name}" /></td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="displayName">显示名称：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+							   data-options="required:true,width:200,height:26,validType:'length[1,50]'"
+							   th:field="*{displayName}" /></td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="dataType">数据类型：</label></td>
+					<td>
+						<select class="easyui-combobox"
+								data-options="width:200,height:26"
+								th:field="*{dataType}">
+							<option th:each="Type : ${DataTypeList}"
+									th:selected="${Type.key eq ModelDefFieldVM.dataType.getIndex()}"
+									th:value="${Type.key}" th:text="${Type.value}"></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="isNotNull">是否必填：</label></td>
+					<td>
+						<input id="sbIsNotNull" class="easyui-switchbutton"
+							   data-options="labelWidth:0,onText:'是',offText:'否'" tabindex="1"
+							   th:checked="${ModelDefFieldVM.getIsNotNull()}" />
+					</td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="isUnique">是否唯一：</label></td>
+					<td>
+						<input id="sbIsUnique" class="easyui-switchbutton"
+							   data-options="labelWidth:0,onText:'是',offText:'否'" tabindex="1"
+							   th:checked="${ModelDefFieldVM.getIsUnique()}" />
+					</td>
+				</tr>
+				<tr>
+					<td><label for="index">排序：</label></td>
+					<td><input class="easyui-numberspinner easyui-textbox"
+							   data-options="required:true,width:200,min:1,max:100"
+							   th:field="*{index}" /></td>
+				</tr>
+				<tr>
+					<td><label for="description">描述：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="multiline:true,width:200,height:60,validType:'length[0,500]'"
+						th:field="*{description}" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+	<script type="text/javascript" th:inline="javascript">
+
+		$(function () {
+			let isEditMode = [[${ModelDefFieldVM.isEditMode}]];
+			let dataType = [[${ModelDefFieldVM.dataType.getIndex()}]];
+			let isNotNull = [[${ModelDefFieldVM.getIsNotNull()}]];
+			let isUnique = [[${ModelDefFieldVM.getIsUnique()}]];
+			$('.textbox').bind('blur', function () {
+				$(this).validatebox('enableValidation').validatebox('validate');
+			});
+
+			if (isEditMode) {
+				$('#name').textbox('readonly');
+			}
+
+			$('#dataType').combobox('select', dataType);
+			initSwitchButton('sbIsNotNull', 'isNotNull', isNotNull);
+			initSwitchButton('sbIsUnique', 'isUnique', isUnique);
+		});
+
+	</script>
+</body>
+</html>

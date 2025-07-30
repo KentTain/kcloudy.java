@@ -1,0 +1,139 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="mlayout :: common_header(~{::title},~{},~{})">
+    <title>商品日志</title>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:100%;">
+    <div id="toolbar">
+        <div>
+            <input id="code" class="easyui-textbox" data-options="prompt:'请输入商品编号'" th:value="${code}" style="width:180px">
+            <input id="name" class="easyui-textbox" data-options="prompt:'请输入商品名称'" style="width:180px">
+            <a href="javascript:void(0)" onclick="reloadDatagrid()" class="easyui-linkbutton"
+               data-options="iconCls:'fa fa-search'">查询</a>
+            <a href="javascript:void(0)" onclick="refreshSearch()" class="easyui-linkbutton"
+               data-options="iconCls:'fa fa-refresh'">刷新</a>
+        </div>
+    </div>
+    <table id="datagrid"></table>
+</div>
+
+<th:block th:replace="layout :: scripts"/>
+<script type="text/javascript">
+    $(function () {
+        InitDataGrid();
+    });
+
+    function refreshSearch() {
+        $("#code").searchbox('setValue', '');
+        $("#name").searchbox('setValue', '');
+        reloadDatagrid();
+    }
+
+    function reloadDatagrid() {
+        $("#datagrid").datagrid("load", {
+            code: $("#code").searchbox("getValue"),
+            name: $("#name").searchbox("getValue")
+        });
+    }
+
+
+    let loadDataUrl = '/OfferingManage/LoadOfferingLogList';
+
+    function InitDataGrid() {
+        let $dataGrid = $('#datagrid').datagrid({
+            url: loadDataUrl,
+            method: 'get',
+            idField: 'offeringId',
+            striped: true,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            pagination: true,
+            nowrap: false,
+            fit: true,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            showFooter: false,
+            toolbar: "#toolbar",
+            columns: [
+                [
+                    {field: 'offeringCode', title: '商品编号', width: 100, align: 'left'},
+                    {field: 'offeringName', title: '商品名称', width: 100, align: 'left'},
+                    {field: 'typeString', title: '日志类别', width: 60, align: 'left'},
+                    {field: 'operator', title: '操作人', width: 100, align: 'left'},
+                    {field: 'operateDate', title: '创建日期', width: 120, align: 'left'},
+                    {field: 'remark', title: '日志内容', width: 300, align: 'left'}
+                ]],
+            onBeforeLoad: function (param) {
+                let code = $("#code").searchbox("getValue");
+                let name = $("#name").searchbox("getValue");
+                param.code = code;
+                param.name = name;
+            },
+            onLoadSuccess: function (data) {
+                $dataGrid.datagrid("fixRowHeight");
+            },
+            onLoadError: function () {
+            }
+        });
+    }
+
+    let getFormUrl = '/OfferingManage/GetOfferingForm';
+    let saveFormUrl = '/OfferingManage/SaveOffering';
+
+    function openForm(id, title) {
+        let dialog = $.easyui.showDialog({
+            title: title,
+            width: 500,
+            height: 400,
+            href: getFormUrl + "?id=" + id,
+            modal: true,
+            topMost: false,
+            enableHeaderContextMenu: false,
+            enableApplyButton: false,
+            onSave: function (d) {
+                let validate = d.form("enableValidation").form("validate");
+                let postData = d.form("getData");
+                if (validate) {
+                    $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                    $.ajax({
+                        async: true,
+                        type: "post",
+                        //contentType:"application/x-www-form-urlencoded;charset=UTF-8",
+                        dataType: "json",
+                        url: saveFormUrl,
+                        data: postData,
+                        success: function (data) {
+                            if (data.success) {
+                                d.window('close');
+                                if (data.result) {
+                                    $.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+                                    $('#datagrid').datagrid('reload');
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', data.message);
+                                }
+                            } else {
+                                $.messager.showInfoTopCenter('系统提示', data.message);
+                            }
+                        },
+                        complete: function () {
+                            $.easyui.loaded();
+                        }
+                    });
+                    return false;
+                } else {
+                    return false;
+                }
+            },
+            onLoad: function () {
+                let f = $(this), ret = $.fn.dialog.defaults.onLoad();
+                f.form("disableValidation").form("enableValidation");
+                return ret;
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

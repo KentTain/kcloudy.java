@@ -1,0 +1,124 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+	<title>用户新增/编辑</title>
+</head>
+<body>
+
+	<form id="saveform" class="easyui-form" action="#" method="post"
+		th:action="@{/User/SaveUser}" th:object="${UserEntity}">
+		<input type="hidden" th:field="*{memberId}" />
+		<input type="hidden" th:field="*{userId}" />
+		<input type="hidden" th:field="*{emailConfirmed}" />
+		<input type="hidden" th:field="*{emailConfirmedExpired}" />
+		<input type="hidden" th:field="*{emailConfirmedDate}" />
+		<input type="hidden" th:field="*{phoneNumberConfirmed}" />
+		<input type="hidden" th:field="*{password}" />
+		<input type="hidden" th:field="*{lockoutEnabled}" />
+<!--		<input type="hidden" th:field="*{lockoutEndDateUtc}" />-->
+<!--		<input type="hidden" th:field="*{securityStamp}" />-->
+		<input type="hidden" th:field="*{twoFactorEnabled}" />
+		<input type="hidden" th:field="*{accessFailedCount}" />
+		<input type="hidden" th:field="*{createDate}" />
+		<input type="hidden" th:field="*{openId}" />
+
+		<table class="dialog-form-table">
+			<tbody>
+				<tr th:if="*{editMode}">
+					<td><label class="required">*</label><label for="memberId">用户编号：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,height:26,"
+						th:readonly="*{editMode}?'readonly':''" th:field="*{memberId}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="userName">用户名：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+							   data-options="required:true,width:200,validType:{validator:['/User/ExistUserName?isEditMode=*{IsEditMode}&orginalUserName=*{UserName}','UserName', '该用户名已存在']}"
+						th:field="*{userName}" /></td>
+				</tr>
+
+				<tr>
+					<td><label for="organizationId">所属部门：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="width:200,height:26,validType:'length[0,50]'"
+						th:field="*{organizationIds}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="positionLevel">部门岗位：</label></td>
+					<td><select class="easyui-combobox" 
+						data-options="width:200,height:26" 
+						th:field="*{positionLevel}">
+							<option th:each="PositionLevel : ${PositionLevels}"
+								th:value="${PositionLevel.key}" th:text="${PositionLevel.value}"></option>
+					</select></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="displayName">姓名：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+							   data-options="required:true,width:200,validType:['length[2,50]']"
+							   th:field="*{displayName}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="email">邮箱：</label></td>
+					<td><input id="Email" class="easyui-validatebox easyui-textbox"
+							   data-options="required:true,width:200,validType:{validator:['/User/ExistUserEmail?isEditMode=*{IsEditMode}&orginalUserName=*{Email}','Email', '该邮箱已存在']}"
+							   th:field="*{email}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="phoneNumber">邮箱：</label></td>
+					<td><input id="PhoneNumber" class="easyui-validatebox easyui-textbox"
+							   data-options="required:true,width:200,validType:{validator:['/User/ExistUserPhone?isEditMode=*{IsEditMode}&orginalUserName=*{PhoneNumber}','PhoneNumber', '系统已存在该号码']}"
+							   th:field="*{phoneNumber}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="telephone">姓名：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox" placeholder="分机号格式：82680051-801"
+							   data-options="width:200,validType:['tel','length[6,15]']"
+							   th:field="*{telephone}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="contactQQ">联系人QQ：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox" placeholder="分机号格式：82680051-801"
+							   data-options="width:200,validType:['tel','length[6,15]']"
+							   th:field="*{contactQQ}" /></td>
+				</tr>
+
+			</tbody>
+		</table>
+	</form>
+	<script type="text/javascript" th:inline="javascript">
+
+		$(function () {
+			$('.textbox').bind('blur', function () {
+				$(this).validatebox('enableValidation').validatebox('validate');
+			});
+			$('#organizationId').combotree({
+				multiple: true,
+				url: '/User/UserOrganizationTree',
+				required: true,
+				cascadeCheck: false,
+
+			});
+			let organizationName = $('#organizationId').combotree('getValues');
+			$('#organizationId').combotree('setValues', [${OrganizationIds}]);
+
+			if ($("#isEditMode").val() === "True") {
+				$('.userName').attr('disabled', true);
+			}
+			$("#positionLevel").combobox({
+				editable: false,
+				required:true
+			})
+		})
+
+
+	</script>
+</body>
+</html>

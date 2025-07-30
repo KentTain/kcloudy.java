@@ -1,0 +1,343 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout :: common_header(~{::title},~{},~{})">
+    <title>应用管理</title>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:100%;">
+    <div id="toolbar">
+        <div>
+            <!--应用管理-保存应用-->
+            <a sec:authorize="hasAuthority('9C65146A-A0BE-4E15-A6C7-C3FDCF897121')" href="javascript:void(0)" class="easyui-linkbutton" iconcls="fa fa-plus" onclick="addApplication()">添加</a>
+            <!--应用管理-保存应用-->
+            <a sec:authorize="hasAuthority('9C65146A-A0BE-4E15-A6C7-C3FDCF897121')" href="javascript:void(0)" class="easyui-linkbutton" iconcls="fa fa-pencil" onclick="editApplication()">编辑</a>
+            <!--应用管理-删除应用-->
+            <a sec:authorize="hasAuthority('0E86F5D6-F93B-47FD-BBC1-39CBBAF17178')" href="javascript:void(0)" class="easyui-linkbutton" iconcls="fa fa-trash" onclick="removeApplication()">删除</a>
+        </div>
+
+        <div>
+            <input id="searchbox" class="easyui-textbox" data-options="prompt:'请输入应用程序名称'">
+            <a href="#" onclick="reloadDatagrid()" class="easyui-linkbutton ListToolStartBtn"
+               data-options="iconCls:'fa fa-search'">查询</a>
+            <a href="#" onclick="refreshSearch()" class="easyui-linkbutton ListToolEndBtn"
+               data-options="iconCls:'fa fa-refresh'">刷新</a>
+        </div>
+    </div>
+    <table id="datagrid"></table>
+</div>
+
+<th:block th:replace="layout :: scripts"/>
+<script th:src="${resWebDomain} + 'lib/jquery-easyui/datagrid-detailview.js'"></script>
+<script type="text/javascript">
+    var $dataGrid = $('#datagrid');
+    $(function () {
+        InitDataGrid();
+    });
+
+    function refreshSearch() {
+        $("#searchbox").searchbox('setValue', '');
+        reloadDatagrid();
+    }
+
+    function reloadDatagrid() {
+        $("#datagrid").datagrid("load", {
+            searchValue: $("#searchbox").searchbox("getValue"),
+        });
+    }
+
+    const loadDataUrl = '/Application/LoadApplicationList';
+    const loadModuleDataUrl = '/Application/LoadModuleList';
+
+    function InitDataGrid() {
+        $dataGrid.datagrid({
+            view: detailview,
+            url: loadDataUrl,
+            method: 'get',
+            idField: 'applicationId',
+            toolbar: '#toolbar',
+            striped: true,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            nowrap: false,
+            fit: true,
+            pagination: true,
+            showFooter: false,
+            columns: [
+                [
+                    {field: 'applicationId', title: '应用程序Id', width: 180, align: 'left'},
+                    {field: 'applicationName', title: '应用程序名称', width: 100, align: 'left'},
+                    {field: 'domainName', title: '域名', width: 140, align: 'left'},
+                    {field: 'description', title: '描述', width: 160, align: 'left'},
+                    {field: 'operator', title: '操作', width: 160, align: 'center',
+                        formatter: function (value, row, index) {
+                            var tdContext = '<a href="##" class="btnAddModule" onclick="openModuleForm(\'' + defaultGuid + '\',\'' + row.applicationId + '\')">添加模块</a>';
+                            if (row.applicationId == "5a79fd6a-7dd9-45e6-b35b-ab24d32e89bb") {
+                                if (row.isEnabledWorkFlow) {
+                                    tdContext += '<a href="##" class="btnAddModule" onclick="ChangeIsEnabledWorkFlow(\'' + row.applicationId + '\',\'' + row.applicationName + '\',false)">关闭工作流</a>';
+                                } else {
+                                    tdContext += '<a href="##" class="btnAddModule" onclick="ChangeIsEnabledWorkFlow(\'' + row.applicationId + '\',\'' + row.applicationName + '\',true)">启用工作流</a>';
+                                }
+                            }
+                            return tdContext;
+                        }
+                    }
+                ]
+            ],
+            onBeforeLoad: function (param) {
+                /*var bId = $("#txtBId").val();
+                var AllSearchKey = $("#txtAllSearchKey").val();
+                param.bId = bId;
+                param.AllSearchKey = AllSearchKey;*/
+            },
+            onLoadSuccess: function (data) {
+                $(".btnAddModule").linkbutton({iconCls: 'fa fa-plus'});
+                $dataGrid.datagrid("fixRowHeight");
+            },
+            onLoadError: function () {
+            },
+            detailFormatter: function (index, row) {
+                return '<div style="padding:2px;"><table class="ddv"></table></div>';
+            },
+            onExpandRow: function (index, row) {
+                var ddv = $(this).datagrid('getRowDetail', index).find('table.ddv');
+                ddv.datagrid({
+                    url: loadModuleDataUrl + '?appId=' + row.applicationId,
+                    fitColumns: true,
+                    singleSelect: true,
+                    rowNumbers: true,
+                    loadMsg: '',
+                    height: 'auto',
+                    columns: [
+                        [
+                            //{ field: 'moduleId', title: '模块Id', width: 180, align: 'left' },
+                            {field: 'moduleName', title: '模块名称', width: 80, align: 'left'},
+                            {field: 'assemblyName', title: '模块涉及程序集', width: 160, align: 'left'},
+                            {field: 'description', title: '模块描述', width: 200, align: 'left'},
+                            {field: 'createdBy', title: '创建人', width: 80, align: 'left'},
+                            {field: 'createdDate', title: '创建时间', width: 80, align: 'left',},
+                            {
+                                field: 'statisticOpera', title: '任务操作', width: 260, align: 'center',
+                                formatter: function (value, row, index) {
+                                    var tdContext = '<a href="##" class="btnEditModule" onclick="openModuleForm(\'(' + row.moduleId + ')\',\'\')">编辑模块</a>';
+                                    tdContext += '<a href="##" class="btnRemoveModule" onclick="removeModule(\'(' + row.moduleId + ')\')">删除模块</a>';
+                                    return tdContext;
+                                }
+                            }
+                        ]
+                    ],
+                    onResize: function () {
+                        $('#datagrid').datagrid('fixDetailRowHeight', index);
+                    },
+                    onLoadSuccess: function () {
+                        $(".btnEditModule").linkbutton({iconCls: 'fa fa-pencil'});
+                        $(".btnRemoveModule").linkbutton({iconCls: 'fa fa-trash'});
+                        $(ddv).datagrid('fixRowHeight');
+
+                        setTimeout(function () {
+                            $('#datagrid').datagrid('fixDetailRowHeight', index);
+
+                        }, 0);
+                    }
+                });
+            }
+        });
+
+        $('#txtSearchbox').searchbox({
+            menu: '#divSearchMenu',
+            prompt: '请输入查询值',
+            searcher: searchData
+        });
+    }
+
+    function searchData(value, name) {
+        $('#datagrid').datagrid('unselectAll');
+        $('#datagrid').datagrid('load', {"searchKey": name, "searchValue": value});
+    }
+
+    const getFormUrl = '/Application/GetApplicationForm';
+    const saveFormUrl = '/Application/SaveApplication';
+
+    function openForm(id) {
+        var dialog = $.easyui.showDialog({
+            title: "保存数据",
+            width: 500,
+            height: 400,
+            href: getFormUrl + "?id=" + id,
+            modal: true,
+            topMost: false,
+            enableHeaderContextMenu: false,
+            enableApplyButton: false,
+            onSave: function (d) {
+                var validate = d.form("enableValidation").form("validate");
+                if (validate) {
+                    $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                    $.ajax({
+                        async: true,
+                        type: "post",
+                        dataType: "json",
+                        url: saveFormUrl,
+                        data: AddAntiForgeryToken(d.form("getData")),
+                        success: function (data) {
+                            if (data.success) {
+                                d.window('close');
+                                if (data.result) {
+                                    $('#datagrid').datagrid('clearSelections');
+                                    $('#datagrid').datagrid('reload');
+                                    $.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', '保存数据失败。');
+                                }
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', data.message);
+                            }
+                        },
+                        complete: function () {
+                            $.easyui.loaded();
+                        }
+                    });
+                    return false;
+                } else {
+                    return false;
+                }
+            },
+            onLoad: function () {
+                var f = $(this), ret = $.fn.dialog.defaults.onLoad();
+                f.form("disableValidation").form("enableValidation");
+                return ret;
+            }
+        });
+    }
+
+    function addApplication() {
+        openForm('');
+    }
+
+    function editApplication() {
+        var row = $('#datagrid').datagrid('getSelected');
+        if (row) {
+            openForm(row.applicationId);
+        }
+    }
+
+    const removeUrl = '/Application/RemoveApplication';
+
+    function removeApplication() {
+        var row = $('#datagrid').datagrid('getSelected');
+        if (row) {
+            $.messager.confirm('系统提示', '是否确定删除该条记录?', function (r) {
+                if (r) {
+                    $.post(removeUrl, {id: row.applicationId}, function (result) {
+                        if (data.success) {
+                            if (data.result) {
+                                $('#datagrid').datagrid('clearSelections');
+                                $('#datagrid').datagrid('reload'); // reload the user data
+                                $.messager.showInfoTopCenter('系统提示', '删除数据成功。', 1000);
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', '删除数据失败。');
+                            }
+                        } else {
+                            $.messager.showErrorTopCenter('错误消息', data.message);
+                        }
+                    }, 'json');
+                }
+            });
+        }
+    }
+
+    const getModuleFormUrl = '/Application/GetModuleForm';
+    const saveModuleFormUrl = '/Application/SaveModule';
+
+    function openModuleForm(id, appId) {
+        var dialog = $.easyui.showDialog({
+            title: "保存数据",
+            width: 400,
+            height: 220,
+            modal: true,
+            topMost: false,
+            href: getModuleFormUrl + "?id=" + id + "&appId=" + appId,
+            enableHeaderContextMenu: false,
+            enableApplyButton: false,
+            onSave: function (d) {
+                var validate = d.form("enableValidation").form("validate");
+                if (validate) {
+                    $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                    $.ajax({
+                        async: true,
+                        type: "post",
+                        dataType: "json",
+                        url: saveModuleFormUrl,
+                        data: AddAntiForgeryToken(d.form("getData")),
+                        success: function (data) {
+                            if (data.success) {
+                                d.window('close');
+                                if (data.result) {
+                                    $('#datagrid').datagrid('clearSelections');
+                                    $('#datagrid').datagrid('reload');
+                                    $.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', '保存数据失败。');
+                                }
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', data.message);
+                            }
+                        },
+                        complete: function () {
+                            $.easyui.loaded();
+                        }
+                    });
+                    return false;
+                } else {
+                    return false;
+                }
+            },
+            onLoad: function () {
+                var f = $(this), ret = $.fn.dialog.defaults.onLoad();
+                f.form("disableValidation").form("enableValidation");
+                return ret;
+            }
+        });
+    }
+
+    const removeModuleUrl = '/Application/RemoveModule';
+
+    function removeModule(id) {
+        $.messager.confirm('系统提示', '是否确定删除该模块记录?', function (r) {
+            if (r) {
+                $.post(removeModuleUrl, {id: id}, function (data) {
+                    if (data.success) {
+                        if (data.result) {
+                            $('#datagrid').datagrid('clearSelections');
+                            $('#datagrid').datagrid('reload');
+                            $.messager.showInfoTopCenter('系统提示', '删除数据成功。', 1000);
+                        } else {
+                            $.messager.showErrorTopCenter('错误消息', '删除数据失败。');
+                        }
+                    } else {
+                        $.messager.showErrorTopCenter('错误消息', data.message);
+                    }
+                }, 'json');
+            }
+        });
+    }
+
+    const ChangeIsEnabledWorkFlowUrl = 'Application/ChangeIsEnabledWorkFlow';
+
+    function ChangeIsEnabledWorkFlow(id, title, type) {
+        $.messager.confirm("系统提示", "" + title + "是否执行此操作！",
+            function (r) {
+                if (r) {
+                    $.post(ChangeIsEnabledWorkFlowUrl, {id: id, type: type}, function (d) {
+                        if (d.Result) {
+                            $.messager.showInfoTopCenter('系统提示', '执行成功。', 1000);
+                            $dataGrid.datagrid('reload');
+                        } else {
+                            $.messager.showErrorTopCenter('错误消息', '失败。' + d.message, 1000);
+                        }
+                    });
+                }
+            });
+    }
+</script>
+</body>
+</html>

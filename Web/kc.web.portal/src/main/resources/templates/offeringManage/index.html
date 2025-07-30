@@ -1,0 +1,517 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="mlayout :: common_header(~{::title},~{::link},~{::style})">
+    <title>商品分类管理</title>
+    <link rel="stylesheet" th:href="@{/js/webuploader/webuploader.css}"/>
+    <link rel="stylesheet" th:href="@{/css/upload.css}"/>
+    <style>
+        .table-form.tr-col2 td:nth-child(odd) {
+            width: 15%;
+            font-size: 14px;
+        }
+
+        .table-form.tr-col2 td:nth-child(even) {
+            width: 85%;
+            font-size: 14px;
+        }
+
+        .webuploader-pick {
+            padding: 2px !important;
+            border-radius: 0 3px 3px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:100%;">
+    <div id="toolbar">
+        <div>
+            <!--商品分类管理-保存商品分类-->
+            <a sec:authorize="hasAuthority('94EB3E21-03FF-4E90-A211-AEA23B1023DD')" href="javascript:void(0)"
+               class="easyui-linkbutton" iconcls="fa fa-plus" onclick="addCategory()">添加</a>
+            <!--商品分类管理-保存商品分类-->
+            <a sec:authorize="hasAuthority('94EB3E21-03FF-4E90-A211-AEA23B1023DD')" href="javascript:void(0)"
+               class="easyui-linkbutton" iconcls="fa fa-pencil" onclick="editCategory()">编辑</a>
+            <!--商品分类管理-删除商品分类-->
+            <a sec:authorize="hasAuthority('93F6DC06-6426-41DF-9DB8-C0FA0758FBB7')" href="javascript:void(0)"
+               class="easyui-linkbutton" iconcls="fa fa-trash" onclick="removeCategory()">删除</a>
+        </div>
+        <div></div>
+    </div>
+    <div data-options="region:'west',collapsible:false" title="商品分类" style="width:400px;padding:2px" id="roles">
+        <table id="dgCategory"></table>
+    </div>
+    <div data-options="region:'center'" style="padding: 2px;">
+        <div id="toolbarOffering">
+            <div>
+                <!--商品管理-保存商品-->
+                <a sec:authorize="hasAuthority('52DFF617-3BB5-4A43-B807-73DB4A571924')" href="javascript:void(0)"
+                   class="easyui-linkbutton" iconcls="fa fa-plus" onclick="addOffering()">添加</a>
+                <!--商品管理-保存商品-->
+                <a sec:authorize="hasAuthority('52DFF617-3BB5-4A43-B807-73DB4A571924')" href="javascript:void(0)"
+                   class="easyui-linkbutton" iconcls="fa fa-pencil" onclick="editOffering()">编辑</a>
+            </div>
+            <div>
+                <select class="easyui-combobox" id="status" name="status" style="width:120px;"
+                        data-options="editable: false,panelHeight:'auto',">
+                    <option value="">请选择状态</option>
+                    <option th:each="status : ${status}"
+                            th:value="${statu.key}"
+                            th:text="${statu.value}"></option>
+                </select>
+                <input id="code" class="easyui-textbox" data-options="prompt:'请输入商品编号'" style="width:120px">
+                <input id="name" class="easyui-textbox" data-options="prompt:'请输入商品名称'" style="width:120px">
+                <a href="javascript:void(0)" onclick="reloadDgOffering()" class="easyui-linkbutton"
+                   data-options="iconCls:'fa fa-search'">查询</a>
+                <a href="javascript:void(0)" onclick="refreshOfferingSearch()" class="easyui-linkbutton"
+                   data-options="iconCls:'fa fa-refresh'">刷新</a>
+            </div>
+        </div>
+        <table id="dgOffering" title="商品列表"></table>
+    </div>
+</div>
+<th:block th:replace="layout :: scripts"/>
+<script th:src="@{/js/webuploader/md5.js}"></script>
+<script th:src="@{/js/webuploader/webuploader.min.js}"></script>
+<!--商品分类-->
+<script th:inline="javascript">
+
+    let imageSize = [[${uploadConfig.imageMaxSize}]];
+    let imageExt = [[${uploadConfig.imageExt}]];
+    let fileMaxSize = [[${uploadConfig.fileMaxSize}]];
+    let fileExt = [[${uploadConfig.fileExt}]];
+    let selectCategoryId = [[${selectCategoryId}]];
+    let selectCategoryName;
+    $(function () {
+        InitTreeCategory();
+        InitDgOffering();
+    });
+
+    //主表
+    const dgCategory = "#dgCategory";
+    let loadDataUrl = '/OfferingManage/LoadCategoryList';
+    let InitTreeCategory = function () {
+        $(dgCategory).treegrid({
+            url: loadDataUrl,
+            method: 'get',
+            idField: 'id',
+            treeField: 'text',
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            checkOnSelect: true,
+            nowrap: false,
+            fit: true,
+            lines: true,
+            showFooter: false,
+            toolbar: "#toolbar",
+            columns: [
+                [
+                    {field: 'id', title: '编号', width: 50, align: 'left', hidden: true},
+                    {field: 'text', title: '名称', width: 140, align: 'left'},
+                    //{field: 'description', title: '描述', width: 240, align: 'left'},
+                    // {field: 'isShow', title: '是否显示', width: 120, align: 'left', formatter: FormatterUtil.BoolFormatter},
+                    // {field: 'level', title: '层级', width: 100, align: 'left'},
+                    // {field: 'index', title: '排序', width: 100, align: 'left'}
+                ]
+            ],
+            onBeforeLoad: function (param) {
+
+            },
+            onLoadSuccess: function (node, data) {
+                $(".btnContacts").linkbutton({plain: true, iconCls: 'fa fa-search'});
+                //debugger;
+                if (selectCategoryId === 0) {
+                    if (data != null && data[0] != null) {
+                        $(dgCategory).treegrid('select', data[0].id);
+                    }
+                } else {
+                    $.each(data, function (i, item) {
+                        if (item.id === selectCategoryId) {
+                            $(dgCategory).treegrid('select', item.id);
+                        }
+                    })
+                }
+
+                $(dgCategory).treegrid("fixRowHeight");
+            },
+            onLoadError: function () {
+            },
+            onSelect: function (row) {
+                // if (!isCheckFlag) {
+                //     isCheckFlag = true;
+                //     rowIndexTo = row.id;
+                // } else if (rowIndexTo === row.id) {
+                //     isCheckFlag = false;
+                //     $(dgCategory).treegrid("unselectAll");
+                // } else {
+                //     isCheckFlag = false;
+                // }
+
+                //debugger;
+                selectCategoryId = row.id;
+                selectCategoryName = row.text;
+                loadManagerData(row.id);
+            }
+        });
+    };
+
+    let refreshCategorySearch = function () {
+        $(dgCategory).treegrid('unselectAll');
+        reloadCategory();
+    };
+
+    let reloadCategory = function () {
+        $(dgCategory).treegrid('unselectAll');
+        $(dgCategory).treegrid("load", {
+            name: ''
+        });
+    };
+
+    let addCategory = function () {
+        let row = $(dgCategory).treegrid('getSelected');
+        if (row) {
+            openCategoryForm(0, row.id);
+        } else {
+            openCategoryForm(0, 0);
+        }
+    };
+
+    let editCategory = function () {
+        let row = $(dgCategory).treegrid('getSelected');
+        if (!row) {
+            $.messager.showInfoTopCenter('系统提示', "请选择需要编辑的商品分类！", 2000);
+            return;
+        }
+        openCategoryForm(row.id, 0);
+    };
+
+    const getCategoryFormUrl = '/OfferingManage/GetCategoryForm';
+    const saveCategoryFormUrl = '/OfferingManage/SaveCategory';
+
+    let openCategoryForm = function (id, parentId) {
+        $.easyui.showDialog({
+            title: id > 0 ? '编辑商品分类' : '新增商品分类',
+            width: 480,
+            height: 380,
+            href: getCategoryFormUrl + "?id=" + id + "&parentId=" + parentId,
+            modal: true,
+            topMost: false,
+            enableHeaderContextMenu: false,
+            enableApplyButton: false,
+            onSave: function (d) {
+                let validate = d.form("enableValidation").form("validate");
+                if (validate) {
+                    if ($("#level").val() === "4") {
+                        $.messager.showErrorTopCenter("系统提示", "此父级" + ' ' + $("#ParentId").val() + ' ' + "不能作为父级");
+                        $("#level").val(' ');
+                        return false;
+                    }
+
+                    $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                    $.ajax({
+                        async: true,
+                        type: "post",
+                        dataType: "json",
+                        url: saveCategoryFormUrl,
+                        data: d.form("getData"),
+                        success: function (data) {
+                            if (data.success) {
+                                d.window('close');
+                                if (data.result) {
+                                    $(dgCategory).treegrid('clearSelections');
+                                    $(dgCategory).treegrid('reload');
+                                    //$.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', '保存数据失败。');
+                                }
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', data.message);
+                            }
+                        },
+                        complete: function () {
+                            $.easyui.loaded();
+                        }
+                    });
+                    return false;
+                } else {
+                    return false;
+                }
+            },
+            onLoad: function () {
+                $('.textbox').bind('blur', function () {
+                    $(this).validatebox('enableValidation').validatebox('validate');
+                });
+            }
+        });
+    };
+
+    const removeCategoryUrl = '/OfferingManage/RemoveCategory';
+
+    let removeCategory = function () {
+        let row = $(dgCategory).treegrid('getSelected');
+        if (row) {
+            if (row.children.length > 0) {
+                $.messager.showErrorTopCenter('错误消息', '无法删除有子部门的部门，请先删除子部门后再重试。', 1000);
+                return;
+            }
+
+            $.messager.confirm('系统提示', '确认要删除选中行?', function (r) {
+                if (r) {
+                    $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                    $.ajax({
+                        async: true,
+                        type: "get",
+                        dataType: "json",
+                        url: removeCategoryUrl,
+                        data: {id: row.id},
+                        success: function (data) {
+                            if (data.success) {
+                                if (data.result) {
+                                    $(dgCategory).treegrid('clearSelections');
+                                    $(dgCategory).treegrid('reload');
+                                    //$.messager.showInfoTopCenter('系统提示', '删除数据成功。', 1000);
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', '删除数据失败。');
+                                }
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', data.message);
+                            }
+                        },
+                        complete: function () {
+                            $.easyui.loaded();
+                        }
+                    });
+                }
+            });
+        } else {
+            $.messager.showErrorTopCenter('系统提示', "请选择需要删除的数据", 1000);
+        }
+    };
+</script>
+<!--商品列表-->
+<script th:inline="javascript">
+
+    let canEdit = [[${canEdit}]];
+    let canDelete = [[${canDelete}]];
+    let canPublish = [[${canPublish}]];
+    let canPreview = [[${canPreview}]];
+    let canReadLog = [[${canReadLog}]];
+    const dgOffering = "#dgOffering";
+    let InitDgOffering = function () {
+        let $dataGrid = $(dgOffering).datagrid({
+            method: 'get',
+            idField: 'offeringId',
+            striped: true,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            pagination: true,
+            nowrap: false,
+            fit: true,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            showFooter: false,
+            toolbar: "#toolbarOffering",
+            columns: [
+                [
+                    {field: 'offeringCode', title: '商品编号', width: 100, align: 'left'},
+                    {field: 'categoryName', title: '商品类别', width: 100, align: 'left'},
+                    {field: 'offeringName', title: '商品名称', width: 100, align: 'left'},
+                    {field: 'offeringPrice', title: '商品单价', width: 100, align: 'left'},
+                    {field: 'recommended', title: '是否推荐', width: 60, align: 'left', formatter: FormatterUtil.BoolFormatter},
+                    //{field: 'offeringVersionString', title: '商品版本', width: 120, align: 'left'},
+                    {field: 'statusString', title: '商品状态', width: 60, align: 'left'},
+                    {field: 'operator', title: '操作', width: 320, align: 'left',
+                        formatter: function (value, row, index) {
+                            let id = row.offeringId;
+                            let code = row.offeringCode;
+                            let status = row.status;
+
+                            let tdContext = '';
+                            if (canEdit && (status === 0 || status === 3)) { // 可编辑商品 & 草稿||审核退回
+                                tdContext += '<a class="btnAudit" style="cursor:pointer" onclick="publishOffering(\'' + id + '\', null, \' 是否完成商品编辑，提交商品审核？\')" >提交审核</a>';
+                                tdContext += '<a class="btnDelete" style="cursor:pointer" onclick="removeOffering(\'' + id + '\')" >删除商品</a>';
+                            }
+                            if (canPublish && status === 1) { // 可审核上架商品 & 提交审核
+                                tdContext += '<a class="btnAudit" style="cursor:pointer" onclick="publishOffering(\'' + id + '\', true, \' 是否审核通过，上架商品？\')" >审核通过</a>';
+                                tdContext += '<a class="btnDelete" style="cursor:pointer" onclick="publishOffering(\'' + id + '\', false, \' 审核不通过，是否退回？\')" >审核退回</a>';
+                            }
+                            if (canDelete && (status === 2 || status === 3)) { // 可删除商品 & 审核上架||审核退回
+                                tdContext += '<a class="btnAudit" style="cursor:pointer" onclick="publishOffering(\'' + id + '\', null, \' 是否下架商品？\')" >下架商品</a>';
+                            }
+                            if (canPreview) {
+                                tdContext += '<a class="btnPreview" style="cursor:pointer" onclick="previewOffering(\'id=' + id + '\')" >商品预览</a>';
+                            }
+                            if (canReadLog) {
+
+                                tdContext += '<a class="btnLog" style="cursor:pointer" onclick="openOffering(\'code=' + code + '\')" >商品日志</a>';
+                            }
+                            return tdContext;
+                        }
+                    }
+                ]],
+            onBeforeLoad: function (param) {
+            },
+            onLoadSuccess: function (data) {
+                $(".btnAudit").linkbutton({iconCls: 'fa fa-pencil'});
+                $(".btnDelete").linkbutton({iconCls: 'fa fa-trash'});
+                $(".btnPreview").linkbutton({iconCls: 'fa fa-search'});
+                $(".btnLog").linkbutton({iconCls: 'fa fa-file-text-o'});
+
+                $dataGrid.datagrid("fixRowHeight");
+            },
+            onLoadError: function () {
+            }
+        })
+    };
+
+    const loadOfferingDataUrl = '/OfferingManage/LoadOfferingList';
+    let loadManagerData = function () {
+        let status = $('#status').combobox("getValue");
+        if ($('#status').combobox("getValue") === "") {
+            status = "";
+        }
+
+        $.easyui.loading({msg: '正在加载数据，请稍等...'});
+        $.ajax({
+            url: loadOfferingDataUrl,//所有菜单
+            data: {
+                "page": 1,
+                "rows": 10,
+                "categoryId": selectCategoryId,
+                "code": $("#code").searchbox("getValue"),
+                "name": $("#name").searchbox("getValue"),
+                "status": status,
+            },
+            async: false,
+            type: "get",
+            success: function (result) {
+                $.easyui.loaded();
+                $(dgOffering).datagrid('loadData', result);
+            },
+            error: function () {
+            }
+        });
+    };
+
+    let refreshOfferingSearch = function () {
+        $("#code").searchbox('setValue', '');
+        $("#name").searchbox('setValue', '');
+        $('#status').combobox("setValue", '');
+        //$("#version").combobox('setValue', '');
+        loadManagerData();
+    };
+
+    let reloadDgOffering = function () {
+        loadManagerData();
+    };
+
+    let addOffering=  function () {
+        let title = "新增商品";
+        openOfferingForm('', title);
+    };
+
+    let editOffering = function () {
+        let row = $(dgOffering).datagrid('getSelected');
+        if (row) {
+            let title = "编辑商品";
+            openOfferingForm(row.offeringId, title);
+        } else {
+            $.messager.showErrorTopCenter('系统提示', "请选择需要编辑的数据", 1000);
+        }
+    };
+
+    const getOfferingFormUrl = '/OfferingManage/GetOfferingForm';
+    function openOfferingForm(id) {
+        MainPage_PostMessage("openSubPage", getOfferingFormUrl, "id=" + id);
+
+        return;
+    };
+
+    const removeOfferingUrl = '/OfferingManage/RemoveOffering';
+    let removeOffering = function (OfferingId) {
+        let row = $(dgOffering).datagrid('getSelected');
+        if (row) {
+            $.messager.confirm('系统提示', '删除之后将去除该商品所有角色(所有系统)且不可恢复,是否确定删除选中数据?', function (r) {
+                if (r) {
+                    $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                    $.post(removeOfferingUrl, {id: OfferingId}, function (data) {
+                        if (data.success) {
+                            if (data.result) {
+                                $(dgOffering).datagrid('reload');
+                                $.messager.showInfoTopCenter('系统提示', '删除数据成功。', 1000);
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', '删除数据失败。');
+                            }
+                        } else {
+                            $.messager.showInfoTopCenter('系统提示', data.message);
+                        }
+                        $.easyui.loaded();
+                    }, 'json');
+                }
+            });
+        }
+    };
+
+    const publishOfferingUrl = '/OfferingManage/PublishOffering';
+    let publishOffering = function (id, isAgree, title) {
+        $.messager.confirm("系统提示", title,
+            function (r) {
+                if (r) {
+                    $.ajax({
+                        url: publishOfferingUrl,
+                        async: true,
+                        type: 'post',
+                        dataType: 'json',
+                        data: {id: id, isAgree: isAgree},
+                        success: function (data) {
+                            if (data.success) {
+                                if (data.result) {
+                                    $(dgOffering).datagrid('reload');
+                                    $.messager.showInfoTopCenter('系统提示', '操作成功！', 2000);
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', '操作失败！', 2000);
+                                }
+                            } else {
+                                $(dgOffering).datagrid('reload');
+                                $.messager.showInfoTopCenter('系统提示', data.message, 2000);
+                            }
+                        },
+                        error: function (e) {
+                            //let error = JSON.parse(e.responseText).Message;
+                            $.easyui.loaded();
+                            $.messager.showInfoTopCenter('系统提示', '抱歉,你不具有当前操作的权限', 2000);
+                        }
+                    });
+                }
+            });
+    };
+
+    const previewUrl = '/OfferingManage/PreviewOffering';
+    let previewOffering= function (queryString) {
+        MainPage_PostMessage("openSubPage", previewUrl, queryString);
+    };
+
+    const logUrl = "/OfferingManage/OfferingLog";
+    let openOffering= function (queryString) {
+        MainPage_PostMessage("openSubPage", logUrl, queryString);
+    };
+
+    const existOfferingNameUrl = '/OfferingManage/ExistOfferingName';
+    let existOfferingName = function (id) {
+        $.post(existOfferingNameUrl, {id: id, OfferingName: $("#OfferingName").val()}, function (data) {
+                if (data === "result") {
+                    $.messager.showInfoTopCenter('系统提示', '商品名【' + $("#OfferingName").val() + '】已存在,请重新输入。');
+                    $("#OfferingName").val("");
+                }
+                if (data === "result1") {
+                    $.messager.showInfoTopCenter('系统提示', '商品名【' + $("#OfferingName").val() + '】正在审批中,请重新输入。');
+                    $("#OfferingName").val("");
+                }
+            },
+            'json');
+    };
+
+</script>
+</body>
+</html>

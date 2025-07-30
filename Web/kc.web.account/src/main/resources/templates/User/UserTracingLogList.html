@@ -1,0 +1,77 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout :: common_header(~{::title},~{},~{})">
+    <title>用户操作日志</title>
+
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:100%;">
+    <div id="toolbar">
+        <div>
+            <input id="selectname" class="easyui-textbox" data-options="prompt:'请输入姓名'" style="width:100px">
+            <a href="javascript:void(0)" onclick="searchData()" class="easyui-linkbutton" data-options="iconCls:'fa fa-search'">查询</a>
+            <a href="javascript:void(0)" onclick="refreshSearch()" class="easyui-linkbutton" data-options="iconCls:'fa fa-refresh'">刷新</a>
+        </div>
+    </div>
+    <table id="datagrid"></table>
+</div>
+
+<th:block th:replace="layout :: scripts"/>
+<script th:inline="javascript" type="text/javascript">
+    $(function() {
+        InitDataGrid();
+    });
+
+    let loadDataUrl = '/User/LoadUserTracingLogList';
+    function InitDataGrid() {
+        let $dataGrid = $('#datagrid').datagrid({
+            url: loadDataUrl,
+            method: 'get',
+            striped: true,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            pagination: true,
+            nowrap: false,
+            fit: true,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            showFooter: false,
+            toolbar: "#toolbar",
+            columns: [
+                [
+                    //{ field: 'OperatorId', title: '操作人Id', width: 100, align: 'left' },
+                    { field: 'Operator', title: '操作人', width: 100, align: 'left' },
+                    { field: 'OperateDate', title: '操作日期', width: 100, align: 'left' },
+                    { field: 'Remark', title: '内容', width: 500, align: 'left' }
+                ]
+            ],
+            onBeforeLoad: function(param) {
+            },
+            onLoadSuccess: function(data) {
+                $(".btnRemoveModule").linkbutton({ plain: true, iconCls: 'fa fa-trash' });
+                $dataGrid.datagrid("fixRowHeight");
+            },
+            onLoadError: function() {
+            }
+        });
+
+
+        $("#toolbar").keydown(function() {
+            if (event.keyCode === "13") {
+                searchData();
+            }
+        });
+    }
+
+    function refreshSearch() {
+        $("#selectname").searchbox('setValue', '');
+        searchData('', '');
+    }
+    function searchData() {
+        $('#datagrid').datagrid('unselectAll');
+        $("#datagrid").datagrid('load', { selectname: $("#selectname").searchbox("getValue") });
+    }
+</script>
+</body>
+</html>

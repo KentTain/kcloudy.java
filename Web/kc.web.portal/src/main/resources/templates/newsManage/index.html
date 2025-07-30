@@ -1,0 +1,243 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="~{Main/layout}" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <title>新闻管理</title>
+</head>
+<body>
+<div layout:fragment="content" class="easyui-layout" style="width:100%;height:100%;">
+    <div id="toolbar">
+        <div>
+            <!--新闻管理-保存新闻-->
+            <a sec:authorize="hasAuthority('4a1ca9f0-5d51-4f6f-adf7-4a3fda57ef4d')" href="javascript:void(0)"
+               class="easyui-linkbutton" iconcls="fa fa-plus" onclick="addArticle()">添加</a>
+            <!--新闻管理-保存新闻-->
+            <a sec:authorize="hasAuthority('4a1ca9f0-5d51-4f6f-adf7-4a3fda57ef4d')" href="javascript:void(0)"
+               class="easyui-linkbutton" iconcls="fa fa-pencil" onclick="editArticle()">编辑</a>
+        </div>
+
+        <div>
+            <select class="easyui-combobox" id="status" name="status" style="width:120px;"
+                    data-options="editable: false,panelHeight:80">
+                <option value="999">请选择状态</option>
+                <option th:each="statu : ${status}"
+                        th:value="${statu.key}"
+                        th:text="${statu.value}"></option>
+            </select>
+            <input id="code" class="easyui-textbox" data-options="prompt:'请输入新闻编号'" style="width:120px">
+            <input id="name" class="easyui-textbox" data-options="prompt:'请输入新闻名称'" style="width:120px">
+            <a href="javascript:void(0)" onclick="reloadDatagrid()" class="easyui-linkbutton"
+               data-options="iconCls:'fa fa-search'">查询</a>
+            <a href="javascript:void(0)" onclick="refreshSearch()" class="easyui-linkbutton"
+               data-options="iconCls:'fa fa-refresh'">刷新</a>
+        </div>
+    </div>
+    <table id="datagrid"></table>
+</div>
+<div layout:fragment="scripts">
+
+    <script type="text/javascript">
+        $(function () {
+            InitDataGrid();
+        });
+
+        function refreshSearch() {
+            $("#code").searchbox('setValue', '');
+            $("#name").searchbox('setValue', '');
+            $('#status').combobox("setValue", '');
+            reloadDatagrid();
+        }
+
+        function reloadDatagrid() {
+            var status = $('#status').combobox("getValue");
+            if ($('#status').combobox("getValue") == "") {
+                status = "";
+            }
+
+            $("#datagrid").datagrid("load", {
+                code: $("#code").searchbox("getValue"),
+                name: $("#name").searchbox("getValue"),
+                status: status,
+            });
+        }
+
+        var canEdit = [[${canEdit}]];
+        var canDelete = [[${canDelete}]];
+        var canPublish = [[${canPublish}]];
+        var canPreview = [[${canPreview}]];
+        var loadDataUrl = '/NewsManage/LoadArticleList';
+
+        function InitDataGrid() {
+            var $dataGrid = $('#datagrid').datagrid({
+                url: loadDataUrl,
+                method: 'get',
+                idField: 'id',
+                striped: true,
+                fitColumns: true,
+                rownumbers: true,
+                singleSelect: true,
+                pagination: true,
+                nowrap: false,
+                fit: true,
+                pageSize: 10,
+                pageList: [10, 20, 50, 100],
+                showFooter: false,
+                toolbar: "#toolbar",
+                columns: [
+                    [
+                        {field: 'id', title: '编号', width: 20, align: 'left'},
+                        {field: 'articleCategoryName', title: '新闻类别', width: 80, align: 'left'},
+                        {field: 'title', title: '新闻名称', width: 220, align: 'left'},
+                        {field: 'author', title: '作者', width: 80, align: 'left'},
+                        {field: 'statusString', title: '新闻状态', width: 60, align: 'left'},
+                        //{field: 'articleDesc', title: '新闻描述', width: 60, align: 'left'},
+                        {field: 'oper', title: '操作', width: 220, align: 'left',
+                            formatter: function (value, row, index) {
+                                var id = row.id;
+                                var code = row.offeringCode;
+                                var status = row.status;
+
+                                var tdContext = '';
+                                if (canEdit && (status == 0 || status == 3)) { // 可编辑新闻 & 草稿||审核退回
+                                    tdContext += '<a class="btnAudit" style="cursor:pointer" onclick="publishArticle(\'' + id + '\', null, \' 是否完成新闻编辑，提交新闻审核？\')" >提交审核</a>';
+                                    tdContext += '<a class="btnDelete" style="cursor:pointer" onclick="removeArticle(\'' + id + '\')" >删除新闻</a>';
+                                }
+                                if (canPublish && status == 1) { // 可审核上架新闻 & 提交审核
+                                    tdContext += '<a class="btnAudit" style="cursor:pointer" onclick="publishArticle(\'' + id + '\', true, \' 是否审核通过，上架新闻？\')" >审核通过</a>';
+                                    tdContext += '<a class="btnDelete" style="cursor:pointer" onclick="publishArticle(\'' + id + '\', false, \' 审核不通过，是否退回？\')" >审核退回</a>';
+                                }
+                                if (canDelete && (status == 2 || status == 3)) { // 可删除新闻 & 审核上架||审核退回
+                                    tdContext += '<a class="btnAudit" style="cursor:pointer" onclick="publishArticle(\'' + id + '\', null, \' 是否下架新闻？\')" >下架新闻</a>';
+                                }
+                                if (canPreview) {
+                                    tdContext += '<a class="btnPreview" style="cursor:pointer" onclick="previewArticle(\'' + id + '\')" >新闻预览</a>';
+                                }
+                                return tdContext;
+                            }
+                        }
+                    ]],
+                onBeforeLoad: function (param) {
+                },
+                onLoadSuccess: function (data) {
+                    $(".btnAudit").linkbutton({iconCls: 'fa fa-pencil'});
+                    $(".btnDelete").linkbutton({iconCls: 'fa fa-trash'});
+                    $(".btnPreview").linkbutton({iconCls: 'fa fa-search'});
+
+                    $dataGrid.datagrid("fixRowHeight");
+                },
+                onLoadError: function () {
+                }
+            });
+        }
+
+        function addArticle() {
+            var title = "新增新闻";
+            opentForm('', title);
+        }
+
+        function editArticle() {
+            var row = $('#datagrid').datagrid('getSelected');
+            if (row) {
+                var title = "编辑新闻";
+                opentForm(row.id, title);
+            } else {
+                $.messager.showErrorCenter('系统提示', "请选择需要编辑的数据", 1000);
+            }
+        }
+
+        var getFormUrl = '/NewsManage/GetArticleForm';
+        var saveFormUrl = '/NewsManage/SaveArticle';
+
+        function opentForm(id, title) {
+            MainPage_PostMessage("openSubPage", getFormUrl, "id=" + id);
+
+            return;
+        }
+
+        var removeUrl = '/NewsManage/RemoveArticle';
+
+        function removeArticle(ArticleId) {
+            var row = $('#datagrid').datagrid('getSelected');
+            if (row) {
+                $.messager.confirm('系统提示', '删除之后将去除该新闻所有角色(所有系统)且不可恢复,是否确定删除选中数据?', function (r) {
+                    if (r) {
+                        $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                        $.post(removeUrl, {id: ArticleId}, function (data) {
+                            if (data.success) {
+                                if (data.result) {
+                                    $('#datagrid').datagrid('reload');
+                                    $.messager.showInfoCenter('系统提示', '删除数据成功。', 1000);
+                                } else {
+                                    $.messager.showErrorCenter('错误消息', '删除数据失败。');
+                                }
+                            } else {
+                                $.messager.showInfoCenter('系统提示', data.message);
+                            }
+                            $.easyui.loaded();
+                        }, 'json');
+                    }
+                });
+            }
+        }
+
+        var publishUrl = '/NewsManage/PublishArticle';
+
+        function publishArticle(id, isAggree, title) {
+            $.messager.confirm("系统提示", title,
+                function (r) {
+                    if (r) {
+                        $.ajax({
+                            url: publishUrl,
+                            async: true,
+                            type: 'post',
+                            dataType: 'json',
+                            data: {id: id, isAggree: isAggree},
+                            success: function (data) {
+                                if (data.success) {
+                                    if (data.result) {
+                                        $('#datagrid').datagrid('reload');
+                                        $.messager.showInfoCenter('系统提示', '操作成功！', 2000);
+                                    } else {
+                                        $.messager.showErrorCenter('错误消息', '操作失败！', 2000);
+                                    }
+                                } else {
+                                    $('#datagrid').datagrid('reload');
+                                    $.messager.showInfoCenter('系统提示', data.message, 2000);
+                                }
+                            },
+                            error: function (e) {
+                                //var error = JSON.parse(e.responseText).Message;
+                                $.easyui.loaded();
+                                $.messager.showInfoCenter('系统提示', '抱歉,你不具有当前操作的权限', 2000);
+                            }
+                        });
+                    }
+                });
+        }
+
+        var previewUrl = '/Home/newsDetail';
+
+        function previewArticle(queryString) {
+            window.open(previewUrl + "?id=" + queryString);
+        }
+
+        var existArticleNameUrl = '/NewsManage/ExistArticleName';
+
+        function existArticleName(id) {
+            $.post(existArticleNameUrl, {id: id, ArticleName: $("#ArticleName").val()}, function (data) {
+                    if (data == "result") {
+                        $.messager.showInfoCenter('系统提示', '新闻名【' + $("#ArticleName").val() + '】已存在,请重新输入。');
+                        $("#ArticleName").val("");
+                    }
+                    if (data == "result1") {
+                        $.messager.showInfoCenter('系统提示', '新闻名【' + $("#ArticleName").val() + '】正在审批中,请重新输入。');
+                        $("#ArticleName").val("");
+                    }
+                },
+                'json');
+        }
+
+    </script>
+</div>
+</body>
+</html>

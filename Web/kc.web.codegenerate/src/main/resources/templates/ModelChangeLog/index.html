@@ -1,0 +1,163 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="layout :: common_header(~{::title},~{},~{::style})">
+    <title>数据模型管理</title>
+    <meta charset="UTF-8"/>
+    <style>
+        input[readonly] {
+            background-color: #EEEEEE !important;
+        }
+
+        pre {
+            outline: 1px solid #ccc;
+            padding: 5px;
+            margin: 5px;
+        }
+
+        .string {
+            color: green;
+        }
+
+        .number {
+            color: darkorange;
+        }
+
+        .boolean {
+            color: blue;
+        }
+
+        .null {
+            color: magenta;
+        }
+
+        .key {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:100%;">
+    <div id="toolbar">
+        <div>
+            <select id="cmbModelType" name="cmbModelType" class="easyui-combobox"
+                    data-options="width:140,panelHeight:'auto',prompt:'请选择日志类型'">
+                <option value="">请选择日志类型</option>
+                <option th:each="Type : ${ModelTypeList}"
+                        th:value="${Type.key}"
+                        th:text="${Type.value}"></option>
+            </select>
+            <input id="code" class="easyui-textbox" data-options="prompt:'请输入模型Id'" style="width:120px">
+            <input id="name" class="easyui-textbox" data-options="prompt:'请输入模型名称'" style="width:180px">
+            <a href="javascript:void(0)" onclick="reloadDatagrid()" class="easyui-linkbutton"
+               data-options="iconCls:'fa fa-search'">查询</a>
+            <a href="javascript:void(0)" onclick="refreshSearch()" class="easyui-linkbutton"
+               data-options="iconCls:'fa fa-refresh'">刷新</a>
+        </div>
+    </div>
+    <table id="datagrid"></table>
+    <div id="dd" class="easyui-dialog" title="日志详情" style="width:50%;height:70%" closed="true">
+        <pre id="result"></pre>
+    </div>
+</div>
+
+<th:block th:replace="layout :: scripts"/>
+<script type="text/javascript">
+    $(function () {
+        InitDataGrid();
+    });
+
+    let loadDataUrl = '/ModelChangeLog/LoadModelChangeLogList';
+
+    function InitDataGrid() {
+        let $dataGrid = $('#datagrid').datagrid({
+            url: loadDataUrl,
+            method: 'get',
+            idField: 'processLogId',
+            striped: true,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            pagination: true,
+            nowrap: false,
+            fit: true,
+            pageSize: 20,
+            pageList: [20, 30, 50, 100],
+            showFooter: false,
+            toolbar: "#toolbar",
+            columns: [
+                [
+                    {field: 'referenceId', title: '模型Id', width: 40, align: 'left', hidden: true},
+                    {field: 'referenceName', title: '模型名称', width: 100, align: 'left'},
+                    {field: 'modelTypeString', title: '日志类别', width: 60, align: 'left'},
+                    {field: 'operator', title: '操作人', width: 80, align: 'left'},
+                    {field: 'operateDate', title: '操作日期', width: 100, align: 'left'},
+                    {field: 'remark', title: '日志内容', width: 160, align: 'left'},
+                    {
+                        field: 'oper', title: '操作', width: 60, align: 'center',
+                        formatter: function (value, row, index) {
+                            return '<a href="##" class="btnLog" onclick="openDialog(' + index + ')">日志详情</a>';
+                        }
+                    }
+                ]],
+            onBeforeLoad: function (param) {
+                let code = $("#code").searchbox("getValue");
+                let name = $("#name").searchbox("getValue");
+                param.code = code;
+                param.name = name;
+            },
+            onLoadSuccess: function (data) {
+                CommonUtil.buttonStyle();
+                $dataGrid.datagrid("fixRowHeight");
+            },
+            onLoadError: function () {
+            }
+        });
+    }
+
+    let refreshSearch = function () {
+        $("#code").searchbox('setValue', '');
+        $("#name").searchbox('setValue', '');
+        $('#cmbModelType').combobox("setValue", '');
+        reloadDatagrid();
+    };
+    let reloadDatagrid = function () {
+        $("#datagrid").datagrid("load", {
+            code: $("#code").searchbox("getValue"),
+            name: $("#name").searchbox("getValue"),
+            type: $('#cmbModelType').combobox("getValue")
+        });
+    };
+
+    let openDialog = function (index) {
+        let row = $('#datagrid').datagrid('getData').rows[index];
+        let content = jsonFormat(row.refObjectJson);
+        $('#result').html(content);
+        $('#dd').dialog('open').dialog('center').panel('move', {right: '', top: 0, bottom: ''});
+    };
+
+    let jsonFormat = function (json) {
+        if (typeof json != 'string') {
+            json = JSON.stringify(json, undefined, 2);
+        }
+        json = json.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+            var cls = 'number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'key';
+                } else {
+                    cls = 'string';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'boolean';
+            } else if (/null/.test(match)) {
+                cls = 'null';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+
+    };
+
+</script>
+</body>
+</html>

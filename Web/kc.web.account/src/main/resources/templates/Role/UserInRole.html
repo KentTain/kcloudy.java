@@ -1,0 +1,364 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout :: common_header(~{::title},~{},~{})">
+    <title>角色用户</title>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:100%;">
+	<div data-options="region:'west',collapsible:false" title="角色列表" style="width:200px;padding:2px" id="roles">
+        <div id="menuInRole"></div>
+    </div>
+    <div data-options="region:'center'">
+        <div id="menuList" name="menu" style="padding:2px" data-options="title:'用户列表',refreshable:false">
+            <div id="toolbar" style="padding: 5px; height: auto">
+                <input id="searchboxEmail" class="easyui-textbox" data-options="prompt:'请输入邮箱'" style="width:100px">
+                <input id="searchboxPhone" class="easyui-textbox" data-options="prompt:'请输入手机号'" style="width:100px">
+                <input id="searchboxName" class="easyui-textbox" data-options="prompt:'请输入姓名'" style="width:100px">
+                <a href="javascript:void(0)" onclick="reloadDatagrid()" class="easyui-linkbutton" data-options="iconCls:'fa fa-search'">查询</a>
+                <a href="javascript:void(0)" onclick="RefreshSearch()" class="easyui-linkbutton" data-options="iconCls:'fa fa-refresh'">刷新</a>
+            </div>
+            <div style="height: 50%;width:100%;float:none;">
+                <table id="datagrid" title="用户列表" data-options=" iconCls: 'icon-standard-text-list-bullets',border:false"></table>
+            </div>
+            <div style="height:48%;width:100%;margin-top:2px;overflow:hidden;float:none">
+                <table id="UserData" title="当前角色用户"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="layout :: scripts"/>
+<script th:inline="javascript" type="text/javascript">
+    let preSelectRoleId = [[${roleId}]];
+    let canSubmitUserInRole = [[${canSubmitUserInRole}]];
+    let adminUserId = [[${adminUserId}]];
+    let systemSsoRoleId = [[${systemSsoRoleId}]];
+
+    let menuInRole = $('#menuInRole');
+    let menuList = $('#menuList');
+    let del = [];
+    let add = [];
+    $(function () {
+        InitAllUserGrid(preSelectRoleId);
+        getData(preSelectRoleId);
+
+        /* setTimeout(function () {
+            $("#datagrid").datagrid("load", {
+                roleId: preSelectRoleId
+            });
+        }, 0); */
+
+    });
+
+    function RefreshSearch() {
+        $("#searchboxEmail").searchbox('setValue', '');
+        $("#searchboxPhone").searchbox('setValue', '');
+        $("#searchboxName").searchbox('setValue', '');
+        reloadDatagrid();
+    }
+
+    function reloadDatagrid() {
+
+        $("#datagrid").datagrid("load", {
+            email: $("#searchboxEmail").searchbox("getValue"),
+            phone: $("#searchboxPhone").searchbox("getValue"),
+            name: $("#searchboxName").searchbox("getValue"),
+            roleId: preSelectRoleId
+        });
+    }
+
+    let loadDataUrl = '/Role/LoadUserLeftInRoseList';
+    function InitAllUserGrid(roleId) {
+        let $dataGrid = $('#datagrid').datagrid({
+            url: loadDataUrl + "?roleId=" + roleId,
+            method: 'get',
+            idField: 'userId',
+            toolbar: '#toolbar',
+            striped: true,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            nowrap: false,
+            fit: true,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            pagination: true,
+            showFooter: false,
+            columns: [
+                [
+                    { field: 'userName', title: '用户名', width: 140, align: 'left' },
+                    { field: 'displayName', title: '姓名', width: 100, align: 'left' },
+                    { field: 'email', title: '邮箱', width: 160, align: 'left' },
+                    { field: 'phoneNumber', title: '手机号', width: 100, align: 'left' },
+                    { field: 'organizationNames', title: '所属部门', width: 100, align: 'left',
+                        formatter: function (value, row, index) {
+                            if (value != "") {
+                                //return value.substr(0, value.length - 1);
+                            }
+                            return value;
+                        }
+                    },
+                    { field: 'positionLevelName', title: '部门岗位', width: 100, align: 'left' },
+                    { field: 'userId', title: '操作', width: 80, align: 'left',
+                        formatter: function (value) {
+                            if (canSubmitUserInRole) {
+                                return "<a  class='btnAdds' href='#' onclick=Add('" + value + "')>添加</a>";
+                            } else {
+                                return '';
+                            }
+                        }
+                    }
+                ]],
+            onBeforeLoad: function (param) {
+            },
+            onLoadSuccess: function (data) {
+                $(".btnAdds").linkbutton({ plain: true, iconCls: 'fa fa-plus' });
+            },
+            onLoadError: function () {
+            }
+        });
+
+    }
+
+    let getDataUrl = '/Role/GetUserInRole';
+    let getData = function (id) {
+        $.easyui.loading({ msg: '正在加载数据，请稍等...' });
+        $.ajax({
+            url: getDataUrl,//所有菜单
+            data: { "roleId": id },
+            async: false,
+            type: "get",
+            success: function (result) {
+                $.easyui.loaded();
+                bindRole(result.RoleList);
+                InitSelectUserGrid(result.Users);
+            },
+            error: function () {
+            }
+        });
+    };
+
+    function bindRole(data) {
+        menuInRole.datalist({
+            lines: true,
+            valueField: 'Value',
+            textField: 'Key',
+            columns: [
+                [
+                    { field: 'Key', title: '名称', width: 200, align: 'left' }
+                ]
+            ]
+        }).datalist('loadData', data);
+        if (preSelectRoleId.length != 0) {
+            $.each(data, function (index) {
+                if (this.Value === preSelectRoleId) {
+                    menuInRole.datalist('selectRow', index);
+                    return;
+                }
+            });
+        }
+        $('#roles .datagrid-body .datagrid-cell').click(function () {
+                let currentValue = data[$('#roles .datagrid-body .datagrid-cell').index($(this))].Value;
+                if (currentValue === preSelectRoleId) {
+                    return;
+                } else {
+                    preSelectRoleId = currentValue;
+                }
+                reloadDatagrid();
+                if (add.length + del.length > 0) {
+                    $.messager.confirm('系统提示', '您有未保存的更改,是否放弃', function (bl) {
+                        if (bl) {
+                            preSelectRoleId = currentValue;
+                            del = [];
+                            add = [];
+                            bindmenu(preSelectRoleId);
+                        } else {
+                            $.each(data, function (index) {
+                                if (this.Value === preSelectRoleId) {
+                                    menuInRole.datalist('selectRow', index);
+                                    return;
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    preSelectRoleId = currentValue;
+                    del = [];
+                    add = [];
+                    bindmenu(preSelectRoleId);
+
+                }
+
+            }
+        );
+    }
+
+    function bindmenu(roleId) {
+        $.easyui.loading({ msg: '正在加载数据，请稍等...' });
+        $.ajax({
+            url: getDataUrl,
+            data: { "roleId": roleId },
+            type: "get",
+            success: function (result) {
+                $.easyui.loaded();
+                UserData.datalist("loadData", result.Users);
+            },
+            error: function () {
+                $.easyui.loaded();
+            }
+        });
+    }
+
+    let UserData = $('#UserData');
+    function InitSelectUserGrid(data) {
+        UserData.datagrid({
+            data: data,
+            idField: 'userId',
+            striped: true,
+            pagination: false,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            nowrap: false,
+            fit: true,
+            lines: true,
+            showFooter: false,
+            columns: [
+                [
+                    { field: 'userName', title: '用户名', width: 140, align: 'left' },
+                    { field: 'displayName', title: '姓名', width: 100, align: 'left' },
+                    { field: 'email', title: '邮箱', width: 160, align: 'left' },
+                    { field: 'phoneNumber', title: '手机号', width: 100, align: 'left' },
+                    { field: 'organizationNames', title: '所属部门', width: 100, align: 'left',
+                        formatter: function (value, row, index) {
+                            if (value != "") {
+                                //return value.substr(0, value.length - 1);
+                            }
+                            return value;
+                        }
+                    },
+                    { field: 'positionLevelName', title: '部门岗位', width: 100, align: 'left' },
+                    //{ field: 'CreateDate', title: '创建时间', width: 100, align: 'left', formatter: FormatterUtil.DateFormatter },
+                    { field: 'userId', title: '操作', width: 100, align: 'left',
+                        formatter: function (value) {
+                            if (canSubmitUserInRole) {
+                                return "<a class='btnRemoves' href='#' onclick=Remove('" + value + "','" + this.formatter.arguments[2] + "')>移除</a>";
+                            } else {
+                                return '';
+                            }
+                        }
+                    }
+                ]
+            ],
+            onBeforeLoad: function (param) {
+            },
+            onLoadSuccess: function () {
+                $(".btnRemoves").linkbutton({ plain: true, iconCls: 'fa fa-trash' });
+            },
+            onLoadError: function () {
+            }
+        });
+    }
+
+    function Remove(userid) {
+        let itms = menuInRole.datalist("getSelected").Value;
+        if (itms == null || itms.length === 0) {
+            $.messager.showInfoTopCenter('系统提示', "请选择左边角色", 1000);
+            return;
+        }
+
+        $.messager.confirm('系统提示', "确定要移除当前用户?",
+            function (r) {
+                if (r) {
+                    let rows = UserData.datagrid("getRows");
+                    let row;
+                    $.each(rows, function () {
+                        if (this.userId === userid) {
+                            row = this;
+                        }
+                    });
+                    del.push(userid);
+
+                    if (itms === systemSsoRoleId) {
+                        if (del.contains(adminUserId)) {
+                            $.messager.showInfoTopCenter('系统提示', "无法移除系统管理员所属用户！", 1000);
+                            return;
+                        }
+                    }
+                    save(1, del, row, itms);
+                    reloadDatagrid();
+                }
+            });
+    }
+
+    function Add(userId) {
+        let items = menuInRole.datalist("getSelected").Value;
+        if (items == null || items.length === 0) {
+            $.messager.showInfoTopCenter('系统提示', "请选择左边角色", 1000);
+            return;
+        }
+
+        let bl = false;
+        let scores = UserData.datagrid("getRows");
+        $.each(scores, function () {
+            if (this.userId === userId) {
+                bl = true;
+                return;
+            }
+        });
+        if (bl) {
+            $.messager.showInfoTopCenter('系统提示', "用户已存在，不可重复添加");
+            return;
+        }
+        let rows = $('#datagrid').datagrid("getRows");
+        let row;
+        $.each(rows, function () {
+            if (this.userId === userId) {
+                row = this;
+            }
+        });
+
+        add.push(userId);
+        save(0, add, row, items);
+        reloadDatagrid();
+    }
+
+    let savePermissionInrole = '/Role/SubmitUserInRole';
+    function save(type, userIds, row, roleId) {
+        $.easyui.loading({ msg: '正在保存数据，请稍等...' });
+        $.ajax({
+            url: savePermissionInrole,
+            type: "post",
+            data: { 'type': type, 'roleId': roleId, "userIdList": userIds },
+            success: function (data) {
+                $.easyui.loaded();
+                if (data.success) {
+                    if (data.result) {
+                        if(type === 0) {
+                            $.messager.showInfoTopCenter('系统提示', '添加角色用户成功。', 1000);
+                            UserData.datagrid("appendRow", row);
+                            $(".btnRemoves").linkbutton({ plain: true, iconCls: 'fa fa-trash' });
+                        } else if (type === 1) {
+                            $.messager.showInfoTopCenter('系统提示', '移除角色用户成功。', 1000);
+                            UserData.datagrid("deleteRow", UserData.datagrid("getRowIndex", row));
+                        }
+                    }
+                    else {
+                        $.messager.showErrorTopCenter('系统提示', '保存数据失败。');
+                    }
+                } else {
+                    $.messager.showErrorTopCenter('系统提示', data.message);
+                }
+            },
+            error: function () {
+                //let error = JSON.parse(e.responseText).Message;
+                $.easyui.loaded();
+                $.messager.showInfoTopCenter('系统提示', '抱歉,你不具有当前操作的权限');
+            }
+        });
+        del = [];
+        add = [];
+    }
+</script>
+</body>
+</html>

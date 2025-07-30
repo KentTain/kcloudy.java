@@ -1,0 +1,183 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: common_header(~{::title},~{},~{})">
+    <title>数据模型属性新增/编辑</title>
+</head>
+<body>
+<form id="saveform" class="easyui-form" action="#" method="post"
+      th:action="@{/RelationDefinition/SaveRelationDefDetail}" th:object="${RelationDefDetailVM}">
+    <input type="hidden" th:field="*{isEditMode}"/>
+    <input type="hidden" th:field="*{id}"/>
+    <input type="hidden" th:field="*{relationDefId}"/>
+
+    <input type="hidden" th:field="*{deleted}"/>
+    <input type="hidden" th:field="*{createdBy}"/>
+    <input type="hidden" th:field="*{createdName}"/>
+    <input type="hidden" th:field="*{createdDate}"/>
+    <input type="hidden" th:field="*{modifiedBy}"/>
+    <input type="hidden" th:field="*{modifiedName}"/>
+    <input type="hidden" th:field="*{modifiedDate}"/>
+    <table class="dialog-form-table">
+        <tbody>
+        <tr>
+            <td><label class="required">*</label><label for="name">属性名：</label></td>
+            <td><input class="easyui-validatebox easyui-textbox"
+                       data-options="required:true,width:200,height:26,validType:'length[1,50]'"
+                       th:field="*{name}"/></td>
+        </tr>
+        <tr>
+            <td><label class="required">*</label><label for="displayName">显示名称：</label></td>
+            <td><input class="easyui-validatebox easyui-textbox"
+                       data-options="required:true,width:200,height:26,validType:'length[1,50]'"
+                       th:field="*{displayName}"/></td>
+        </tr>
+        <tr>
+            <td><label class="required">*</label><label for="relationType">关系类型：</label></td>
+            <td>
+                <select class="easyui-combobox"
+                        data-options="width:200,height:26,panelHeight:'auto'"
+                        th:field="*{relationType}">
+                    <option th:each="Type : ${RelationTypeList}"
+                            th:selected="${Type.key eq RelationDefDetailVM.relationType.getIndex()}"
+                            th:value="${Type.key}" th:text="${Type.value}"></option>
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td><label class="required">*</label><label for="relationDefName">主表名称：</label></td>
+            <td>
+                <input class="easyui-validatebox easyui-textbox"
+                       data-options="required:true,width:200,height:26"
+                       th:field="*{relationDefName}"/>
+            </td>
+        </tr>
+        <tr>
+            <td><label class="required">*</label><label for="mainModelDefFieldId">主表字段属性：</label></td>
+            <td>
+                <input class="easyui-validatebox easyui-combobox"
+                       data-options="required:true, width:200, height:26,
+                            valueField:'propertyAttributeId', textField: 'displayName',"
+                       th:field="*{mainModelDefFieldId}"/>
+            </td>
+        </tr>
+
+        <tr>
+            <td><label class="required">*</label><label for="subModelDefId">关联子表：</label></td>
+            <td>
+                <input class="easyui-validatebox easyui-combobox"
+                       data-options="required:true, width:200, height:26,
+                            valueField:'propertyId', textField:'displayName'"
+                       th:field="*{subModelDefId}"/>
+            </td>
+        </tr>
+
+        <tr>
+            <td><label class="required">*</label><label for="subModelDefFieldId">关联字段属性：</label></td>
+            <td>
+                <input class="easyui-validatebox easyui-combobox"
+                       data-options="required:true, width:200, height:26,
+                            valueField:'propertyAttributeId', textField:'displayName'"
+                       th:field="*{subModelDefFieldId}"/>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+<!--弹出框：组件初始化-->
+<script type="text/javascript" th:inline="javascript">
+    $(function () {
+        let relationTypeId = '#relationType';
+        let mainModelId = [[${MainModelId}]];
+        let relationDefId = [[${RelationDefDetailVM.relationDefId}]];
+        let isEditMode = [[${RelationDefDetailVM.isEditMode}]];
+        let relationType = [[${RelationDefDetailVM.relationType.getIndex()}]];
+        $('.textbox').bind('blur', function () {
+            $(this).validatebox('enableValidation').validatebox('validate');
+        });
+
+        //获取主表的字段属性数据
+        // 处理引用类型OnChange事件过程：
+        //      1. 设置关系类型选中值；
+        //      2. 主从关系，主键属性下拉框值默认设置为主键字段；
+        //      3. 引用关系，主键属性下拉框值为唯一字段；
+        let mainModelDefFieldId = '#mainModelDefFieldId';
+        let mainModelFieldsData = loadModelFieldsData(mainModelId);
+        $(relationTypeId).combobox({
+            onSelect: function (record) {
+                //debugger;
+                //单击的编辑对象向上一直朝找，找到正在编辑的行的索引：index
+                let isOneByMany = record.value === '0'; //是否为主从关系
+
+                //主从关系，主键属性下拉框值默认设置为主键字段
+                //引用关系，主键属性下拉框值为唯一字段
+                if (mainModelFieldsData && mainModelFieldsData.length > 0) {
+                    let modelFields = isOneByMany
+                        ? mainModelFieldsData.filter(m => m.isPrimaryKey)
+                        : mainModelFieldsData.filter(m => m.isNotNull);
+                    $(mainModelDefFieldId).combobox('loadData', modelFields);
+                    $(mainModelDefFieldId).combobox('select', modelFields[0].propertyAttributeId);
+                }
+
+                // 根据关系类型，设置主表关联字段属性是否可用
+                //$(mainModelDefFieldId).combobox('readonly', isOneByMany);
+            }
+        });
+
+        // 获取关联子表模型列表数据
+        // 处理子表OnChange事件过程：
+        //      1. 主从关系，子表关联属性下拉框值为唯一字段；
+        //      2. 引用关系，子表关联属性下拉框值默认设置为主键字段；
+        let subModelData = loadModelsData();
+        let subModelDefId = '#subModelDefId';
+        let subModelDefFieldId = '#subModelDefFieldId';
+        $(subModelDefId).combobox({
+            data: subModelData,
+            mode: 'local',
+            valueField: 'propertyId',
+            textField: 'displayName',
+            editable: true,
+            filter: function (q, row) {
+                debugger;
+                let opts = $(this).combobox('options');
+                return row[opts.textField].indexOf(q) === 0;
+            },
+            onSelect: function (record) {
+                let relationValue = $('#relationType').combobox('getValue');
+                let isOneByMany = relationValue === '0'; //是否为主从关系
+
+                // 根据关系类型，设置子表关联字段属性下拉框值
+                let subModelFields = loadModelFieldsData(record.propertyId);
+                if (subModelFields && subModelFields.length > 0) {
+                    //主从关系，子表关联属性下拉框值为唯一字段；
+                    //引用关系，子表关联属性下拉框值默认设置为主键字段；
+                    let modelFields = isOneByMany
+                        ? subModelFields.filter(m => m.isNotNull)
+                        : subModelFields.filter(m => m.isPrimaryKey);
+                    if (modelFields && modelFields.length > 0) {
+                        $(subModelDefFieldId).combobox('loadData', modelFields);
+                        $(subModelDefFieldId).combobox('select', modelFields[0].propertyAttributeId);
+                    }
+                }
+
+                // 根据关系类型，设置子表关联字段属性下拉框值
+                if (!isEditMode) {
+                    $('#name').textbox('setValue', isOneByMany ? record.name + 'List' : record.name);
+                    $('#displayName').textbox('setValue', isOneByMany ? record.displayName + '列表' : record.displayName);
+                }
+            }
+        });
+
+        // 设置默认值
+        if (isEditMode) {
+            //$('#name').textbox('readonly', true);
+            $('#relationDefName').textbox('readonly', true);
+
+            $(relationTypeId).combobox('select', relationType);
+        } else {
+            $(relationTypeId).combobox('select', 0);
+            $(subModelDefId).combobox('select', subModelData[0].propertyId);
+        }
+    });
+</script>
+</body>
+</html>

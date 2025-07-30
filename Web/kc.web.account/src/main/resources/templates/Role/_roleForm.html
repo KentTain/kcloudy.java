@@ -1,0 +1,54 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+	<title>用户管理</title>
+
+</head>
+<body>
+
+	<form id="saveform" class="easyui-form" action="#" method="post"
+		th:action="@{/Role/SaveRole}" th:object="${RoleEntity}" >
+		<input type="hidden" th:field="*{roleId}" />
+		<input type="hidden" th:field="*{deleted}" />
+		<input type="hidden" th:field="*{createdBy}" />
+		<input type="hidden" th:field="*{createdDate}" />
+		<input type="hidden" th:field="*{modifiedBy}" />
+		<input type="hidden" th:field="*{editMode}" />
+
+		<table class="dialog-form-table">
+			<tbody>
+				<tr th:if="*{editMode}">
+					<td><label class="required">*</label><label for="roleName">角色名称：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,height:26,"
+						th:readonly="*{editMode}?'readonly':''" th:field="*{roleName}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="displayName">角色显示名：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,height:26,validType:'length[1,50]'"
+						th:field="*{displayName}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="businessType">归属业务类型：</label></td>
+					<td><select class="easyui-combobox" 
+						data-options="width:200,height:26" 
+						th:field="*{businessType}">
+							<option th:each="BusinessType : ${BusinessTypes}"
+								th:value="${BusinessType.key}" th:text="${BusinessType.value}"></option>
+					</select></td>
+				</tr>
+
+				<tr>
+					<td><label for="description">描述：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="width:200,height:26,validType:'length[0,500]'"
+						th:field="*{description}" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</body>
+</html>

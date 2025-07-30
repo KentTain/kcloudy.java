@@ -1,0 +1,51 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="common_header(title, links, styles)">
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+<!--    <meta http-equiv="Content-Security-Policy"-->
+<!--          content="connect-src *; default-src 'self' style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">-->
+    <!-- https://stackoverflow.com/questions/23477344/put-csrf-into-headers-in-spring-4-0-3-spring-security-3-2-3-thymeleaf-2-1-2 -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <title th:replace="${title}">标题</title>
+
+	<link rel="stylesheet" th:href="${resWebDomain} + 'lib/jquery-easyui/themes/metro/easyui.css'" />
+	<link rel="stylesheet" th:href="${resWebDomain} + 'lib/jquery-easyui/themes/icon.css'" />
+    <link rel="stylesheet" th:href="${resWebDomain} + 'css/common.css'" />
+	<!-- <link rel="stylesheet" th:href="${resWebDomain} + 'lib/font-awesome/css/font-awesome.min.css'" /> -->
+	<link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.css}"/>
+
+    <!--/* Per-page placeholder for additional links */-->
+    <th:block th:replace="${links}" />
+    <!--/* Per-page placeholder for additional styles */-->
+    <th:block th:replace="${styles}" />
+</head>
+<body>
+
+<footer th:fragment="scripts">
+    <script th:src="${resWebDomain} + 'lib/jquery/dist/jquery.min.js'"></script>
+    <script th:src="${resWebDomain} + 'lib/jquery/dist/jquery.extension.js'"></script>
+    <script type="text/javascript">
+        let token = $("meta[name='_csrf']").attr("content");
+        let header = $("meta[name='_csrf_header']").attr("content");
+        $(document).ajaxSend(function (e, xhr, options) {
+            xhr.setRequestHeader(header, token);
+        });
+    </script>
+    <script th:src="${resWebDomain} + 'lib/jquery-validation/dist/jquery.validate.js'"></script>
+    <script th:src="${resWebDomain} + 'lib/jquery-easyui/jquery.easyui.min.js'"></script>
+    <script th:src="${resWebDomain} + 'lib/jquery-easyui/jquery.easyui.extension.js'"></script>
+    <script th:src="${resWebDomain} + 'lib/jquery-easyui/locale/easyui-lang-zh_CN.js'"></script>
+    <script th:src="${resWebDomain} + 'js/common/com.common.js'"></script>
+    <script th:src="${resWebDomain} + 'js/common/com.uploader.js'"></script>
+    <script th:src="${resWebDomain} + 'js/com.easyui.extension.js'"></script>
+    <script th:src="${resWebDomain} + 'js/com.global.js'"></script>
+    <script th:src="${resWebDomain} + 'js/mainTabs.js'"></script>
+</footer>
+
+</body>
+</html>

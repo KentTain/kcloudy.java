@@ -1,0 +1,1361 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout :: common_header(~{::title},~{},~{::style})">
+    <title>新增/编辑商品</title>
+    <style>
+
+        .table-form > tbody > tr > td:nth-child(odd) {
+            width: 15%!important;
+        }
+
+        .table-form > tbody > tr > td:nth-child(even) {
+            width: 85%!important;
+        }
+
+        #tabSpecifications .table-form > tbody > tr > td:nth-child(odd) {
+            background: transparent;
+        }
+
+        .datagrid-view .webUploader-image-list .setDefault {
+            font-size: 11px;
+        }
+
+        .datagrid-view .webUploader-image-list .setDefault .radiobutton {
+            width: 16px;
+            height: 16px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="easyui-layout" style="width:99%;">
+    <form id="saveform" class="easyui-form" action="#" method="post"
+          th:action="@{/OfferingManage/SaveOffering}" th:object="${Entity}">
+        <input type="hidden" th:field="*{offeringId}"/>
+        <input type="hidden" th:field="*{offeringCode}"/>
+        <input type="hidden" th:field="*{editMode}"/>
+        <input type="hidden" th:field="*{isMultiSpecification}"/>
+
+        <input type="hidden" th:field="*{createdBy}"/>
+        <input type="hidden" th:field="*{createdDate}"/>
+        <input type="hidden" th:field="*{modifiedBy}"/>
+        <input type="hidden" th:field="*{modifiedDate}"/>
+        <input type="hidden" th:field="*{deleted}"/>
+        <table class="table table-bordered table-form tr-col2">
+            <tbody>
+            <tr>
+                <td><label class="required">*</label><label for="offeringName">名称：</label></td>
+                <td><input class="easyui-validatebox easyui-textbox"
+                                       data-options="required:true,width:360,validType:{validator:['/OfferingManage/ExistOfferingName?isEditMode=*{isEditMode}&id=*{offeringId}&orginalName=*{offeringName}','offeringName', '该商品名已存在']}"
+                                       th:field="*{offeringName}"/></td>
+            </tr>
+            <tr>
+                <td><label class="required">*</label><label for="categoryId">商品分类：</label></td>
+                <td><input class="easyui-validatebox easyui-textbox"
+                                       data-options="width:360"
+                                       th:field="*{categoryId}"/>
+                    <a href="javascript:void(0)" onclick="refreshCategory()" class="easyui-linkbutton"
+                       data-options="iconCls:'fa fa-refresh'">刷新</a>
+                    <a sec:authorize="hasAuthority('526216B4-E9F6-4ED4-B5C4-2106DFDDD614')" href="javascript:void(0)"
+                       class="easyui-linkbutton" iconcls="fa fa-plus" onclick="openCategoryIndex()">新增商品分类规格</a>
+                </td>
+            </tr>
+            <!--
+            <tr>
+                <td><label class="required">*</label><label for="startTime">上架时间：</label></td>
+                <td><input class="easyui-validatebox easyui-datebox"
+                           data-options="required:true,width:360,"
+                           th:field="*{startTime}"/></td>
+                <td><label class="required">*</label><label for="endTime">下架时间：</label></td>
+                <td><input class="easyui-validatebox easyui-datebox"
+                           data-options="required:true,width:360,"
+                           th:field="*{endTime}"/></td>
+            </tr>
+            -->
+
+            <tr>
+                <td><label class="required">*</label><label for="specification">商品型号：</label></td>
+                <td>
+                    <div id="tabSpecifications" class="easyui-tabs" data-options="fit:true"
+                         style="width:800px;height:360px">
+                        <div id="tabSingleSpec" title="单个商品型号" data-options="closable:false,refreshable:false"
+                             style="padding:1px">
+                            <div>
+                                <table class="table table-bordered table-form">
+                                    <tbody>
+                                    <tr>
+                                        <td><label class="required">*</label><label for="offeringPrice">价格：</label></td>
+                                        <td>
+                                            <input id="negotiablePrice"
+                                                   data-options="labelPosition:'after',labelWidth:60,checked:true"
+                                                   class="easyui-radiobutton" name="offeringPrice" value="0" label="面议">
+                                            <input id="simplePrice" data-options="labelPosition:'after',labelWidth:36,"
+                                                   class="easyui-radiobutton" name="offeringPrice" value="1" label="单价">
+                                            <input id="offeringPrice" class="easyui-numberspinner easyui-numberbox"
+                                                   data-options="required:true,width:240,min:0,precision:2"
+                                                   th:field="*{offeringPrice}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label class="required">*</label><label for="offeringImage">图片：</label>
+                                        </td>
+                                        <td style="width:230px;">
+                                            <input type="hidden" data-options="required:true"
+                                                   th:field="*{offeringImage}"/>
+                                            <div class="imageUploaderEditor">
+                                                <div style="display: flex;height: 110px;">
+                                                    <div id="imageUploader" >
+                                                        <a href="javascript:void(0)"><i
+                                                                class="fa fa-plus-square fa-5x"></i></a>
+                                                    </div>
+                                                    <div id="imageList" class="webUploader-image-list">
+                                                    </div>
+                                                </div>
+                                                <label style="padding: 3px;">图片个数：3个；图片大小：[[${uploadConfig.imageMaxSize}]]M
+                                                    ；图片格式：[[${uploadConfig.imageExt}]]；</label>
+                                                <p id="imagePreviewContainer-single" class="imagePreview"></p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label class="required">*</label><label for="offeringFile">文件：</label>
+                                        </td>
+                                        <td style="width:230px;">
+                                            <input type="hidden" data-options="required:true" th:field="*{offeringFileBlob}"/>
+                                            <div class="fileUploaderEditor" style="display: flex;">
+                                                <div id="fileList" class="webUploader-file-single"></div>
+                                                <a id="fileUploader" href="javascript:void(0)" class="easyui-linkbutton" iconcls="fa fa-pencil">选择</a>
+                                            </div>
+                                            <label style="padding: 3px;">文件个数：1个；文件大小：[[${uploadConfig.fileMaxSize}]]M；
+                                                文件格式：[[${uploadConfig.fileExt}]]</label>
+                                        </td>
+                                    </tr>
+                                    <!--<tr>
+                                        <td><label class="required">*</label><label for="offeringFile">文件：</label>
+                                        </td>
+                                        <td style="width:230px;">
+                                            <input type="hidden" data-options="required:true"
+                                                   th:field="*{offeringFileBlob}"/>
+                                            <div class="fileUploaderEditor">
+                                                <div style="display: flex;height: 110px;">
+                                                    <div id="fileUploader" class="webuploader-container">
+                                                        <a href="javascript:void(0)"><i class="fa fa-plus-square fa-5x"></i></a>
+                                                    </div>
+                                                    <div id="fileList" class="webUploader-file-list">
+                                                    </div>
+                                                </div>
+                                                <label style="padding: 3px;">文件个数：3个；文件格式：[[${uploadConfig.fileExt}]]；文件大小：[[${uploadConfig.fileMaxSize}]]M</label>
+                                             </div>
+                                        </td>
+                                    </tr>-->
+                                </table>
+                            </div>
+
+                        </div>
+                        <div id="tabMultiSpec" title="多个商品型号" data-options="closable:false,refreshable:false"
+                             style="padding:1px">
+                            <div id="toolbarProduct">
+                                <div>
+                                    <!--商品管理-添加商品型号-->
+                                    <a sec:authorize="hasAuthority('3B9630CE-A93B-4158-9B44-FE08F9AC03B4')"
+                                       href="javascript:void(0)"
+                                       class="easyui-linkbutton" iconcls="fa fa-plus" onclick="addProduct()">添加商品型号</a>
+                                    <span style="margin-left: 20px;">备注：双击编辑商品型号</span>
+                                </div>
+                                <div></div>
+                            </div>
+                            <table id="dgProduct"></table>
+                            <p id="imagePreviewContainer-multi" class="imagePreview"></p>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td><label for="description">商品简述：</label></td>
+                <td><input class="easyui-textbox" style="height: 100px; width: 100%;"
+                                       data-options="multiline:true"
+                                       th:field="*{description}"></td>
+            </tr>
+            <tr>
+                <td><label for="content">商品详情：</label></td>
+                <td>
+                    <input type="hidden" id="hiddenContentId" th:value="*{contentId}">
+                    <textarea id="content" th:text="*{content}" name="content"
+                              style="height: 100%;width:100%">展示内容</textarea></td>
+            </tr>
+            <!--<tr>
+                <td><label class="required">*</label><label for="offeringType">商品类型：</label></td>
+                <td><select class="easyui-combobox" name="offeringType"
+                            data-options="width:360,height:26">
+                    <option th:each="type : ${OfferingTypes}" style="cursor:pointer;"
+                            th:selected="${type.key == Entity.offeringType.getIndex()}"
+                            th:value="${type.key}" th:text="${type.value}"></option>
+                </select></td>
+            </tr>
+            <tr>
+                <td><label class="required">*</label><label for="offeringVersion">商品版本：</label></td>
+                <td><select class="easyui-combobox"
+                            data-options="multiple:true,width:360,height:26"
+                            th:field="*{offeringVersions}">
+                    <option th:each="OfferingVersion : ${OfferingVersions}" style="cursor:pointer;"
+                            th:selected="${Entity.offeringVersions.contains(OfferingVersion.key)}"
+                            th:value="${OfferingVersion.key}" th:text="${OfferingVersion.value}"></option>
+                </select></td>
+            <tr>
+            </tr>
+                <td><label for="index">排序：</label></td>
+                <td><input class="easyui-numberspinner easyui-textbox"
+                           data-options="width:360,min:1,max:100"
+                           th:field="*{index}"/></td>
+            </tr>
+            -->
+            </tbody>
+        </table>
+    </form>
+</div>
+<div style="height: 50px;"></div>
+<div class="bottom">
+    <a sec:authorize="hasAuthority('70eaeb1b-585f-11ea-861f-7085c2d210f2')" href="javascript:void(0)"
+       class="easyui-linkbutton" iconcls="fa fa-floppy-o" onclick="SaveForm()">保存</a>
+</div>
+
+<th:block th:replace="layout :: scripts"/>
+<script th:src="${resWebDomain} + '/js/webuploader/md5.js'"></script>
+<script th:src="${resWebDomain} + '/js/webuploader/webuploader.min.js'"></script>
+<script th:src="${resWebDomain} + '/js/ueditor/ueditor.config.js'"></script>
+<script th:src="${resWebDomain} + '/js/ueditor/ueditor.all.min.js'"></script>
+
+<!--组件初始化-->
+<script type="text/javascript">
+    let loadFlag = false;
+    let docApiUrl = '[(${docWebApiDomain})]';
+    let fileSetting = {
+        fileNumLimit: 1,
+        isSetDefault: false,
+        fileMaxSize: [[${uploadConfig.FileMaxSize}]],
+        fileExt: '[[${uploadConfig.FileExt}]]',
+        downloadFileUrl: docApiUrl + 'Resources/DownloadFile?id=',
+        imageMaxSize: [[${uploadConfig.ImageMaxSize}]],
+        imageExt: '[[${uploadConfig.ImageExt}]]',
+        showImageUrl: docApiUrl + 'Resources/ShowImage?id=',
+        //isArchive：归档设置
+        //blobId：用于拷贝其他blob后，所使用新的blobId
+        params: { isArchive: false }
+    };
+    //解决UEditor跨域上传问题
+    let uploadUrl = docApiUrl + 'Resources/Upload';
+    UE.Editor.prototype._bkGetActionUrl = UE.Editor.prototype.getActionUrl;
+    UE.Editor.prototype.getActionUrl = function (action) {
+        //debugger;
+        if (action == 'uploadimage'
+            || action == 'uploadfile'
+            || action == 'listimage'
+            || action == 'uplistfile') {
+            return uploadUrl + "?parm=" + action;
+        } else {
+            return this._bkGetActionUrl.call(this, action);
+        }
+    };
+    $(function () {
+        $('.textbox').bind('blur', function () {
+            $(this).validatebox('enableValidation').validatebox('validate');
+        });
+
+        let price = $('#offeringPrice').numberspinner("getValue");
+        if (price !== undefined && price != null && price !== '' && parseFloat(price) !== 0) {
+            $('#simplePrice').radiobutton('check');
+        } else {
+            $('#negotiablePrice').radiobutton('check');
+        }
+
+        InitCategoryTree();
+        InitDgProduct();
+
+        //商品图片
+        fileSetting.fileNumLimit = 3;
+        fileSetting.isSetDefault = true;
+        defaultInitImageUploader('offeringImage', 'imageUploader', 'imageList', fileSetting);
+        //InitImageUploader();
+
+        //商品文档
+        fileSetting.fileNumLimit = 1;
+        fileSetting.isSetDefault = false;
+        defaultInitFileUploader('offeringFile', 'fileUploader', 'fileList', fileSetting);
+        //InitFileUploader();
+
+        UE.getEditor('content', {
+            serverUrl: '/Home/Upload',
+            initialFrameWidth: '100%'
+        });
+    });
+
+    const divCategoryId = '#categoryId';
+    const loadCategoryLisrUrl = '/CategoryManage/LoadCategoryList';
+    let InitCategoryTree = function () {
+        let selectedId = $(divCategoryId).val();
+        $(divCategoryId).combotree({
+            url: loadCategoryLisrUrl,
+            method: 'get',
+            queryParams: {
+                pid: selectedId
+            },
+            required: true,
+            panelHeight: 'auto',
+            onLoadSuccess: function (node, data) {
+                if (!loadFlag && data != null && data.length > 0) {
+                    //node = $(divCategoryId).combotree("tree").tree("find", data[0].id);
+                    loadFlag = true;
+
+                    if (selectedId === undefined || selectedId == null || selectedId === '') {
+                        $(divCategoryId).combotree('setValue', {id: data[0].id, text: data[0].text});
+                        loadAllProvidersByCategoryId(data[0].id);
+                    } else {
+                        $(divCategoryId).combotree('setValue', selectedId);
+                        loadAllProvidersByCategoryId(selectedId);
+                    }
+                } else {
+                    loadFlag = false;
+                    $(divCategoryId).combotree('setValue', {id: null, text: '请先创建商品分类...'});
+                }
+            },
+            onChange: function (newValue, oldValue) {
+                if (newValue !== undefined && newValue != null && newValue !== '' && newValue !== oldValue)
+                    loadAllProvidersByCategoryId(newValue);
+            }
+        });
+    };
+
+    let offeringImageBlobsJsonString = '[[${imageBlobsJsonString}]]';
+    let imageWebUploader = null;
+    let InitImageUploader = function () {
+        let imageUrl = $('#offeringImgUrl').val();
+        imageWebUploader = imageUploader({
+            btnAddFile: '#imageUploader',
+            fileList: '#imageList',
+            imagePreviewContainer: '#imagePreviewContainer-single',
+            fileNumLimit: 3,
+            //params: {blobId: imageUrl},
+            isRegister: true,
+            isSetDefault: true,
+            configure: {
+                imageMaxSize: fileSetting.imageMaxSize,
+                imageExt: fileSetting.imageExt,
+                fileMaxSize: fileSetting.fileMaxSize,
+                fileExt: fileSetting.fileExt
+            },
+            callback: {
+                uploadStart: function (file) {
+                },
+                uploadProgress: function (file, percentage) {
+                },
+                uploadComplete: function (file) { //不管成功或者失败，文件上传完成时触发
+                },
+                uploadSuccess: function (file, response, blob) {
+                },
+                uploadError: function (file, reason) {
+                    let fileName = file.name;
+                    console.error("---file[" + fileName + "] throw error: " + reason);
+                },
+                onFileQueued: function (file) {
+                },
+                onRemoveImage: function (file) {
+                    //新上传未保存至数据库的图片，未生成propertyId
+                    if (file.propertyId !== undefined && file.propertyId != null && file.propertyId !== '')
+                        removeOfferingPropertyIds.push(file.propertyId);
+
+                    return true;
+                }
+            }
+        });
+
+        if (offeringImageBlobsJsonString !== undefined && offeringImageBlobsJsonString !== '') {
+            let objString = CommonUtil.escape2Html(offeringImageBlobsJsonString);
+            let offeringImageBlobs = JSON.parse(objString);
+            imageWebUploader.initImageView(offeringImageBlobs);
+        } else {
+            imageWebUploader.initImageView([]);
+        }
+    };
+
+    let fileWebUploader = null;
+    let offeringFileBlobJsonString = '[[${fileBlobJsonString}]]';
+    let InitFileUploader = function () {
+        let blobId = $('input.fileBlobId').val();
+        fileWebUploader = fileUploader({
+            btnAddFile: '#fileUploader',
+            fileList: '#fileList',
+            fileNumLimit: 1,
+            isRegister: true,
+            configure: {
+                imageMaxSize: fileSetting.imageMaxSize,
+                imageExt: fileSetting.imageExt,
+                fileMaxSize: fileSetting.fileMaxSize,
+                fileExt: fileSetting.fileExt
+            },
+            callback: {
+                uploadProgress: function (file, percentage) {
+                },
+                uploadComplete: function (file) { //不管成功或者失败，文件上传完成时触发
+                },
+                uploadSuccess: function (file, response, blob) {
+                },
+                uploadError: function (file, reason) {
+                },
+                onFileQueued: function (file) {
+                }
+            }
+        });
+
+        if (offeringFileBlobJsonString !== undefined && offeringFileBlobJsonString !== '') {
+            let objString = CommonUtil.escape2Html(offeringFileBlobJsonString);
+            let offeringFileBlob = JSON.parse(objString);
+            fileWebUploader.initFileView([offeringFileBlob]);
+        } else {
+            fileWebUploader.initFileView([]);
+        }
+
+    };
+
+    let removeOfferingPropertyIds = []; //所删除的商品规格属性Id列表，保存商品时需要传递至后台
+    const dgProductId = "#dgProduct";
+    const dynamicColumnId = "id-";
+    let InitDgProduct = function () {
+        $(dgProductId).datagrid({
+            idField: 'id',
+            striped: true,
+            //fitColumns: true,
+            height: 300,
+            rowNumbers: true,
+            singleSelect: true,
+            nowrap: false,
+            fit: true,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            pagination: false,
+            showFooter: false,
+            toolbar: "#toolbarProduct",
+            columns: [
+                [
+                    {field: 'attrName2', title: '未创建商品规格', width: 100, align: 'left', editor: 'text'},
+                ]
+            ],
+            onLoadSuccess: function (data) {
+                CommonUtil.buttonStyle();
+                $(this).datagrid("fixRowHeight");
+            },
+            onSelect: function (index, row) {
+                $(this).datagrid('unselectRow', index);
+                CommonUtil.buttonStyle();
+            },
+            onDblClickRow: function (index, row) {
+                $(this).datagrid('beginEdit', index);
+                editIndex = index;
+                CommonUtil.buttonStyle();
+            },
+            onBeforeEdit: function (index, row) {
+                //let tt = $(this).datagrid('getColumnOption', 'specName'); //通过列名获得此列
+                //tt.editor = {type:'textarea'}; //设置此列的编辑属性 如果禁用编辑 则设置 tt.editor={}
+
+                row.editing = true;
+            },
+            onAfterEdit: function (index, row, changes) {
+                row.editing = false;
+                $(this).datagrid('updateRow', {
+                    index: index,
+                    row: {
+                        occupation: parseInt(row.occupation),
+                        cause: row.cause
+                    }
+                });
+            },
+            onCancelEdit: function (index, row) {
+                row.editing = false;
+            },
+            onEndEdit: function (index, row) {
+                endEditProduct(index, row);
+            }
+        });
+    };
+
+    const tabSpecifications = '#tabSpecifications';
+    let showTabSpecifications = function (isShowSingleSpec) {
+        if (isShowSingleSpec) {
+            if (imageWebUploader){
+                //单规格时，需要将多规格隐藏的上传按钮进行显示，以便单规格上传组件好用
+                $('.webuploader-element-invisible').parent().show();
+                //imageWebUploader.refresh();
+            }
+
+            $('#multiSpecification').val(true);
+            $(tabSpecifications).tabs("select", 0);
+            $(tabSpecifications).tabs('getTab', "单个商品型号").panel('options').tab.show();//显示tab表头
+            $("#tabSingleSpec").parent().show();//显示tab内容
+
+            $(tabSpecifications).tabs('getTab', "多个商品型号").panel('options').tab.hide();//隐藏tab表头
+            $("#tabMultiSpec").parent().hide();//隐藏tab内容
+        } else {
+            if (imageWebUploader){
+                //多规格时，需要将单规格初始化所生成的上传按钮进行隐藏，否则在页面上有div始终可用
+                $('.webuploader-element-invisible').parent().hide();
+                //imageWebUploader.destroy();
+            }
+
+            $('#multiSpecification').val(false);
+            $(tabSpecifications).tabs("select", 1);
+            $(tabSpecifications).tabs('getTab', "单个商品型号").panel('options').tab.hide();//隐藏tab表头
+            $("#tabSingleSpec").parent().hide();//隐藏tab内容
+
+            $(tabSpecifications).tabs('getTab', "多个商品型号").panel('options').tab.show();//显示tab表头
+            $("#tabMultiSpec").parent().show();//显示tab内容
+        }
+    };
+
+    const getCategoryIndexUrl = '/CategoryManage/Index';
+    let openCategoryIndex = function () {
+        let selectedCategoryId = $(divCategoryId).val();
+        MainPage_PostMessage("openPage", getCategoryIndexUrl, "id=" + selectedCategoryId);
+    };
+
+    let refreshCategory = function () {
+        let selectedId = $(divCategoryId).val();
+        $(divCategoryId).combotree({url: loadCategoryLisrUrl});
+        $(divCategoryId).combotree("reload");
+    };
+
+</script>
+<!--商品规格-->
+<script type="text/javascript">
+
+    //let dgImageUploader = {};
+    $.extend($.fn.datagrid.defaults.editors, {
+        specCombobox: {
+            index: 0,
+            init: function (container, options) {
+                let idx = '-' + this.index++;
+                let divSpec = $('<div id="spec' + idx + '"></div>').appendTo(container);
+                let divHiddenSpec = '<input type="hidden" class="propertyId" id="txtSpec' + idx + '" />';
+                options.onChange = function (newValue, oldValue) {
+                    if (newValue !== undefined
+                        && newValue != null
+                        && newValue !== ''
+                        && newValue !== oldValue) {
+                        //debugger;
+                        let serviceProviderAttr = $(this).combobox('getSelectRow');
+                        let propertyAttrId = $(this).combobox('getValue');
+                        let propertyAttrName = $(this).combobox('getText');
+
+                        let hiddenProperty = $(this).find('input.propertyId');
+                        hiddenProperty.attr('providerId', serviceProviderAttr.serviceProviderId);
+                        hiddenProperty.attr('providerName', serviceProviderAttr.serviceProviderName);
+                        hiddenProperty.attr('propertyAttrId', serviceProviderAttr.id);
+                        hiddenProperty.attr('propertyName', serviceProviderAttr.name);
+                    }
+                };
+
+                $(divSpec).combobox(options);
+                $(divHiddenSpec).appendTo(divSpec);
+
+                return divSpec;
+            },
+            destroy: function (target) {
+                $(target).remove();
+            },
+            getValue: function (target) {
+                //debugger;
+                let hiddenProperty = $(target).find('input.propertyId');
+                if (hiddenProperty === undefined || hiddenProperty == null)
+                    return null;
+
+                let propertyAttrId = $(target).combobox('getValue');
+                let propertyAttrName = $(target).combobox('getText');
+
+                let property = {};
+                property.id = hiddenProperty.val();
+                property.name = hiddenProperty.attr('propertyName');
+                property.refProviderId = hiddenProperty.attr('providerId');
+                property.refProviderAttrId = propertyAttrId;
+                property.value = propertyAttrName;
+                return property;
+            },
+            setValue: function (target, productProperty) {
+                //debugger;
+                let specCombobox = $(target);
+                let hiddenProperty = $(target).find('input.propertyId');
+                //由于是动态列，后台返回对象未包括动态列的字段，前端不可能获取到所绑定的对象，故以下代码无用
+                if (productProperty !== undefined && productProperty != null) {
+                    let propertyId = productProperty.id;
+                    let propertyName = productProperty.name;
+                    let propertyValue = productProperty.value;
+                    let refProviderId = productProperty.refProviderId;
+                    let refProviderAttrId = productProperty.refProviderAttrId;
+                    specCombobox.combobox('select', refProviderAttrId);
+                    hiddenProperty.val(propertyId);
+                    hiddenProperty.attr('providerId', refProviderId);
+                    hiddenProperty.attr('propertyName', propertyName);
+                }
+            },
+            resize: function (target, width) {
+
+            }
+        },
+        priceGroup: {
+            index: 0,
+            init: function (container, options) {
+                //debugger;
+                let idx = '-' + this.index++;
+                let divPrice = $('<div id="priceGroup' + idx + '"></div>').appendTo(container);
+                let divPrice1 = '<input class="rdoProductPrice"  id="rdoProductPrice' + idx + '-0" name="productPrice' + idx + '" data-options="labelPosition:\'after\',labelWidth:140,checked:true," class="easyui-radiobutton" value="0" label="面议">';
+                let input = $(divPrice1).appendTo(divPrice);
+                input.radiobutton();
+                let divPrice2 = '<input class="rdoProductPrice" id="rdoProductPrice' + idx + '-1" name="productPrice' + idx + '" data-options="labelPosition:\'after\',labelWidth:40," class="easyui-radiobutton" value="1" label="单价">';
+                input = $(divPrice2).appendTo(divPrice);
+                input.radiobutton();
+                let divPrice3 = '<input class="txtProductPrice" id="txtProductPrice' + idx + '" data-options="width:100,min:0,precision:2"  class="easyui-numberspinner"/>';
+                input = $(divPrice3).appendTo(divPrice);
+                input.numberspinner();
+
+                return divPrice;
+            },
+            destroy: function (target) {
+                $(target).remove();
+            },
+            getValue: function (target) {
+                //debugger;
+                let priceSelect = $(target).find('span.radiobutton.radiobutton-checked input.radiobutton-value').val();
+                //let priceSelect = $(target).find('input:checked').val();
+                if (priceSelect === "0") {
+                    return null;
+                } else {
+                    let price = $(target).find('input.txtProductPrice').val();
+                    if (price === undefined || price == null || price === '')
+                        return 0;
+                    else
+                        return price;
+                }
+            },
+            setValue: function (target, value) {
+                let radio1 = null;
+                let radio2 = null;
+                let radios = $(target).find('.rdoProductPrice');
+                let price = $(target).find('.txtProductPrice');
+                $.each(radios, function (i, radio) {
+                    let rdoValue = $(radio).val();
+                    if (rdoValue === '0') {
+                        radio1 = radio;
+                    } else {
+                        radio2 = radio;
+                    }
+                });
+                if (value === undefined || value == null || value === '') {
+                    $(radio1).radiobutton('check');
+                } else {
+                    $(radio2).radiobutton('check');
+                    price.numberspinner('setValue', value);
+                }
+            },
+            resize: function (target, width) {
+
+            }
+        }
+    });
+
+    let removeProductPropertyIds = []; //所删除的产品规格属性Id列表，保存商品时需要传递至后台
+    let productsJsonString = "[[${productsJsonString}]]";//现有产品规格数据，用来初始化产品规格列表
+    let canRemoveProduct = [[${canRemoveProduct}]];
+    const loadAllProvidersByCategoryIdUrl = '/CategoryManage/loadAllProvidersByCategoryId';
+    let loadAllProvidersByCategoryId = function (categoryId) {
+        $.ajax({
+            async: true,
+            type: "get",
+            dataType: "json",
+            url: loadAllProvidersByCategoryIdUrl + "?categoryId=" + categoryId,
+            success: function (data) {
+                if (data && data.length > 0) {
+                    //showMultiSpec(true);
+                    showTabSpecifications(false);
+
+                    //产品数据
+                    let products = [];
+                    if (productsJsonString !== undefined && productsJsonString != null && productsJsonString !== '') {
+                        let objString = CommonUtil.escape2Html(productsJsonString);
+                        products = JSON.parse(objString);
+
+                        //备注：动态列，field='id-' + serviceProvider.attributesId ---> 对应后台属性的refProviderAttrId
+                        //加载数据时，需要根据后台产品属性列表对象（List<ProductPropertyDTO>）绑定行对象ProductPropertyDTO
+                        $.each(products, function (i, product) {
+                            if (product.specificationProperties !== undefined
+                                && product.specificationProperties != null
+                                && product.specificationProperties.length > 0) {
+                                $.each(product.specificationProperties, function (j, specProperty) {
+                                    //动态列，绑定后台产品
+                                    product[dynamicColumnId + specProperty.refProviderId] = specProperty;
+                                });
+                            }
+                        });
+                    }
+
+                    //产品列
+                    let cols = [];
+                    $.each(data, function (i, item) {
+                        let properties = item.serviceProviderAttrs;
+                        //备注：动态列，field='id-' + serviceProvider.attributesId ---> 对应后台属性的refProviderAttrId
+                        //加载数据时，需要根据后台产品属性列表对象（List<ProductPropertyDTO>）动态生成行对象
+                        cols.push({
+                            "field": dynamicColumnId + item.id, "title": item.name, "width": 140,
+                            formatter: function (productProperty, row, index) {
+                                //debugger;
+                                let tdContext = '';
+                                if (productProperty !== undefined && productProperty != null) {
+                                    tdContext += productProperty.value
+                                }
+                                return tdContext;
+                            },
+                            editor: {
+                                type: 'specCombobox',
+                                options: {
+                                    data: properties,
+                                    width: 138,
+                                    valueField: "id",
+                                    textField: "name",
+                                    panelHeight: "auto",
+                                    required: true
+                                }
+                            }
+                        })
+                    });
+                    cols.push({
+                        field: 'productPrice', title: '价格', width: 170, align: 'left',
+                        formatter: function (value, row, index) {
+                            let tdContext = '';
+                            if (value === undefined || value == null || value === '') {
+                                tdContext += '面议';
+                            } else {
+                                tdContext += '单价：' + value;
+                            }
+                            return tdContext;
+                        },
+                        editor: {
+                            type: 'priceGroup',
+                            options: {
+                                value: '',
+                                labelPosition: 'after',
+                            }
+                        }
+                    }, {
+                        field: 'productImageBlobs',
+                        title: '图片【格式：[[${uploadConfig.imageExt}]]，大小：[[${uploadConfig.imageMaxSize}]]M】',
+                        width: 340,
+                        align: 'left',
+                        formatter: function (value, row, index) {
+                            //debugger;
+                            let tdContext = '';
+                            if (value !== undefined && value != null && value.length > 0) {
+                                tdContext = '<div class="webUploader-image-list showImage">';
+                                $.each(value, function (i, blob) {
+                                    blob.imageUrl = '/Home/ShowTempImg?id=' + blob.id;
+                                    tdContext += imageUploader.getImageListHtmlView(blob, false, false);
+                                });
+                                tdContext += "</div>";
+                            }
+                            return tdContext;
+                        },
+                        editor: {
+                            type: 'imageUploader',
+                            options: {
+                                //设置预览图片的标签：<p id="imagePreviewContainer" class="imagePreview"></p>
+                                imagePreviewContainer: $('#imagePreviewContainer-multi'),
+                                fileNumLimit: imageNumLimit,
+                                configure: {
+                                    imageMaxSize: imageSize,
+                                    imageExt: imageExt,
+                                    fileMaxSize: fileMaxSize,
+                                    fileExt: fileExt
+                                },
+                                callback: {
+                                    onRemoveImage: function (file) {
+                                        //新上传未保存至数据库的图片，未生成propertyId
+                                        if (file.propertyId !== undefined && file.propertyId != null && file.propertyId !== '')
+                                            removeProductPropertyIds.push(file.propertyId);
+
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }, {
+                        field: 'productFileBlobs',
+                        title: '文档【格式：[[${uploadConfig.fileExt}]]，大小：[[${uploadConfig.fileMaxSize}]]M】',
+                        width: 350,
+                        align: 'left',
+                        formatter: function (value, row, index) {
+                            //debugger;
+                            let tdContext = '';
+                            if (value !== undefined && value != null) {
+                                //单文件
+                                //value.imageUrl = '/Home/ShowTempImg?id=' + value.blobId;
+                                //tdContext += fileUploader.getFileListHtmlView(value, false, true);
+                                //多文件
+                                tdContext = '<div class="webUploader-file-list">';
+                                $.each(value, function (i, blob) {
+                                    blob.imageUrl = '/Home/ShowTempImg?id=' + blob.id;
+                                    tdContext += fileUploader.getFileListHtmlView(blob, false, false);
+                                });
+                                tdContext += "</div>";
+                            }
+                            return tdContext;
+                        },
+                        editor: {
+                            type: 'fileUploader',
+                            options: {
+                                fileNumLimit: 3,
+                                configure: {
+                                    imageMaxSize: imageSize,
+                                    imageExt: imageExt,
+                                    fileMaxSize: fileMaxSize,
+                                    fileExt: fileExt
+                                },
+                                callback: {
+                                    onRemoveImage: function (file) {
+                                        //新上传未保存至数据库的图片，未生成propertyId
+                                        if (file.propertyId !== undefined && file.propertyId != null && file.propertyId !== '')
+                                            removeProductPropertyIds.push(file.propertyId);
+
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }, {
+                        field: 'operator', title: '操作', width: 80, align: 'left',
+                        formatter: function (value, row, index) {
+                            let specId = row.productId;
+                            if (specId === undefined || specId === null || specId === "")
+                                specId = "";
+                            //debugger;
+                            let tdContext = '';
+                            if (canRemoveProduct) {
+                                tdContext += '<a class="btnDelete" style="cursor:pointer" onclick="removeProduct(this, \'' + specId + '\')" >删除</a>';
+                            }
+
+                            return tdContext;
+                        }
+                    });
+
+                    //初始化产品datagrid
+                    $(dgProductId).datagrid({
+                        columns: [cols],
+                        data: products,
+                        onLoadSuccess: function (data) {
+                            CommonUtil.buttonStyle();
+                            $(this).datagrid("fixRowHeight");
+                            showImagePreview();
+                        },
+                    });
+
+                } else {
+                    //showMultiSpec(false);
+                    showTabSpecifications(true);
+
+                    $(dgProductId).datagrid('loadData', {total: 0, rows: []});
+                }
+            },
+            complete: function () {
+                $.easyui.loaded();
+            }
+        });
+    };
+
+    let showImagePreview = function () {
+        let showImages = $('.showImage .fileImage');
+        if (showImages !== undefined && showImages != null && showImages.length > 0) {
+            $.each(showImages, function (i, showImage) {
+                $(showImage).hover(function (self) {
+                    $("#imagePreviewContainer-multi").css("top", (self.pageY + 5) + "px")
+                        .css("left", (self.pageX + 5) + "px")
+                        .html("<img src=" + $(this).attr("src") + " alt='" + $(this).attr("alt") + "' /><br/>" + $(this).attr("alt"))
+                        .fadeIn("slow");
+                }, function () {
+                    $("#imagePreviewContainer-multi").fadeOut("fast");
+                });
+            })
+        }
+    };
+
+    let editIndex = undefined;
+    let isEndEditing = function () {
+        if (editIndex === undefined) {
+            return true
+        }
+        if ($(dgProductId).datagrid('validateRow', editIndex)) {
+            $(dgProductId).datagrid('endEdit', editIndex);
+            editIndex = undefined;
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    //获取行
+    let getRowIndex = function (target) {
+        let tr = $(target).closest('tr.datagrid-row');
+        return parseInt(tr.attr('datagrid-row-index'));
+    };
+    //添加行
+    let addProduct = function () {
+        $(dgProductId).datagrid('insertRow', {index: 0, row: {}})
+            .datagrid('selectRow', 0)
+            .datagrid('beginEdit', 0);
+
+        //if (isEndEditing()) {
+        // editIndex = $(dgProductId).datagrid('getRows').length - 1;
+        // $(dgProductId).datagrid('appendRow', {editIndex: editIndex});
+        // $(dgProductId).datagrid('selectRow', editIndex);
+        // $(dgProductId).datagrid('beginEdit', editIndex);
+
+        //}
+
+        CommonUtil.buttonStyle();
+
+    };
+    //取消操作
+    let cancelProduct = function (target) {
+        let rowIndex = getRowIndex(target);
+        $(dgProductId).datagrid('cancelEdit', rowIndex);
+    };
+    //编辑行
+    let editProduct = function (target) {
+        let rowIndex = getRowIndex(target);
+        $(dgProductId).datagrid('beginEdit', rowIndex);
+    };
+    //结束编辑行，拼凑产品对象：Product
+    let endEditProduct = function (index, row) {
+        //debugger;
+        let i = 0;
+        row.productProperties = [];
+        for (let property in row) {
+            if (row.hasOwnProperty(property) && typeof row[property] != "function") {
+                // property.startsWith(dynamicColumnId);
+                let ed = $(dgProductId).datagrid('getEditor', {
+                    index: index,
+                    field: property
+                });
+
+                if (ed && ed.target) {
+                    let type = ed.type;
+                    switch (type) {
+                        // 产品规格属性：Product[0].productProperties
+                        case 'specCombobox':
+                            let specProperty = row[property];
+                            specProperty.isProvider = true;
+                            specProperty.index = i + 1;
+                            row.productProperties.push(specProperty);
+                            break;
+                        // 产品价格属性：Product[0].productPrice
+                        case 'priceGroup':
+                            //debugger;
+                            let price = row.productPrice;
+                            if (price === undefined || price == null || price === '') {
+                                row.productPrice = null;
+                            }
+
+                            //let priceValue = $(ed.target).combobox('getValue');
+                            break;
+                        // 产品图片属性：Product[0].productProperties
+                        case 'imageUploader':
+                            //debugger;
+                            // 将blob列表对象转换成后台存储的List<ProductProperty>对象
+                            $.each(row.productImageBlobs, function (i, blob) {
+                                let blobId = blob.blobId;
+                                let blobName = blob.blobName;
+                                let ext = blob.ext;
+                                let size = blob.size;
+                                let id = blob.propertyId;
+                                let isSelect = blob.isSelect;
+                                let imageProperty = {};
+                                imageProperty.id = id !== '' ? id : null;
+                                imageProperty.productPropertyType = 2; //ProductPropertyType.Image
+                                imageProperty.name = 'Image';
+                                imageProperty.value = JSON.stringify(blob);
+                                imageProperty.value1 = blobId;
+                                imageProperty.value2 = blobName;
+                                imageProperty.refProviderId = null;
+                                imageProperty.refProviderAttrId = null;
+                                imageProperty.isProvider = false;
+                                imageProperty.index = i + 1;
+                                if (isSelect !== undefined && isSelect != null && isSelect) {
+                                    row.offeringImageBlob = JSON.stringify(blob);
+                                }
+
+                                row.productProperties.push(imageProperty);
+                            });
+                            //let imageBlobs = $(ed.target).combobox('getValue');
+                            break;
+                        // 产品文档：Product[0].productFileBlob
+                        case 'fileUploader':
+                            //debugger;
+                            // 将blob列表对象转换成后台存储的List<ProductProperty>对象
+                            //多文件
+                            $.each(row.productFileBlobs, function (i, blob) {
+                                let blobId = blob.blobId;
+                                let blobName = blob.blobName;
+                                let ext = blob.ext;
+                                let size = blob.size;
+                                let id = blob.propertyId;
+                                let isSelect = blob.isSelect;
+                                let fileProperty = {};
+                                fileProperty.id = id !== '' ? id : null;
+                                fileProperty.productPropertyType = 4; //ProductPropertyType.File
+                                fileProperty.name = 'File';
+                                fileProperty.value = JSON.stringify(blob);
+                                fileProperty.value1 = blobId;
+                                fileProperty.value2 = blobName;
+                                fileProperty.refProviderId = null;
+                                fileProperty.refProviderAttrId = null;
+                                fileProperty.isProvider = false;
+                                fileProperty.index = i + 1;
+                                if (isSelect !== undefined && isSelect != null && isSelect) {
+                                    row.offeringFileBlob = JSON.stringify(blob);
+                                }
+
+                                row.productProperties.push(fileProperty);
+                            });
+                            //单文件
+                            //row.productFileBlob = JSON.stringify(blob);
+                            //row.productProperties.push(fileProperty);
+                            //let imageBlobs = $(ed.target).combobox('getValue');
+                            break;
+                    }
+
+                    i++;
+                }
+            }
+        }
+    };
+    //获取行数据
+    let getProductData = function () {
+        //debugger;
+        let products = [];
+        let rows = $(dgProductId).datagrid("getRows");
+        for (let i = 0; i < rows.length; i++) {
+            let isEditing = rows[i].editing;
+            let isValid = $(dgProductId).datagrid('validateRow', i);
+            if (isEditing && isValid) {
+                $(dgProductId).datagrid('selectRow', i).datagrid('endEdit', i);//关闭第i行的编辑
+            }
+            let product = {};
+            product.productId = rows[i].productId;
+            product.productCode = rows[i].productCode;
+            product.productNumber = null;
+            product.productDiscount = null;
+            product.productRate = null;
+            product.productPrice = rows[i].productPrice;
+            product.productProperties = rows[i].productProperties;
+            product.productFileBlob = rows[i].productFileBlob;
+            product.productImageBlob = getDefaultProductImageBlob(rows[i].productProperties);
+            product.productName = getProductNameBySpecs(rows[i].specificationProperties);
+
+            products.push(product);
+        }
+
+        //CommonUtil.buttonStyle();
+        //showImagePreview();
+        return products;
+    };
+    //根据字段名称获取列的标题
+    let getColumnTitleByField = function (field) {
+        let columns = $(dgProductId).datagrid('getColumnFields');
+        let result = '';
+        for (let i in columns) {
+            //获取每一列的列名对象
+            if (columns.hasOwnProperty(i)
+                && typeof columns[i] != "function"
+                && columns[i].startsWith(dynamicColumnId)) {
+                let col = $(dgProductId).datagrid("getColumnOption", columns[i]);
+                if (col.field === field)
+                    result = col.title;
+            }
+        }
+
+        return result;
+    };
+    //根据产品规格获取产品名称
+    let getProductNameBySpecs = function (productProperties) {
+        //debugger;
+        let name = $('#offeringName').val() + '[';
+        $.each(productProperties, function (i, specification) {
+            //ProductPropertyType.Specification
+            if (specification.productPropertyType === 1) {
+                name += specification.name + "：" + specification.value + "，";
+            }
+        });
+        name = name.substring(0, name.length - 1);
+        return name + "]";
+    };
+    //获取默认选中产品图片Blob对象的Json字符串
+    let getDefaultProductImageBlob = function (imageBlobs) {
+        let selectBlob = null;
+        let blobJsonString = '';
+        if (imageBlobs !== undefined && imageBlobs != null && imageBlobs.length > 0) {
+            $.each(imageBlobs, function (i, blob) {
+                let isSelect = blob.isSelect;
+                if (isSelect) {
+                    selectBlob = blob;
+                    blobJsonString = JSON.stringify(blob);
+                }
+            });
+        }
+
+        return selectBlob;
+    };
+
+    //删除产品规格属性数据
+    const removeProductUrl = '/OfferingManage/RemoveProduct';
+    let removeProduct = function (target, id) {
+        let rowIndex = getRowIndex(target);
+        if (id === undefined || id === null || id === "" || id === 0) {
+            $(dgProductId).datagrid('deleteRow', rowIndex);
+            return;
+        }
+        $.messager.confirm("系统提示", "是否删除该商品的规格数据？",
+            function (r) {
+                if (r) {
+                    $.easyui.loading({msg: '正在删除数据，请稍等...'});
+                    $.ajax({
+                        url: removeProductUrl + "?id=" + id,
+                        async: false,
+                        type: "get",
+                        success: function (data) {
+                            $.easyui.loaded();
+                            if (data.success) {
+                                //console.log(data);
+                                if (data.result) {
+                                    $(dgProductId).datagrid('deleteRow', rowIndex);
+                                    $.messager.showInfoTopCenter('系统提示', '删除数据成功。', 1000);
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', '删除数据失败。');
+                                }
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', '角色下面还分配有相关的用户，请移除关联用户后再重试！');
+                            }
+                        },
+                        error: function () {
+                        }
+                    });
+                }
+            })
+            .panel('move', {right: '', top: document.body.scrollTop, bottom: ''});
+
+    };
+
+    //未使用，改为：保存商品时处理
+    /*  删除产品图片数据
+        备注：ajax调用需要返回对象时使用Deferred对象，调用时实例如下：
+        $.when(removeImage(true, 1)).done(function(data){
+            alert(data);
+        });
+    */
+    const removeImageUrl = '/OfferingManage/RemoveOfferingImageById';
+    let removeImage = function (isSingleOffering, id) {
+        $.messager.confirm("系统提示", "是否删除该商品规格的图片数据？",
+            function (r) {
+                if (r) {
+                    $.easyui.loading({msg: '正在删除数据，请稍等...'});
+                    let defer = $.Deferred();
+                    $.ajax({
+                        url: removeImageUrl + "?isSingleOffering=" + isSingleOffering + "&id=" + id,
+                        //async: false, //同步
+                        type: "get",
+                        success: function (data) {
+                            $.easyui.loaded();
+                            if (data.success) {
+                                //console.log(data);
+                                if (data.result) {
+                                    $.messager.showInfoTopCenter('系统提示', '删除数据成功。', 1000);
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', '删除数据失败。');
+                                }
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', '角色下面还分配有相关的用户，请移除关联用户后再重试！');
+                            }
+
+                            defer.resolve(data.success);
+                        },
+                        error: function () {
+                            defer.resolve(false);
+                        }
+                    });
+
+                    return defer.promise();
+                } else {
+                    return r;
+                }
+            })
+            .panel('move', {right: '', top: document.body.scrollTop + document.documentElement.scrollTop, bottom: ''});
+
+    };
+</script>
+<!--相关事件-->
+<script type="text/javascript">
+    //获取商品的产品属性列表，主要为Image
+    let getOfferingPrice = function () {
+        let priceSelect = $('#tabSingleSpec').find('span.radiobutton.radiobutton-checked input.radiobutton-value').val();
+        if (priceSelect === "0") {
+            return null;
+        } else {
+            let price = $('#offeringPrice').numberspinner('getValue');
+            if (price === undefined || price == null || price === '')
+                return 0;
+            else
+                return price;
+        }
+    };
+    //获取商品的产品属性列表，主要为Image
+    let getOfferingProperties = function () {
+        let offeringProperties = [];
+        if (uEditorContent !== undefined && uEditorContent != null) {
+            let imageProperty = {};
+            imageProperty.id = $(contentId).val();
+            imageProperty.offeringPropertyType = 1; //OfferingPropertyType.Detail
+            imageProperty.name = 'Detail';
+            imageProperty.value = uEditorContent.getContent();
+            imageProperty.refProviderId = null;
+            imageProperty.refProviderAttrId = null;
+            imageProperty.isProvider = false;
+            imageProperty.index = 1;
+
+            offeringProperties.push(imageProperty);
+        }
+        // 商品图片属性：Offering.offeringProperties
+        if (imageWebUploader != null) {
+            let imageBlobs = imageWebUploader.getAllBlobs();
+            if (imageBlobs !== undefined && imageBlobs != null && imageBlobs.length > 0) {
+                $.each(imageBlobs, function (i, blob) {
+                    let blobId = blob.blobId;
+                    let blobName = blob.blobName;
+                    let ext = blob.ext;
+                    let size = blob.size;
+                    let propertyId = blob.propertyId;
+                    let isSelect = blob.isSelect;
+                    let imageProperty = {};
+                    imageProperty.id = propertyId !== '' ? propertyId : null;
+                    imageProperty.offeringPropertyType = 2; //OfferingPropertyType.Image
+                    imageProperty.name = 'Image';
+                    imageProperty.value = JSON.stringify(blob);
+                    imageProperty.value1 = blobId;
+                    imageProperty.value2 = blobName;
+                    imageProperty.refProviderId = null;
+                    imageProperty.refProviderAttrId = null;
+                    imageProperty.isProvider = false;
+                    imageProperty.index = i + 1;
+
+                    offeringProperties.push(imageProperty);
+                });
+            }
+        }
+
+        return offeringProperties;
+    };
+    //获取商品默认选中图片Blob对象的Json字符串
+    let getDefaultOfferingImageBlob = function () {
+        let selectBlob = null;
+        let blobJsonString = '';
+        let imageBlobs = imageWebUploader.getAllBlobs();
+        if (imageBlobs !== undefined && imageBlobs != null && imageBlobs.length > 0) {
+            $.each(imageBlobs, function (i, blob) {
+                let isSelect = blob.isSelect;
+                if (isSelect) {
+                    selectBlob = blob;
+                    blobJsonString = JSON.stringify(blob);
+                }
+            });
+        }
+
+        return selectBlob;
+    };
+    //获取商品技术文档Blob对象的Json字符串
+    let getOfferingFileBlob = function () {
+        let selectBlob = null;
+        let blobJsonString = '';
+        let fileBlobs = fileWebUploader.getAllBlobs();
+        if (fileBlobs !== undefined && fileBlobs != null && fileBlobs.length > 0) {
+            selectBlob = fileBlobs[0];
+            blobJsonString = JSON.stringify(fileBlobs[0]);
+        }
+
+        return selectBlob;
+    };
+
+    const formId = '#saveform';
+    const saveFormUrl = '/OfferingManage/SaveOffering';
+    const getFormUrl = '/OfferingManage/GetOfferingForm';
+    let SaveForm = function () {
+        let validate = $(formId).form("enableValidation").form("validate");
+        if (!validate) {
+            let errorMsg = '';
+            let invalidComps = $(formId).find(".validatebox-invalid");
+            $.each(invalidComps, function (i, invalidComp) {
+                errorMsg += 'id=' + invalidComp.id + ', ';
+            });
+            console.error("---验证失败的组件Id：" + errorMsg);
+            return;
+        }
+
+        debugger;
+        let postData = $(formId).form("getData");
+        let tab = $(tabSpecifications).tabs('getSelected');
+        let index = $(tabSpecifications).tabs('getTabIndex', tab);
+        postData.content = null; //保存至Offering.offeringProperties[0]
+        if (index === 0) {
+            //单一商品规格
+            postData.offeringPrice = getOfferingPrice();
+            postData.offeringFileBlob = getOfferingFileBlob();
+            postData.offeringImageBlob = getDefaultOfferingImageBlob();
+            postData.offeringProperties = getOfferingProperties();
+            postData.deletedOfferingPropertyIds = removeOfferingPropertyIds;
+            postData.products = null;
+        } else {
+            //多个商品规格
+            postData.offeringImageBlob = null;
+            postData.offeringFileBlob = null;
+            postData.offeringPrice = null;
+            postData.offeringDiscount = null;
+            postData.offeringRate = null;
+
+            postData.products = getProductData();
+            postData.deletedProductPropertyIds = removeProductPropertyIds;
+        }
+
+        let jsonData = JSON.stringify(postData);
+
+        console.log(jsonData);
+
+        $.easyui.loading({msg: '正在保存数据，请稍等...'});
+        $.ajax({
+            //async: true,
+            url: saveFormUrl,
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=UTF-8",
+            data: jsonData,
+            //contentType:"application/x-www-form-urlencoded;charset=UTF-8",
+            //data: postData,
+            success: function (data) {
+                if (data.success) {
+                    if (data.result) {
+                        $.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+                        MainPage_PostMessage("closeSubPage", getFormUrl);
+                    } else {
+                        $.messager.showErrorTopCenter('错误消息', data.message);
+                    }
+                } else {
+                    $.messager.showInfoTopCenter('系统提示', data.message);
+                }
+            },
+            complete: function () {
+                $.easyui.loaded();
+            }
+        });
+    };
+</script>
+</body>

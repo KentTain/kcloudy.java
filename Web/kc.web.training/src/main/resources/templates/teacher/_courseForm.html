@@ -1,0 +1,46 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+</head>
+<body>
+	<form id="saveform" class="easyui-form" action="#"
+		th:action="@{/ConfigManager/SaveConfigAttribute}" th:object="${ConfigAttribute}"
+		method="post">
+		<input type="hidden" th:field="*{ConfigId}" /> 
+		<input type="hidden" th:field="*{PropertyAttributeId}" /> 
+		<input type="hidden" th:field="*{deleted}" />
+		<input type="hidden" th:field="*{CreatedBy}" /> 
+		<input type="hidden" th:field="*{CreatedDate}" /> 
+		<input type="hidden" th:field="*{ModifiedBy}" /> 
+
+		<table class="dialog-form-table">
+			<tbody>
+				<tr>
+					<td><label class="required">*</label><label for="DisplayName">显示名称：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,height:26,validType:'length[1,50]'"
+						th:field="*{DisplayName}" /></td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="Name">系统名：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,height:26,validType:'length[1,50]'"
+						th:readonly="${IsEditMode}?'readonly':''" th:field="*{Name}" /></td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="Value">值：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:false,width:200,height:26,validType:'length[0,200]'"
+						th:field="*{Value}" /></td>
+				</tr>
+				<tr>
+					<td><label for="Description">描述：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="width:200,height:26,validType:'length[0,500]'"
+						th:field="*{Description}" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</body>
+</html>

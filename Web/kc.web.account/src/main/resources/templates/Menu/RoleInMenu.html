@@ -1,0 +1,233 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout :: common_header(~{::title},~{},~{})">
+	<title>菜单角色管理</title>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:100%;">
+	<div class="easyui-layout" style="height: 100%;">
+	    <div id="p" data-options="region:'west',collapsible:false," title="菜单列表" style="width:300px;padding:1px">
+	        <div style="background-color: #F2F2F2; padding: 4px; display: none;">
+	            <a href="#" onclick="reloadMenu();" class="easyui-linkbutton ListToolStartBtn" data-options="iconCls:'icon-search'">查询</a>
+	        </div>
+	        <div id="menuInRole"></div>
+	    </div>
+	    <div data-options="region:'center'">
+	        <div id="permissionsList" name="permissions" style="padding:1px; height:98%;" data-options="title:'角色菜单',refreshable:false">
+	            <div id="toolbar" style="padding: 5px; height: auto">
+	                <div style="float: right; display: none;">
+	                    <a href="javascript:void(0)" onclick="reloadPermission();" class="easyui-linkbutton" data-options="iconCls:'fa fa-search'">查询</a>
+	                </div>
+	                <!--菜单角色管理-保存菜单角色数据-->
+	                <a sec:authorize="hasAuthority('6862116B-CA67-44DA-9E6A-D5C05DA7F964')" href="javascript:void(0)" class="easyui-linkbutton" iconcls="fa fa-plus" onclick="SaveMenu()">保存</a>
+	                <a id="closeCurrentBtn" class="easyui-linkbutton" style="margin-left: 5px" onclick="closeCurrentTab()" iconCls="fa fa-times" href="javascript:void(0)">关闭当前页</a>
+	            </div>
+	            <table id="RoleData" title="角色菜单"></table>
+	        </div>
+	    </div>
+	</div>
+</div>
+
+<th:block th:replace="layout :: scripts"/>
+<script th:inline="javascript" type="text/javascript">
+	let preSelectMenuId = [[${id}]];
+	let RoleData = $('#RoleData');
+	let menuInRole = $('#menuInRole');
+	let menuList = $('#menuList');
+
+	$(function () {
+		InitDataGrid(preSelectMenuId);
+		LoadMenuData(preSelectMenuId);
+
+	});
+
+	//关闭当前页
+	let closeCurrentUrl = '/Menu/RoleInMenu';
+	function closeCurrentTab() {
+		MainPage_PostMessage("closeSubPage", closeCurrentUrl);
+	}
+	//单击查询重新加载菜单
+	function reloadMenu() {
+		preSelectMenuId = '';
+		menuInRole.treegrid('clearSelections');
+		LoadMenuData();
+	}
+	//加载角色列表
+	let getMenuInRoleUrl = '/Menu/GetRoleInMenu';
+	function InitDataGrid(menuId) {
+		let $dataGrid = RoleData.datagrid({
+			method: 'get',
+			url: getMenuInRoleUrl + "?id=" + menuId,
+			idField: 'RoleId',
+			toolbar: '#toolbar',
+			striped: true,
+			pagination: false,
+			fitColumns: true,
+			rowNumbers: true,
+			singleSelect: false,
+			nowrap: false,
+			fit: true,
+			lines: true,
+			showFooter: false,
+			checkbox: true,
+			columns: [
+				[
+					{ field: 'checked', checkbox: true, title: 'checked', align: 'left' },
+					{ field: 'displayName', title: '角色名称', width: '20%', align: 'left' },
+					//{ field: 'roleName', title: '角色名称', width: '15%', align: 'left' },
+					{ field: 'isSystemRole', title: '是否为系统角色', width: '20%', align: 'left', formatter: FormatterUtil.BoolFormatter },
+					//{ field: 'applictionName', title: '应用名称', width: '20%', align: 'left' },
+					{ field: 'description', title: '描述', width: '40%', align: 'left' }
+				]
+			],
+			onLoadSuccess: function (row) {
+				bindRole(row.rows);
+			},
+			onLoadError: function () {
+			}
+		});
+	}
+
+	//加载菜单
+	let getDataUrl = '/Menu/LoadMenuList';
+	function LoadMenuData(id) {
+		$.easyui.loading({ msg: '正在加载数据，请稍等...' });
+		$.ajax({
+			type: "get",
+			url: getDataUrl, //所有菜单
+			data: { searchValue: "" },
+			async: false,
+			success: function (result) {
+				$.easyui.loaded();
+				InitMenuTree(result);
+			},
+			error: function () {
+				$.easyui.loaded();
+			}
+		});
+	}
+
+	function InitMenuTree(data) {
+		menuInRole.treegrid({
+			lines: true,
+			idField: 'id',
+			treeField: 'text',
+			valueField: 'id',
+			textField: 'text',
+			columns: [
+				[
+					{ field: 'text', title: '名称', width: 260, align: 'left' }
+				]
+			],
+			onSelect: function (index, row) {
+				if (index != null)
+					preSelectMenuId = index.id;
+				bindMenu(preSelectMenuId);
+			}
+		}).datalist('loadData', data);
+
+		if (preSelectMenuId.length > 0)
+			selectedTreeNode(data, preSelectMenuId);
+
+		//menuInRole.treegrid('collapseAll');
+		let node = menuInRole.treegrid("find", preSelectMenuId);
+		if (node.parentId != null)
+			menuInRole.treegrid("expandAll", node.parentId);
+		else
+			menuInRole.treegrid("expandAll", node.id);
+	}
+
+	function selectedTreeNode(data, preSelectTreeId) {
+		if (data.length > 0) {
+			$.each(data, function (index) {
+				//if (this.children.length === 0) {
+				if (this.id === preSelectTreeId) {
+					menuInRole.datalist('selectRow', preSelectTreeId);
+					return;
+				}
+				//}
+				selectedTreeNode(this.children, preSelectTreeId);
+			});
+		}
+	}
+
+	function bindMenu(roleId) {
+		RoleData.datagrid('uncheckAll');
+		$.easyui.loading({ msg: '正在加载数据，请稍等...' });
+		$.ajax({
+			type: "get",
+			url: getMenuInRoleUrl,
+			data: { "id": roleId },
+			success: function (result) {
+				$.easyui.loaded();
+				bindRole(result);
+			},
+			error: function () {
+				$.easyui.loaded();
+			}
+		});
+	}
+
+	function bindRole(datas) {
+		if (datas.length > 0) {
+			$.each(datas, function () {
+				let $this = this;
+				if ($this.checked) {
+					let rows = RoleData.datagrid("getRows");
+					let row;
+					$.each(rows, function () {
+						if (this.roleId === $this.roleId) {
+							row = this;
+						}
+					});
+					RoleData.datagrid('checkRow', RoleData.datagrid("getRowIndex", row));
+				}
+			});
+		}
+	}
+
+	//保存菜单角色
+	let saveMenuInRole = '/Menu/SubmitRoleInMenu';
+	function SaveMenu() {
+		let checkedNodes = RoleData.datagrid('getChecked');
+		let newlist = [];
+
+		if (checkedNodes.length > 0) {
+			for (let i = 0; i < checkedNodes.length; i++) {
+				newlist.push(checkedNodes[i].roleId);
+
+			}
+		}
+		let item = menuInRole.datalist("getSelected");
+		if (item == null || item.id === 0 || item.id == null) {
+			$.messager.showErrorTopCenter('系统提示', "请选择左边的菜单", 1000);
+			return;
+		}
+		$.easyui.loading({ msg: '正在保存数据，请稍等...' });
+		$.ajax({
+			type: "post",
+			url: saveMenuInRole + "?menuId=" + item.id,
+			traditional: true,//这里设置为true
+			data: { 'addList': newlist },
+			success: function (data) {
+				$.easyui.loaded();
+				if (data.success) {
+					if (data.result) {
+						$.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+					} else {
+						$.messager.showErrorTopCenter('系统提示', '保存数据失败。', 1000);
+					}
+				} else {
+					$.messager.showErrorTopCenter('系统提示', data.message, 1000);
+				}
+			},
+			error: function (e) {
+				//let error = JSON.parse(e.responseText).Message;
+				$.easyui.loaded();
+				$.messager.showInfoTopCenter('系统提示', '抱歉,你不具有当前操作的权限');
+			}
+		});
+	}
+</script>
+</body>
+</html>

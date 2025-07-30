@@ -1,0 +1,63 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+</head>
+<body>
+
+	<form id="saveform" class="easyui-form" action="#"
+		th:action="@{/ConfigManager/SaveConfig}" th:object="${ConfigEntity}"
+		method="post">
+		<input type="hidden" th:field="*{ConfigId}" /> 
+		<input type="hidden" th:field="*{deleted}" />
+		<input type="hidden" th:field="*{CreatedBy}" /> 
+		<input type="hidden" th:field="*{CreatedDate}" /> 
+		<input type="hidden" th:field="*{ModifiedBy}" /> 
+		<input type="hidden" th:field="*{ConfigSign}" /> 
+		<input type="hidden" th:field="*{ConfigImgUrl}" />
+
+		<table class="dialog-form-table">
+			<tbody>
+				<tr th:if="${IsEditMode}">
+					<td><label class="required">*</label><label for="ConfigCode">配置代码：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,height:26,"
+						th:readonly="${IsEditMode}?'readonly':''" th:field="*{configCode}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="ConfigName">配置名称：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,height:26,validType:'length[1,10]'"
+						th:field="*{ConfigName}" /></td>
+				</tr>
+				<tr>
+					<td><label for="ConfigDescription">配置描述：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="width:200,height:26,validType:'length[0,50]'"
+						th:field="*{ConfigDescription}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="ConfigType">配置类型：</label></td>
+					<td><select class="easyui-combobox" 
+						data-options="width:200,height:26" 
+						th:field="*{ConfigType}">
+							<option th:each="ConfigType : ${ConfigTypeList}"
+								th:value="${ConfigType.key}" th:text="${ConfigType.value}"></option>
+					</select></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="State">状态：</label></td>
+					<td><select class="easyui-combobox" 
+						data-options="width:200,height:26" 
+						th:field="*{State}">
+							<option th:each="State : ${StateList}" th:value="${State.key}"
+								th:text="${State.value}"></option>
+					</select></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</body>
+</html>

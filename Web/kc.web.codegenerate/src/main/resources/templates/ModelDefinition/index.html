@@ -1,0 +1,661 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout :: common_header(~{::title},~{},~{::style})">
+    <title>数据模型管理</title>
+    <meta charset="UTF-8"/>
+    <style>
+        input[readonly]{ background-color: #EEEEEE !important;  }
+    </style>
+</head>
+<body>
+
+<div class="easyui-layout" data-options="fit:true" style="width: 360px;padding:2px;">
+    <div data-options="region:'west',collapsible:false">
+        <div id="categoryToolbar">
+            <div>
+            </div>
+            <div>
+                <input id="txtCategoryName" class="easyui-textbox" style="width: 140px;height:26px;"
+                       data-options="prompt:'请输入名称'"/>
+                <a href="javascript:void(0)" onclick="reloadCategory()" class="easyui-linkbutton"
+                   data-options="iconCls:'fa fa-search'">查询</a>
+                <a href="javascript:void(0)" onclick="refreshCategory()" class="easyui-linkbutton ListToolEndBtn"
+                   data-options="iconCls:'fa fa-refresh'">刷新</a>
+                <!--模型管理-保存模型分类-->
+                <a id="btnAddCategory" sec:authorize="hasAuthority('376E7F91-C48A-40DF-B3BB-C69903AD0358')"
+                   href="javascript:void(0)" class="easyui-linkbutton" iconcls="fa fa-plus"
+                   onclick="addCategory()">添加</a>
+            </div>
+        </div>
+        <table id="categoryTreeGrid"></table>
+    </div>
+    <div data-options="region:'center'">
+        <div id="toolbar">
+            <div>
+                <!--数据模型管理-保存数据模型-->
+                <a sec:authorize="hasAuthority('C1396AE0-5CD8-4008-B862-FDA1B34A7CCA')" href="javascript:void(0)"
+                   class="easyui-linkbutton" iconcls="fa fa-plus" onclick="addModelDefinition()">添加</a>
+                <!--                &lt;!&ndash;数据模型管理-保存数据模型&ndash;&gt;-->
+                <!--                <a sec:authorize="hasAuthority('C1396AE0-5CD8-4008-B862-FDA1B34A7CCA')" href="javascript:void(0)"-->
+                <!--                   class="easyui-linkbutton" iconcls="fa fa-pencil" onclick="editModelDefinition()">编辑</a>-->
+                <!--                &lt;!&ndash;数据模型管理-删除数据模型&ndash;&gt;-->
+                <!--                <a sec:authorize="hasAuthority('54099A1B-B97E-45EB-9DF6-379D5EE464C0')" href="javascript:void(0)"-->
+                <!--                   class="easyui-linkbutton" iconcls="fa fa-trash" onclick="removeModelDefinition()">删除</a>-->
+            </div>
+
+            <div>
+                <input id="txtName" class="easyui-textbox" data-options="width:100, prompt:'请输入名称'"/>
+                <input id="txtDisplayName" class="easyui-textbox" data-options="width:100, prompt:'请输入显示名'"/>
+                <input id="txtTableName" class="easyui-textbox" data-options="width:100, prompt:'请输入显示名'"/>
+                <select id="cmbModelBaseType" name="cmbModelBaseType" class="easyui-combobox"
+                        data-options="width:140,panelHeight:'auto',prompt:'请选择继承类型'">
+                    <option value="">请选择继承类型</option>
+                    <option th:each="Type : ${ModelBaseTypeList}"
+                            th:value="${Type.key}"
+                            th:text="${Type.value}"></option>
+                </select>
+                <a href="#" onclick="reloadDataGrid()" class="easyui-linkbutton ListToolStartBtn"
+                   data-options="iconCls:'fa fa-search'">查询</a>
+                <a href="#" onclick="refreshSearch()" class="easyui-linkbutton ListToolEndBtn"
+                   data-options="iconCls:'fa fa-refresh'">刷新</a>
+            </div>
+        </div>
+        <table id="datagrid"></table>
+    </div>
+</div>
+
+<!--引入公共Js-->
+<th:block th:replace="layout :: scripts"/>
+<script th:src="${resWebDomain} + 'lib/jquery-easyui/datagrid-detailview.js'"></script>
+<!--组件初始化-->
+<script type="text/javascript">
+    $.extend($.fn.validatebox.defaults.rules, {
+        existCategoryName: {
+            validator: function (value, param) {
+                //debugger;
+                let flag = true;
+                let postData = {};
+                postData.id = $('#id').val();
+                postData.modelType = $('#modelType').val();
+                postData.pId = $('#parentId').val();
+                postData.name = value;
+                $.ajax({
+                    async: false,
+                    type: 'POST',
+                    dataType: 'json',
+                    url: param[0],
+                    data: postData,
+                    success: function (result) {
+                        flag = !result;
+                    }
+                });
+                return flag;
+            },
+            message: '分类名称已经存在！'
+        }
+    });
+
+    let selectCategoryId = 0;
+    const defaultModelType = 0; //ModelType.ModelDefinition
+    const canSaveAtt = [[${canSaveAtt}]];
+    const canRemoveAtt = [[${canRemoveAtt}]];
+    $(function () {
+        showAddValueButton();
+
+        InitTreeGrid();
+        InitDataGrid();
+    });
+
+    let showAddValueButton = function (id) {
+        if (selectCategoryId === 0) {
+            $('#btnAddValue').linkbutton('disable');
+        } else {
+            $('#btnAddValue').linkbutton('enable');
+        }
+    };
+
+    let initSwitchButton = function (sbButtonId, hiddenValId, isChecked, callback) {
+        $('#' + sbButtonId).switchbutton({
+            checked: isChecked,
+            onChange: function(checked){
+                $('#' + hiddenValId).val(checked);
+                if(callback)
+                    callback(checked);
+            }
+        });
+    }
+</script>
+<!--模型分类（左侧）-->
+<script type="text/javascript">
+    let $dataTreeGrid = $('#categoryTreeGrid');
+    const maxLevel = 2;
+    const canEditCategory = [[${canEditCategory}]];
+    const canDeleteCategory = [[${canDeleteCategory}]];
+
+    const loadCategoryTreeUrl = '/ModelCategory/LoadModelCategoryTree';
+
+    function InitTreeGrid() {
+        $dataTreeGrid.treegrid({
+            url: loadCategoryTreeUrl,
+            toolbar: '#categoryToolbar',
+            method: 'get',
+            idField: 'id',
+            treeField: 'text',
+            queryParams: {
+                excludeId: null,
+                selectedId: null,
+                hasAll: true,
+                hasRoot: false,
+                maxLevel: maxLevel,
+                modelType: defaultModelType
+            },
+            striped: true,
+            fit: true,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            nowrap: false,
+            lines: true,
+            showFooter: false,
+            checkbox: false,
+            checkOnSelect: false,
+            cascadeCheck: true,
+            cache: true,
+            pagination: false,
+            columns: [
+                [{field: 'id', title: 'Id', hidden: true},
+                    {field: 'text', title: '分类名称', width: 140},
+                    {
+                        field: 'c', title: ' 操作', width: 60,
+                        formatter: function (value, row, index) {
+                            let id = row.id;
+                            let name = row.text ? row.text : '';
+                            let parentId = row.parentId ? row.parentId : '';
+                            let hasChild = row.children && row.children.length > 0;
+                            let tdContext = '';
+                            if (canEditCategory && (id !== 0 && id !== -1)) {
+                                tdContext += '<a class="btnEdit" style="cursor:pointer;margin:0 5px;" onclick="editCategory(\'' + id + '\',\'' + parentId + '\',' + hasChild + ')" > </a>';
+                            }
+                            if (canDeleteCategory && (id !== 0 && id !== -1) && !hasChild) {
+                                tdContext += '<a class="btnDelete" style="cursor:pointer;margin:0 5px;" onclick="removeCategory(\'' + id + '\',\'' + name + '\',' + hasChild + ')" > </a>';
+                            }
+                            return tdContext;
+                        }
+                    }]
+            ],
+            onBeforeLoad: function (param) {
+            },
+            onLoadSuccess: function (node, data) {
+                CommonUtil.buttonStyle();
+                $dataTreeGrid.treegrid('unselectAll');
+                $dataTreeGrid.treegrid('expandAll');
+                $dataTreeGrid.treegrid("fixRowHeight");
+
+                //默认选中第一个节点
+                if (data.length > 0) {
+                    selectCategoryId = data[0].id;
+                    $dataTreeGrid.treegrid("selectRow", 0);
+                }
+            },
+            onLoadError: function () {
+            },
+            onSelect: function (row) {
+                if (selectCategoryId === row.id) return;
+                //点击左侧消息类型，显示右侧列表信息
+                selectCategoryId = row.id;
+                if (selectCategoryId === -1) {
+                    $('#btnAddCategory').linkbutton('disable');
+                } else {
+                    $('#btnAddCategory').linkbutton('enable');
+                }
+
+                //只能创建两级流程分类
+                let level = row.level;
+                if (level > maxLevel - 1) {
+                    $('#btnAddCategory').linkbutton('disable');
+                } else {
+                    $('#btnAddCategory').linkbutton('enable');
+                }
+
+                reloadDataGrid();
+            }
+        });
+    }
+
+    let refreshCategory = function () {
+        $dataTreeGrid.treegrid('unselectAll');
+        $("#txtCategoryName").searchbox('setValue', '');
+        reloadCategory();
+    };
+    let reloadCategory = function () {
+        $dataTreeGrid.treegrid('unselectAll');
+        $dataTreeGrid.treegrid("reload", {
+            name: $("#txtCategoryName").textbox("getValue"),
+            excludeId: null,
+            selectedId: null,
+            hasAll: true,
+            hasRoot: false,
+            maxLevel: maxLevel,
+            modelType: defaultModelType
+        });
+    };
+
+    const getCategoryUrl = '/ModelCategory/GetModelCategoryForm';
+    const saveCategoryUrl = '/ModelCategory/SaveModelCategory';
+    let openCategoryForm = function (id, pid, hasChild) {
+        let dialogC = $.easyui.showDialog({
+            title: id == null ? "新增分类" : "编辑分类",
+            width: 450,
+            height: 300,
+            modal: true,
+            topMost: false,
+            href: getCategoryUrl + "?id=" + id + "&pid=" + pid + "&modelType=" + defaultModelType,
+            enableHeaderContextMenu: false,
+            enableApplyButton: false,
+            pagination: true,
+            onSave: function (d) {
+                let validate = d.form("enableValidation").form("validate");
+                if (!validate) {
+                    let errorMsg = '';
+                    let invalidComps = d.find(".validatebox-invalid");
+                    $.each(invalidComps, function (i, invalidComp) {
+                        errorMsg += 'id=' + invalidComp.id + ', ';
+                    });
+                    console.error("---验证失败的组件Id：" + errorMsg);
+                    return;
+                }
+
+                let dataInfo = d.form("getData");
+                if (hasChild && dataInfo.category != null && dataInfo.category !== "") {
+                    $.messager.showErrorTopCenter("错误", "该组下面已有子分类，不能直接移动，请先移动或删除子分类。");
+                    return false;
+                }
+
+                dataInfo.modelType = defaultModelType;
+                $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                $.ajax({
+                    async: true,
+                    type: "post",
+                    dataType: "json",
+                    url: saveCategoryUrl,
+                    data: dataInfo,
+                    success: function (data) {
+                        if (data.success) {
+                            if (data.result) {
+                                reloadCategory();
+                                $.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', '保存数据失败。');
+                            }
+                        } else {
+                            $.messager.showErrorTopCenter("错误", data.message);
+                        }
+                    },
+                    complete: function () {
+                        $.easyui.loaded();
+                    }
+                });
+            },
+            onLoad: function () {
+            },
+            onClose: function () {
+            }
+        });
+    };
+
+    //新增/编辑
+    let addCategory = function () {
+        let selectedRow = $dataTreeGrid.treegrid("getSelected");
+        if (selectedRow) {
+            if (selectedRow.level === 3) {
+                $.messager.showErrorTopCenter("错误", "分类只有三级数据，该条数据已经是子级，请选择父级进行添加子级操作。");
+                return false;
+            }
+            openCategoryForm(0, selectedRow.id, false);
+        } else {
+            openCategoryForm(0, 0, false);
+        }
+    };
+    let editCategory = function (id, pid, hasChild) {
+        if (hasChild) {
+            $.messager.showErrorTopCenter('错误消息', '无法删除有子分类的文档类型，请先删除子分类后再重试。', 1000);
+            return;
+        }
+        if (id === 0) {
+            $.messager.showErrorTopCenter('系统提示', '此分类无法编辑', 1000);
+        } else {
+            openCategoryForm(id, pid, hasChild);
+        }
+    };
+
+    //删除类型
+    const removeCategoryUrl = '/ModelCategory/RemoveModelCategory';
+    let removeCategory = function (id, name, hasChild) {
+        if (id <= 0) {
+            $.messager.showErrorTopCenter('系统提示', '此消息类型无法删除', 1000);
+            return;
+        }
+        if (hasChild) {
+            $.messager.showErrorTopCenter('错误消息', '无法删除有子部门的部门，请先删除子部门后再重试。', 1000);
+            return;
+        }
+        $.messager.confirm('确定删除该分类：' + name + '?', function (f) {
+            if (f) {
+                $.ajax({
+                    async: true,
+                    type: "get",
+                    dataType: "json",
+                    url: removeCategoryUrl,
+                    data: {id: id},
+                    success: function (data) {
+                        if (data.success) {
+                            if (data.result) {
+                                $.messager.showInfoTopCenter("提示", '删除成功。', 1500);
+                                $dataTreeGrid.treegrid('reload');
+                                $dataTreeGrid.treegrid('clearSelections');
+                            } else {
+                                $.messager.showErrorTopCenter("错误", data.result.message);
+                            }
+                        } else {
+                            $.messager.showErrorTopCenter("错误", data.message);
+                        }
+                    },
+                    complete: function () {
+                        $.easyui.loaded();
+                    }
+                });
+            }
+        });
+    };
+</script>
+<!--数据模型（右侧）-->
+<script type="text/javascript">
+    let $dataGrid = $('#datagrid');
+    const canSave = [[${canSave}]];
+    const canRemove = [[${canRemove}]];
+
+    const loadDataUrl = '/ModelDefinition/LoadModelDefinitionList';
+    const loadModelDefFieldDataUrl = '/ModelDefinition/LoadModelDefFieldList';
+
+    function InitDataGrid() {
+        $dataGrid.datagrid({
+            view: detailview,
+            url: loadDataUrl,
+            method: 'get',
+            idField: 'propertyId',
+            toolbar: '#toolbar',
+            striped: true,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            nowrap: false,
+            fit: true,
+            pagination: true,
+            pageSize: 20,
+            pageList: [20, 40, 60, 100],
+            showFooter: false,
+            columns: [
+                [
+                    {field: 'propertyId', title: 'Id', width: 30, align: 'left', hidden: true},
+                    {field: 'name', title: '名称', width: 130, align: 'left'},
+                    {field: 'tableName', title: '表名', width: 130, align: 'left'},
+                    {field: 'displayName', title: '显示名', width: 140, align: 'left'},
+                    {field: 'description', title: '描述', width: 120, align: 'left'},
+                    {
+                        field: 'operator', title: '操作', width: 240, align: 'center',
+                        formatter: function (value, row, index) {
+                            let id = row.propertyId;
+                            let tdContext = '';
+                            if (canSave) {
+                                tdContext += '<a class="btnEdit" style="cursor:pointer;margin:0 5px;" onclick="editModelDefinition(\'' + id + '\')" >编辑</a>';
+                            }
+                            if (canRemove) {
+                                tdContext += '<a class="btnDelete" style="cursor:pointer;margin:0 5px;" onclick="removeModelDefinition(\'' + id + '\')" >删除</a>';
+                            }
+                            if (canSaveAtt) {
+                                tdContext += '<a href="##" class="btnAddModelDefField" onclick="openModelDefFieldForm(\'' + id + '\')">添加属性</a>';
+                            }
+                            return tdContext;
+                        }
+                    }
+                ]
+            ],
+            onBeforeLoad: function (param) {
+                /*var bId = $("#txtBId").val();
+                var AllSearchKey = $("#txtAllSearchKey").val();
+                param.bId = bId;
+                param.AllSearchKey = AllSearchKey;*/
+            },
+            onLoadSuccess: function (data) {
+                CommonUtil.buttonStyle();
+                $(".btnAddModelDefField").linkbutton({iconCls: 'fa fa-plus'});
+                $dataGrid.datagrid("fixRowHeight");
+            },
+            onLoadError: function () {
+            },
+            detailFormatter: function (index, row) {
+                return '<div style="padding:2px;"><table class="ddv"></table></div>';
+            },
+            onExpandRow: function (index, row) {
+                let ddv = $(this).datagrid('getRowDetail', index).find('table.ddv');
+                ddv.datagrid({
+                    url: loadModelDefFieldDataUrl + '?id=' + row.propertyId,
+                    method: 'get',
+                    fitColumns: true,
+                    singleSelect: true,
+                    rowNumbers: true,
+                    loadMsg: '',
+                    height: 'auto',
+                    columns: [
+                        [
+                            //{ field: 'propertyAttributeId', title: '属性Id', width: 180, align: 'left' },
+                            {field: 'name', title: '名称', width: 120, align: 'left'},
+                            {field: 'displayName', title: '显示名', width: 160, align: 'left'},
+                            {field: 'dataTypeString', title: '数据类型', width: 120, align: 'left'},
+                            {
+                                field: 'isPrimaryKey',
+                                title: '主键',
+                                width: 80,
+                                align: 'center',
+                                formatter: FormatterUtil.BoolFormatter
+                            },
+                            {
+                                field: 'isNotNull',
+                                title: '必填',
+                                width: 80,
+                                align: 'center',
+                                formatter: FormatterUtil.BoolFormatter
+                            },
+                            {
+                                field: 'isUnique',
+                                title: '唯一',
+                                width: 80,
+                                align: 'center',
+                                formatter: FormatterUtil.BoolFormatter
+                            },
+                            // {field: 'createdBy', title: '创建人', width: 80, align: 'left'},
+                            // {field: 'createdDate', title: '创建时间', width: 80, align: 'left',},
+                            {
+                                field: 'operator', title: '任务操作', width: 180, align: 'center',
+                                formatter: function (value, row, index) {
+                                    let tdContext = '';
+                                    if (canSaveAtt && (!row.isProviderAttr || row.canEdit))
+                                        tdContext += '<a href="##" class="btnEditModelDefField" onclick="openModelDefFieldForm(\'' + row.modelDefId + '\',\'' + row.propertyAttributeId + '\')">编辑属性</a>';
+                                    if (canRemoveAtt && (!row.isProviderAttr || row.canEdit))
+                                        tdContext += '<a href="##" class="btnRemoveModelDefField" onclick="removeModelDefField(\'' + row.propertyAttributeId + '\')">删除属性</a>';
+                                    return tdContext;
+                                }
+                            }
+                        ]
+                    ],
+                    onResize: function () {
+                        $dataGrid.datagrid('fixDetailRowHeight', index);
+                    },
+                    onLoadSuccess: function () {
+                        $(".btnEditModelDefField").linkbutton({iconCls: 'fa fa-pencil'});
+                        $(".btnRemoveModelDefField").linkbutton({iconCls: 'fa fa-trash'});
+                        $(ddv).datagrid('fixRowHeight');
+
+                        setTimeout(function () {
+                            $dataGrid.datagrid('fixDetailRowHeight', index);
+
+                        }, 0);
+                    }
+                });
+            }
+        });
+    }
+
+    let refreshSearch = function () {
+        $("#txtName").searchbox('setValue', '');
+        $("#txtTableName").searchbox('setValue', '');
+        $("#txtDisplayName").searchbox('setValue', '');
+        $('#cmbModelBaseType').combobox("setValue", '');
+        reloadDataGrid();
+    };
+    let reloadDataGrid = function () {
+        $dataGrid.datagrid("load", {
+            categoryId: selectCategoryId,
+            name: $("#txtName").searchbox("getValue"),
+            tableName: $("#txtTableName").searchbox("getValue"),
+            displayName: $("#txtDisplayName").searchbox("getValue"),
+            type: $('#cmbModelBaseType').combobox("getValue")
+        });
+    };
+
+    const getFormUrl = '/ModelDefinition/GetModelDefinitionForm';
+    let openForm = function (id) {
+        let queryString = "id=" + id + "&categoryId=" + selectCategoryId;
+        MainPage_PostMessage("openSubPage", getFormUrl, queryString);
+    };
+
+    let addModelDefinition = function () {
+        openForm('');
+    };
+    let editModelDefinition = function (id) {
+        if (id) {
+            openForm(id);
+        }
+    };
+    const removeUrl = '/ModelDefinition/RemoveModelDefinition';
+    let removeModelDefinition = function (id) {
+        if (id) {
+            $.messager.confirm('系统提示', '是否确定删除该条记录?', function (r) {
+                if (r) {
+                    $.ajax({
+                        async: true,
+                        type: "get",
+                        dataType: "json",
+                        url: removeUrl,
+                        data: {id: id},
+                        success: function (data) {
+                            if (data.success) {
+                                if (data.result) {
+                                    $dataGrid.datagrid('clearSelections');
+                                    $dataGrid.datagrid('reload'); // reload the user data
+                                    $.messager.showInfoTopCenter('系统提示', '删除数据成功。', 1000);
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', '删除数据失败。');
+                                }
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', data.message);
+                            }
+                        },
+                        complete: function () {
+                            $.easyui.loaded();
+                        }
+                    });
+                }
+            });
+        }
+    };
+
+    const getModelDefFieldFormUrl = '/ModelDefinition/GetModelDefFieldForm';
+    const saveModelDefFieldFormUrl = '/ModelDefinition/SaveModelDefField';
+    let openModelDefFieldForm = function (defId, id) {
+        let dialog = $.easyui.showDialog({
+            title: "新增/编辑数据模型字段",
+            width: 460,
+            height: 420,
+            modal: true,
+            topMost: false,
+            href: getModelDefFieldFormUrl + "?defId=" + (defId ? defId : 0)+ "&id=" + (id ? id : 0),
+            enableHeaderContextMenu: false,
+            enableApplyButton: false,
+            onSave: function (d) {
+                let validate = d.form("enableValidation").form("validate");
+                if (validate) {
+                    let postData = d.form("getData");
+                    let jsonData = JSON.stringify(postData);
+                    $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                    $.ajax({
+                        async: true,
+                        type: "post",
+                        dataType: "json",
+                        contentType: "application/json;charset=UTF-8",
+                        url: saveModelDefFieldFormUrl,
+                        data: jsonData,
+                        success: function (data) {
+                            if (data.success) {
+                                d.window('close');
+                                if (data.result) {
+                                    $dataGrid.datagrid('clearSelections');
+                                    $dataGrid.datagrid('reload');
+                                    $.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+                                } else {
+                                    $.messager.showErrorTopCenter('错误消息', '保存数据失败。');
+                                }
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', data.message);
+                            }
+                        },
+                        complete: function () {
+                            $.easyui.loaded();
+                        }
+                    });
+                    return false;
+                } else {
+                    return false;
+                }
+            },
+            onLoad: function () {
+                let f = $(this), ret = $.fn.dialog.defaults.onLoad();
+                f.form("disableValidation").form("enableValidation");
+                return ret;
+            }
+        });
+    };
+
+    const removeModelDefFieldUrl = '/ModelDefinition/RemoveModelDefField';
+    let removeModelDefField = function (id) {
+        $.messager.confirm('系统提示', '是否确定删除该数据模型属性记录?', function (r) {
+            if (r) {
+                $.ajax({
+                    async: true,
+                    type: "get",
+                    dataType: "json",
+                    url: removeModelDefFieldUrl,
+                    data: {id: id},
+                    success: function (data) {
+                        if (data.success) {
+                            if (data.result) {
+                                $dataGrid.datagrid('clearSelections');
+                                $dataGrid.datagrid('reload');
+                                $.messager.showInfoTopCenter('系统提示', '删除数据成功。', 1000);
+                            } else {
+                                $.messager.showErrorTopCenter('错误消息', '删除数据失败。');
+                            }
+                        } else {
+                            $.messager.showErrorTopCenter('错误消息', data.message);
+                        }
+                    },
+                    complete: function () {
+                        $.easyui.loaded();
+                    }
+                });
+            }
+        });
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="mlayout :: common_header(~{::title},~{},~{::style})">
+    <title>编辑商品分类</title>
+    <style>
+        .table-form.tr-col2 td:nth-child(odd){width:15%;font-size:14px;}
+        .table-form.tr-col2 td:nth-child(even){width:85%;font-size:14px;}
+    </style>
+</head>
+<body>
+
+<form id="saveform" class="easyui-form" action="#" method="post"
+      th:action="@{/CategoryManage/SaveCategory}" th:object="${CategoryEntity}">
+    <input type="hidden" th:field="*{id}"/>
+    <input type="hidden" th:field="*{leaf}"/>
+    <input type="hidden" th:field="*{level}"/>
+    <input type="hidden" th:field="*{treeCode}"/>
+
+    <input type="hidden" th:field="*{createdBy}"/>
+    <input type="hidden" th:field="*{createdDate}"/>
+    <input type="hidden" th:field="*{modifiedBy}"/>
+    <input type="hidden" th:field="*{modifiedDate}"/>
+    <input type="hidden" th:field="*{deleted}"/>
+    <table class="dialog-form-table">
+        <tbody>
+        <tr>
+            <td><label class="required">*</label><label for="parentId">父节点：</label></td>
+            <td><input class="easyui-validatebox easyui-textbox"
+                       data-options="width:224,height:26,"
+                       th:field="*{parentId}"/></td>
+        </tr>
+
+        <tr>
+            <td><label class="required">*</label><label for="text">名称：</label></td>
+            <td><input class="easyui-validatebox easyui-textbox"
+                       data-options="required:true,width:224,validType:['length[2,50]']"
+                       th:field="*{text}"/></td>
+        </tr>
+
+        <tr>
+            <td><label class="required">*</label><label for="imageBlobId">图片：</label></td>
+            <td style="width:230px;">
+                <input type="hidden" data-options="required:true" th:field="*{imageBlobId}"/>
+                <div style="display: flex;height:32px;">
+                    <input id="lblFileName"  class="easyui-validatebox easyui-textbox" th:value="*{imageBlobId}" data-options="required:true,editable:false"/>
+                    <a id="uploader" href="javascript:void(0)" class="easyui-linkbutton" iconcls="fa fa-pencil">选择</a>
+                </div>
+                <label>文件格式：[[${uploadConfig.imageExt}]]，文件大小：[[${uploadConfig.imageMaxSize}]]M</label>
+                <div class="webuploader-filename">
+                    <a class="closeImg" style="display: none;">
+                        <div>
+                            <i class="fa fa-times fa-1x" aria-hidden="true"></i>
+                        </div>
+                    </a>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td><label for="description">描述：</label></td>
+            <td><input class="easyui-textbox" style="height: 60px; width: 224px;"
+                       data-options="multiline:true,width:224,height:160"
+                       th:field="*{description}"></td>
+        </tr>
+
+        <tr>
+            <td><label for="index">排序：</label></td>
+            <td><input class="easyui-numberspinner easyui-textbox"
+                       data-options="required:true,width:224,min:1,max:100"
+                       th:field="*{index}"/></td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+<script type="text/javascript" th:inline="javascript">
+
+    $(function () {
+        $('.textbox').bind('blur', function () {
+            $(this).validatebox('enableValidation').validatebox('validate');
+        });
+        let id = $("#parentId").val();
+        $('#parentId').combotree({
+            url: '/OfferingManage/LoadCategoryTree',
+            method: 'get',
+            queryParams: {
+                pid: id
+            },
+            required: true
+        });
+
+        InitUploader();
+    });
+
+    var InitUploader = function () {
+        let imageUrl = $('#imageBlobId').val();
+        let count = 0;
+        let uploader = imageUploader({
+            btnAddFile: $('#uploader'),
+            fileNumLimit: 1,
+            params: {blobId: imageUrl},
+            isRegister: true,
+            configure: {
+                imageMaxSize: imageSize,
+                imageExt: imageExt,
+                fileMaxSize: fileMaxSize,
+                fileExt: fileExt
+            },
+            callback: {
+                uploadProgress: function (file, percentage) {
+                    if (percentage < 100) {
+                        $('#uploadPdfProgress').progressbar('setValue', parseInt(percentage * 100));
+                    } else {
+                        $('#bartab').setVisibility(View.VISIBLE);
+                    }
+                },
+                uploadComplete: function (file) { //不管成功或者失败，文件上传完成时触发
+                    $('.uploadPdfProgress').hide();
+                    uploader.removeFile(file);
+                },
+                uploadSuccess: function (file, response, blob) {
+                    if (count === 0) {
+                        //debugger;
+                        let fileId = blob.fileId;
+                        let fileName = blob.fileName;
+                        let blobId = blob.blobId;
+
+                        console.log('合并异常: ' + blobId);
+                        $('#lblFileName').textbox('setValue', fileName);
+                        $('#lblFileName').val(fileName);
+                        $('#blobId').val(blobId);
+                        //$(".webuploader-filename").css("display", "inline-flex");
+                        uploader.options.formData.blobId = blobId;
+                        uploader.reset();
+                    }
+                    count++;
+                },
+                uploadError: function (file, reason) {
+                    //debugger;
+                },
+                onFileQueued: function (file) {
+                    count = 0;
+                    uploader.upload();
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

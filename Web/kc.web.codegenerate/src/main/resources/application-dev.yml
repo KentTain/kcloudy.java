@@ -1,0 +1,26 @@
+spring:
+  jpa:
+    show-sql: true
+  datasource: #数据库连接
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://127.0.0.1;databaseName=MSSqlKCContext;
+    username: sa
+    password: P@ssw0rd
+  thymeleaf:
+    cache: false
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+logging:
+  level:
+    org.springframework.boot.autoconfigure: INFO
+    
+GlobalConfig:
+  EncryptKey: dev-cfwin-EncryptKey
+
+  SSOWebDomain: http://localhost:1001/
+  ResWebDomain: http://localhost:9999/
+  CodeWebDomain: http://subdomain.localhost:1007/
+

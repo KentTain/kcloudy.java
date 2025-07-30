@@ -1,0 +1,288 @@
+﻿<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="~{Main/layout}" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{/js/webuploader/webuploader.css}"/>
+    <link rel="stylesheet" th:href="@{/css/upload.css}"/>
+    <style>
+        .webuploader-container {
+            border-width: 0px;
+        }
+
+        .webuploader-pick {
+            padding: 5px;
+            font-size: 13px;
+            background: #009ADD;
+            color: #fff;
+            display: inline-block;
+            cursor: pointer;
+            border-radius: 0px 3px 3px 0px;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            position: relative;
+            display: table;
+            border-collapse: separate;
+        }
+
+        .input-group .form-control:first-child, .input-group-addon:first-child, .input-group-btn:first-child > .btn, .input-group-btn:first-child > .btn-group > .btn, .input-group-btn:first-child > .dropdown-toggle, .input-group-btn:last-child > .btn-group:not(:last-child) > .btn, .input-group-btn:last-child > .btn:not(:last-child):not(.dropdown-toggle) {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .input-group .form-control, .input-group-addon, .input-group-btn {
+            display: table-cell;
+        }
+
+        .input-group .form-control {
+            position: relative;
+            z-index: 2;
+            float: left;
+            width: 100%;
+            margin-bottom: 0;
+        }
+
+        .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+            background-color: #eee;
+            opacity: 1;
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            height: 34px;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            background-image: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+            -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+            -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+            transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        }
+
+        .input-group-btn {
+            position: relative;
+            font-size: 0;
+            white-space: nowrap;
+        }
+
+        .input-group-addon, .input-group-btn {
+            width: 1%;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .input-group .form-control, .input-group-addon, .input-group-btn {
+            display: table-cell;
+        }
+
+    </style>
+</head>
+<body>
+<div layout:fragment="content" class="easyui-layout" style="width:100%;height:100%;">
+    <form id="saveform" class="easyui-form" action="#" method="post"
+          th:action="@{/NewsManage/SaveArticle}" th:object="${Entity}">
+        <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{articleType}"/>
+        <input type="hidden" th:field="*{status}"/>
+        <input type="hidden" th:field="*{editMode}"/>
+
+        <input type="hidden" th:field="*{createdBy}"/>
+        <input type="hidden" th:field="*{createdDate}"/>
+        <input type="hidden" th:field="*{modifiedBy}"/>
+        <input type="hidden" th:field="*{modifiedDate}"/>
+        <input type="hidden" th:field="*{deleted}"/>
+        <table class="table table-bordered table-form">
+            <tbody>
+            <tr>
+                <td><label class="required">*</label><label for="title">名称：</label></td>
+                <td><input class="easyui-validatebox textbox form-control"
+                           data-options="required:true,width:300,validType:{validator:['/NewsManage/ExistArticleName?isEditMode=*{isEditMode}&id=*{articleId}&orginalName=*{articleName}','articleName', '该产品名已存在']}"
+                           th:field="*{title}"/></td>
+
+                <td><label class="required">*</label><label for="articleCategoryId">帮助类别：</label></td>
+                <td><input class="easyui-validatebox textbox form-control"
+                           data-options="width:300,height:26,"
+                           th:field="*{articleCategoryId}"/></td>
+                <td><label for="link">外部链接：</label></td>
+                <td><input class="easyui-validatebox textbox form-control"
+                           data-options="width:300"
+                           th:field="*{link}"/></td>
+            </tr>
+
+            <tr>
+                <td><label class="required">*</label><label for="fileUrl">附件：</label></td>
+                <td>
+                    <input type="hidden" class="easyui-validatebox textbox" th:field="*{fileUrl}"/>
+                    <div class="input-group" style="width:300px;">
+                    <span class="input-group-btn">
+                        <a id="uploader" href="javascript:void(0)" class="easyui-linkbutton"
+                           iconcls="fa fa-pencil">上传附件</a>
+                        <label style="vertical-align:middle;display:inline-block;margin-left: 10px;">文件格式：txt,doc,docx,pdf</label>
+                    </span>
+                    </div>
+                    <br/>
+                    <a id="imgOffering"
+                       th:href="${Entity.fileUrl != null ? '/Home/ShowTempImg?id=' + Entity.fileUrl : '/Home/ShowTempImg?id='}"
+                       th:text="${Entity.fileUrl}" th:download="${Entity.fileUrl}"></a>
+
+                </td>
+                <td><label for="articleDesc">描述：</label></td>
+                <td colspan="3"><input class="easyui-textbox form-control" style="height: 100px;width:100%"
+                                       data-options="multiline:true"
+                                       th:field="*{articleDesc}"></td>
+            </tr>
+
+            <tr>
+                <td><label for="content">内容：</label></td>
+                <td colspan="5"><textarea id="Content" name="Content" style="height: 60%;width:100%"
+                                          th:field="*{content}"/></td>
+            </tr>
+
+            </tbody>
+        </table>
+    </form>
+</div>
+
+<div layout:fragment="footer"  style="text-align:center;margin:10px 0 20px 0;">
+    <a sec:authorize="hasAuthority('4a1ca9f0-5d51-4f6f-adf7-4a3fda57ef4d')" href="javascript:void(0)"
+       class="easyui-linkbutton" iconcls="fa fa-floppy-o" onclick="SaveForm()">保存</a>
+</div>
+
+<div layout:fragment="scripts">
+    <script th:src="@{/js/webuploader/md5.js}"></script>
+    <script th:src="@{/js/webuploader/webuploader.min.js}"></script>
+    <script th:src="@{/js/ueditor/ueditor.config.js}"></script>
+    <script th:src="@{/js/ueditor/ueditor.all.min.js}"></script>
+    <script type="text/javascript">
+
+        var ueditorContent = null;
+        $(function () {
+            $('.textbox').bind('blur', function () {
+                $(this).validatebox('enableValidation').validatebox('validate');
+            });
+            var id = $("#articleCategoryId").val();
+            $('#articleCategoryId').combotree({
+                url: '/NewsManage/LoadArticleCategoryTree',
+                method: 'get',
+                queryParams: {
+                    pid: id
+                },
+                required: true
+            });
+
+            ueditorContent = UE.getEditor('Content', {
+                serverUrl: '/Home/Upload',
+                initialFrameWidth: '100%'
+            });
+
+            InitUploader();
+        });
+
+        var uploader = null;
+        var exts = 'jpg,jpeg,png';
+
+        function InitUploader() {
+            //$('#bartab').setVisibility(View.GONE);
+            var imageUrl = $('#fileUrl').val();
+            var count = 0;
+            uploader = cfwinUploader({
+                componentName: 'uploadFile',
+                btnAddFile: $('#uploader'),
+                type: 2,
+                fileNumLimit: 1,
+                params: {blobId: imageUrl},
+                isRegister: true,
+                configure: {
+                    fileMaxSize: 50,
+                    imageExt: exts
+                },
+                callback: {
+                    uploadProgress: function (file, percentage) {
+                        if (percentage < 100) {
+                            $('#uploadPdfProgress').progressbar('setValue', parseInt(percentage * 100));
+                        } else {
+                            $('#bartab').setVisibility(View.VISIBLE);
+                        }
+                    },
+                    uploadComplete: function (file) { //不管成功或者失败，文件上传完成时触发
+                        $('.uploadPdfProgress').hide();
+                        uploader.removeFile(file);
+                    },
+                    uploadSuccess: function (file, response) {
+                        if (count == 0) {
+                            //if (!response.success) {
+                            //    //合并异常
+                            //    $.messager.showErrorCenter('错误消息', '上传失败!');
+                            //    return;
+                            //}
+                            var imgSrc = $('#imgOffering')[0].href;
+                            $('#imgOffering').attr('href', "/Home/ShowTempImg?id=" + response.id);
+                            $('#imgOffering').attr('download', file.name);
+                            $('#imgOffering').text(file.name)
+                            $('#blobName').val(file.name);
+                            $('#fileUrl').val(response.id);
+
+                            uploader.options.formData.blobId = response.id;
+                            uploader.reset();
+                        }
+                        count++;
+                    },
+                    uploadError: function (file, reason) {
+                        debugger;
+                    },
+                    onFileQueued: function (file) {
+                        count = 0;
+                        uploader.upload();
+                    }
+                }
+            });
+        }
+
+        var getFormUrl = '/NewsManage/GetArticleForm';
+        var saveFormUrl = '/NewsManage/SaveArticle';
+
+        function SaveForm() {
+            var validate = $("#saveform").form("enableValidation").form("validate");
+            var postData = $("#saveform").form("getData");
+            if (validate) {
+                $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                $.ajax({
+                    async: true,
+                    type: "post",
+                    //contentType:"application/x-www-form-urlencoded;charset=UTF-8",
+                    dataType: "json",
+                    url: saveFormUrl,
+                    data: postData,
+                    success: function (data) {
+                        if (data.success) {
+                            if (data.result) {
+                                $.messager.showInfoCenter('系统提示', '保存数据成功。', 1000);
+                                MainPage_PostMessage("closeSubPage", getFormUrl);
+                            } else {
+                                $.messager.showErrorCenter('错误消息', data.message);
+                            }
+                        } else {
+                            $.messager.showInfoCenter('系统提示', data.message);
+                        }
+                    },
+                    complete: function () {
+                        $.easyui.loaded();
+                    }
+                });
+                return false;
+            } else {
+                return false;
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

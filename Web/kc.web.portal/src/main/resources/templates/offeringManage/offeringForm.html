@@ -1,0 +1,546 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="mlayout :: common_header(~{::title},~{},~{::style})">
+    <title>新增/编辑商品</title>
+    <style>
+
+        .table-form > tbody > tr > td:nth-child(odd) {
+            width: 15%!important;
+        }
+
+        .table-form > tbody > tr > td:nth-child(even) {
+            width: 85%!important;
+        }
+
+        #tabSpecifications .table-form > tbody > tr > td:nth-child(odd) {
+            background: transparent;
+        }
+
+        .datagrid-view .webUploader-image-list .setDefault {
+            font-size: 11px;
+        }
+
+        .datagrid-view .webUploader-image-list .setDefault .radiobutton {
+            width: 16px;
+            height: 16px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="easyui-layout" style="width:99%;">
+    <form id="saveform" class="easyui-form" action="#" method="post"
+          th:action="@{/OfferingManage/SaveOffering}" th:object="${Entity}">
+        <input type="hidden" th:field="*{offeringId}"/>
+        <input type="hidden" th:field="*{offeringCode}"/>
+        <input type="hidden" th:field="*{editMode}"/>
+
+        <input type="hidden" th:field="*{createdBy}"/>
+        <input type="hidden" th:field="*{createdDate}"/>
+        <input type="hidden" th:field="*{modifiedBy}"/>
+        <input type="hidden" th:field="*{modifiedDate}"/>
+        <input type="hidden" th:field="*{deleted}"/>
+        <table class="table table-bordered table-form tr-col2">
+            <tbody>
+            <tr>
+                <td><label class="required">*</label><label for="offeringName">名称：</label></td>
+                <td><input class="easyui-validatebox easyui-textbox"
+                                       data-options="required:true,width:360,validType:{validator:['/OfferingManage/ExistOfferingName?isEditMode=*{isEditMode}&id=*{offeringId}&orginalName=*{offeringName}','offeringName', '该商品名已存在']}"
+                                       th:field="*{offeringName}"/></td>
+            </tr>
+            <tr>
+                <td><label class="required">*</label><label for="categoryId">商品分类：</label></td>
+                <td><input class="easyui-validatebox easyui-textbox"
+                                       data-options="width:360"
+                                       th:field="*{categoryId}"/>
+                    <a href="javascript:void(0)" onclick="refreshCategory()" class="easyui-linkbutton"
+                       data-options="iconCls:'fa fa-refresh'">刷新</a>
+                    <a sec:authorize="hasAuthority('7F6FCA65-007B-4CC0-B866-D92E11409DC9')" href="javascript:void(0)"
+                       class="easyui-linkbutton" iconcls="fa fa-plus" onclick="openCategoryIndex()">新增商品分类规格</a>
+                </td>
+            </tr>
+            <!--
+            <tr>
+                <td><label class="required">*</label><label for="startTime">上架时间：</label></td>
+                <td><input class="easyui-validatebox easyui-datebox"
+                           data-options="required:true,width:360,"
+                           th:field="*{startTime}"/></td>
+                <td><label class="required">*</label><label for="endTime">下架时间：</label></td>
+                <td><input class="easyui-validatebox easyui-datebox"
+                           data-options="required:true,width:360,"
+                           th:field="*{endTime}"/></td>
+            </tr>
+            -->
+
+            <tr>
+                <td><label class="required">*</label><label for="offeringPrice">价格：</label></td>
+                <td>
+                    <input id="negotiablePrice"
+                           data-options="labelPosition:'after',labelWidth:60,checked:true"
+                           class="easyui-radiobutton" name="offeringPrice" value="0" label="面议">
+                    <input id="simplePrice" data-options="labelPosition:'after',labelWidth:36,"
+                           class="easyui-radiobutton" name="offeringPrice" value="1" label="单价">
+                    <input id="offeringPrice" class="easyui-numberspinner easyui-numberbox"
+                           data-options="required:true,width:240,min:0,precision:2"
+                           th:field="*{offeringPrice}"/></td>
+            </tr>
+            <tr>
+                <td><label class="required">*</label><label
+                        for="offeringImageBlob">图片：</label>
+                </td>
+                <td style="width:230px;">
+                    <input type="hidden" data-options="required:true"
+                           th:field="*{offeringImageBlob}"/>
+                    <div class="imageUploaderEditor">
+                        <div style="display: flex;height: 110px;">
+                            <div id="imageUploader" >
+                                <a href="javascript:void(0)"><i
+                                        class="fa fa-plus-square fa-5x"></i></a>
+                            </div>
+                            <div id="imageList" class="webUploader-image-list">
+                                <!--
+                                <div>
+                                    <div th:id="*{'file-' + offeringImageBlob}" class="imageFile easyui-tooltip" title="文件名">
+                                        <input th:id="*{'txt-' + offeringImageBlob}" type="hidden"/>
+                                        <img th:id="*{'img-' + offeringImageBlob}" class="fileImage" th:src="*{'/Home/ShowTempImg?id=' + offeringImageBlob}">
+                                        <a th:id="*{'close-' + offeringImageBlob}" class="closeImg">
+                                            <div>
+                                                <i class="fa fa-times fa-1x" aria-hidden="true"></i>
+                                            </div>
+                                        </a>
+                                        <div class="easyui-progressbar"></div>
+                                    </div>
+                                    <div class="setDefault">
+                                        <input class="easyui-radiobutton" name="setDefault" value="1" label="默认封面">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div th:id="*{'file-' + offeringImageBlob}" class="imageFile easyui-tooltip" title="文件名">
+                                        <input th:id="*{'txt-' + offeringImageBlob}" type="hidden"/>
+                                        <img th:id="*{'img-' + offeringImageBlob}" class="fileImage" th:src="*{'/Home/ShowTempImg?id=' + offeringImageBlob}">
+                                        <a th:id="*{'close-' + offeringImageBlob}" class="closeImg">
+                                            <div>
+                                                <i class="fa fa-times fa-1x" aria-hidden="true"></i>
+                                            </div>
+                                        </a>
+                                        <div class="easyui-progressbar"></div>
+                                    </div>
+                                    <div class="setDefault">
+                                        <input class="easyui-radiobutton" name="setDefault" value="1" label="默认封面">
+                                    </div>
+                                </div>
+                                -->
+                            </div>
+                        </div>
+                        <!--                                                <p class="imagePreview"></p>-->
+                        <label style="padding: 3px;">文件个数：3个；文件格式：[[${uploadConfig.imageExt}]]；文件大小：[[${uploadConfig.imageMaxSize}]]M</label>
+                        <p id="imagePreviewContainer-single" class="imagePreview"></p>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><label class="required"></label><label
+                        for="offeringFileBlob">技术文档：</label></td>
+                <td style="width:360px;">
+                    <div class="fileUploaderEditor" style="display: flex;">
+                        <div id="fileList" class="webUploader-file-single"></div>
+                        <a id="fileUploader" href="javascript:void(0)" class="easyui-linkbutton"
+                           iconcls="fa fa-pencil">选择</a>
+                    </div>
+                    <label>文件格式：[[${uploadConfig.fileExt}]]，文件大小：[[${uploadConfig.fileMaxSize}]]M</label>
+                </td>
+            </tr>
+
+            <tr>
+                <td><label for="description">商品简述：</label></td>
+                <td><input class="easyui-textbox" style="height: 100px; width: 100%;"
+                                       data-options="multiline:true"
+                                       th:field="*{description}"></td>
+            </tr>
+            <tr>
+                <td><label for="content">商品详情：</label></td>
+                <td>
+                    <input type="hidden" id="hiddenContentId" th:value="*{contentId}">
+                    <textarea id="content" th:text="*{content}" name="content"
+                              style="height: 100%;width:100%">展示内容</textarea></td>
+            </tr>
+            <!--<tr>
+                <td><label class="required">*</label><label for="offeringType">商品类型：</label></td>
+                <td><select class="easyui-combobox" name="offeringType"
+                            data-options="width:360,height:26">
+                    <option th:each="type : ${OfferingTypes}" style="cursor:pointer;"
+                            th:selected="${type.key == Entity.offeringType.getIndex()}"
+                            th:value="${type.key}" th:text="${type.value}"></option>
+                </select></td>
+            </tr>
+            <tr>
+                <td><label class="required">*</label><label for="offeringVersion">商品版本：</label></td>
+                <td><select class="easyui-combobox"
+                            data-options="multiple:true,width:360,height:26"
+                            th:field="*{offeringVersions}">
+                    <option th:each="OfferingVersion : ${OfferingVersions}" style="cursor:pointer;"
+                            th:selected="${Entity.offeringVersions.contains(OfferingVersion.key)}"
+                            th:value="${OfferingVersion.key}" th:text="${OfferingVersion.value}"></option>
+                </select></td>
+            <tr>
+            </tr>
+                <td><label for="index">排序：</label></td>
+                <td><input class="easyui-numberspinner easyui-textbox"
+                           data-options="width:360,min:1,max:100"
+                           th:field="*{index}"/></td>
+            </tr>
+            -->
+            </tbody>
+        </table>
+    </form>
+</div>
+<div style="height: 50px;"></div>
+<div class="bottom">
+    <a sec:authorize="hasAuthority('52DFF617-3BB5-4A43-B807-73DB4A571924')" href="javascript:void(0)"
+       class="easyui-linkbutton" iconcls="fa fa-floppy-o" onclick="SaveForm()">保存</a>
+</div>
+
+<th:block th:replace="layout :: scripts"/>
+<script th:src="${resWebDomain} + '/js/webuploader/md5.js'"></script>
+<script th:src="${resWebDomain} + '/js/webuploader/webuploader.min.js'"></script>
+<script th:src="${resWebDomain} + '/js/ueditor/ueditor.config.js'"></script>
+<script th:src="${resWebDomain} + '/js/ueditor/ueditor.all.min.js'"></script>
+
+<!--组件初始化-->
+<script type="text/javascript">
+    let loadFlag = false;
+    $(function () {
+        $('.textbox').bind('blur', function () {
+            $(this).validatebox('enableValidation').validatebox('validate');
+        });
+
+        let price = $('#offeringPrice').numberspinner("getValue");
+        if (price !== undefined && price != null && price !== '' && parseFloat(price) !== 0) {
+            $('#simplePrice').radiobutton('check');
+        } else {
+            $('#negotiablePrice').radiobutton('check');
+        }
+
+        InitCategoryTree();
+
+        InitImageUploader();
+
+        InitFileUploader();
+
+        InitUEditor();
+    });
+
+    const divCategoryId = '#categoryId';
+    const loadCategoryLisrUrl = '/OfferingManage/LoadCategoryList';
+    let InitCategoryTree = function () {
+        let selectedId = $(divCategoryId).val();
+        $(divCategoryId).combotree({
+            url: loadCategoryLisrUrl,
+            method: 'get',
+            queryParams: {
+                pid: selectedId
+            },
+            required: true,
+            panelHeight: 'auto',
+            onLoadSuccess: function (node, data) {
+                if (!loadFlag && data != null && data.length > 0) {
+                    //node = $(divCategoryId).combotree("tree").tree("find", data[0].id);
+                    loadFlag = true;
+
+                    if (selectedId === undefined || selectedId == null || selectedId === '') {
+                        $(divCategoryId).combotree('setValue', {id: data[0].id, text: data[0].text});
+
+                    } else {
+                        $(divCategoryId).combotree('setValue', selectedId);
+
+                    }
+                } else {
+                    loadFlag = false;
+                    $(divCategoryId).combotree('setValue', {id: null, text: '请先创建商品分类...'});
+                }
+            },
+            onChange: function (newValue, oldValue) {
+
+            }
+        });
+    };
+
+    let imageNumLimit = 3;
+    let imageSize = [[${uploadConfig.imageMaxSize}]];
+    let imageExt = '[[${uploadConfig.imageExt}]]';
+    let fileMaxSize = [[${uploadConfig.fileMaxSize}]];
+    let fileExt = '[[${uploadConfig.fileExt}]]';
+    let offeringImageBlobsJsonString = '[[${imageBlobsJsonString}]]';
+    let removeOfferingPropertyIds = []; //所删除的商品规格属性Id列表，保存商品时需要传递至后台
+    let imageWebUploader = null;
+    let InitImageUploader = function () {
+        //$('#bartab').setVisibility(View.GONE);
+        let imageUrl = $('#offeringImgUrl').val();
+        imageWebUploader = imageUploader({
+            btnAddFile: '#imageUploader',
+            fileList: '#imageList',
+            imagePreviewContainer: '#imagePreviewContainer-single',
+            fileNumLimit: imageNumLimit,
+            //params: {blobId: imageUrl},
+            isRegister: true,
+            isSetDefault: true,
+            configure: {
+                imageMaxSize: imageSize,
+                imageExt: imageExt,
+                fileMaxSize: fileMaxSize,
+                fileExt: fileExt
+            },
+            callback: {
+                uploadStart: function (file) {
+                },
+                uploadProgress: function (file, percentage) {
+                },
+                uploadComplete: function (file) { //不管成功或者失败，文件上传完成时触发
+                },
+                uploadSuccess: function (file, response, blob) {
+                },
+                uploadError: function (file, reason) {
+                    let fileName = file.name;
+                    console.error("---file[" + fileName + "] throw error: " + reason);
+                },
+                onFileQueued: function (file) {
+                },
+                onRemoveImage: function (file) {
+                    //新上传未保存至数据库的图片，未生成propertyId
+                    if (file.propertyId !== undefined && file.propertyId != null && file.propertyId !== '')
+                        removeOfferingPropertyIds.push(file.propertyId);
+
+                    return true;
+                }
+            }
+        });
+
+        if (offeringImageBlobsJsonString !== undefined && offeringImageBlobsJsonString !== '') {
+            let objString = CommonUtil.escape2Html(offeringImageBlobsJsonString);
+            let offeringImageBlobs = JSON.parse(objString);
+            imageWebUploader.initImageView(offeringImageBlobs);
+        } else {
+            imageWebUploader.initImageView([]);
+        }
+
+    };
+
+    let fileWebUploader = null;
+    let offeringFileBlobJsonString = '[[${fileBlobJsonString}]]';
+    let InitFileUploader = function () {
+        let blobId = $('input.fileBlobId').val();
+        fileWebUploader = fileUploader({
+            btnAddFile: '#fileUploader',
+            fileList: '#fileList',
+            fileNumLimit: 1,
+            //params: {blobId: blobId},
+            isRegister: true,
+            configure: {
+                imageMaxSize: imageSize,
+                imageExt: imageExt,
+                fileMaxSize: fileMaxSize,
+                fileExt: fileExt
+            },
+            callback: {
+                uploadProgress: function (file, percentage) {
+                },
+                uploadComplete: function (file) { //不管成功或者失败，文件上传完成时触发
+                },
+                uploadSuccess: function (file, response, blob) {
+                },
+                uploadError: function (file, reason) {
+                },
+                onFileQueued: function (file) {
+                }
+            }
+        });
+
+        if (offeringFileBlobJsonString !== undefined && offeringFileBlobJsonString !== '') {
+            let objString = escape2Html(offeringFileBlobJsonString);
+            let offeringFileBlob = JSON.parse(objString);
+            fileWebUploader.initFileView([offeringFileBlob]);
+        } else {
+            fileWebUploader.initFileView([]);
+        }
+
+    };
+
+    const contentId = '#hiddenContentId';
+    let uEditorContent = null;
+    let InitUEditor = function () {
+        uEditorContent = UE.getEditor('content', {
+            serverUrl: '/Home/Upload',
+            initialFrameWidth: '100%'
+        });
+        //对编辑器的操作最好在编辑器ready之后再做
+        uEditorContent.ready(function () {
+            //let content =  $(contentId).val();
+            //设置编辑器的内容
+            //uEditorContent.setContent(content);
+        });
+    };
+
+    const getCategoryIndexUrl = '/OfferingManage/Index';
+    let openCategoryIndex = function () {
+        let selectedCategoryId = $(divCategoryId).val();
+        MainPage_PostMessage("openPage", getCategoryIndexUrl, "id=" + selectedCategoryId);
+    };
+
+    let refreshCategory = function () {
+        let selectedId = $(divCategoryId).val();
+        $(divCategoryId).combotree({url: loadCategoryLisrUrl});
+        $(divCategoryId).combotree("reload");
+    };
+
+</script>
+
+<!--相关事件-->
+<script type="text/javascript">
+    //获取商品的产品属性列表，主要为Image
+    let getOfferingPrice = function () {
+        let priceSelect = $('#tabSingleSpec').find('span.radiobutton.radiobutton-checked input.radiobutton-value').val();
+        if (priceSelect === "0") {
+            return null;
+        } else {
+            let price = $('#offeringPrice').numberspinner('getValue');
+            if (price === undefined || price == null || price === '')
+                return 0;
+            else
+                return price;
+        }
+    };
+    //获取商品的产品属性列表，主要为Image
+    let getOfferingProperties = function () {
+        let offeringProperties = [];
+        if (uEditorContent !== undefined && uEditorContent != null) {
+            let imageProperty = {};
+            imageProperty.id = $(contentId).val();
+            imageProperty.offeringPropertyType = 1; //OfferingPropertyType.Detail
+            imageProperty.name = 'Detail';
+            imageProperty.value = uEditorContent.getContent();
+            imageProperty.refProviderId = null;
+            imageProperty.refProviderAttrId = null;
+            imageProperty.isProvider = false;
+            imageProperty.index = 1;
+
+            offeringProperties.push(imageProperty);
+        }
+        // 商品图片属性：Offering.offeringProperties
+        if (imageWebUploader != null) {
+            let imageBlobs = imageWebUploader.getAllBlobs();
+            if (imageBlobs !== undefined && imageBlobs != null && imageBlobs.length > 0) {
+                $.each(imageBlobs, function (i, blob) {
+                    let blobId = blob.blobId;
+                    let blobName = blob.blobName;
+                    let ext = blob.ext;
+                    let size = blob.size;
+                    let propertyId = blob.propertyId;
+                    let isSelect = blob.isSelect;
+                    let imageProperty = {};
+                    imageProperty.id = propertyId !== '' ? propertyId : null;
+                    imageProperty.offeringPropertyType = 2; //OfferingPropertyType.Image
+                    imageProperty.name = 'Image';
+                    imageProperty.value = JSON.stringify(blob);
+                    imageProperty.value1 = blobId;
+                    imageProperty.value2 = blobName;
+                    imageProperty.refProviderId = null;
+                    imageProperty.refProviderAttrId = null;
+                    imageProperty.isProvider = false;
+                    imageProperty.index = i + 1;
+
+                    offeringProperties.push(imageProperty);
+                });
+            }
+        }
+
+        return offeringProperties;
+    };
+    //获取商品默认选中图片Blob对象的Json字符串
+    let getDefaultOfferingImageBlob = function () {
+        let selectBlob = null;
+        let blobJsonString = '';
+        let imageBlobs = imageWebUploader.getAllBlobs();
+        if (imageBlobs !== undefined && imageBlobs != null && imageBlobs.length > 0) {
+            $.each(imageBlobs, function (i, blob) {
+                let isSelect = blob.isSelect;
+                if (isSelect) {
+                    selectBlob = blob;
+                    blobJsonString = JSON.stringify(blob);
+                }
+            });
+        }
+
+        return selectBlob;
+    };
+    //获取商品技术文档Blob对象的Json字符串
+    let getOfferingFileBlob = function () {
+        let selectBlob = null;
+        let blobJsonString = '';
+        let fileBlobs = fileWebUploader.getAllBlobs();
+        if (fileBlobs !== undefined && fileBlobs != null && fileBlobs.length > 0) {
+            selectBlob = fileBlobs[0];
+            blobJsonString = JSON.stringify(fileBlobs[0]);
+        }
+
+        return selectBlob;
+    };
+
+    const formId = '#saveform';
+    const saveFormUrl = '/OfferingManage/SaveOffering';
+    const getFormUrl = '/OfferingManage/GetOfferingForm';
+    let SaveForm = function () {
+        let validate = $(formId).form("enableValidation").form("validate");
+        if (!validate) {
+            let errorMsg = '';
+            let invalidComps = $(formId).find(".validatebox-invalid");
+            $.each(invalidComps, function (i, invalidComp) {
+                errorMsg += 'id=' + invalidComp.id + ', ';
+            });
+            console.error("---验证失败的组件Id：" + errorMsg);
+            return;
+        }
+
+        debugger;
+        let postData = $(formId).form("getData");
+        //单一商品规格
+        postData.offeringPrice = getOfferingPrice();
+        postData.offeringFileBlob = getOfferingFileBlob();
+        postData.offeringImageBlob = getDefaultOfferingImageBlob();
+        postData.offeringProperties = getOfferingProperties();
+        postData.deletedOfferingPropertyIds = removeOfferingPropertyIds;
+        postData.content = null; //保存至Offering.offeringProperties[0]
+        postData.products = null;
+
+        let jsonData = JSON.stringify(postData);
+        console.log(jsonData);
+
+        $.easyui.loading({msg: '正在保存数据，请稍等...'});
+        $.ajax({
+            //async: true,
+            url: saveFormUrl,
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=UTF-8",
+            data: jsonData,
+            //contentType:"application/x-www-form-urlencoded;charset=UTF-8",
+            //data: postData,
+            success: function (data) {
+                if (data.success) {
+                    if (data.result) {
+                        $.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+                        MainPage_PostMessage("closeSubPage", getFormUrl);
+                    } else {
+                        $.messager.showErrorTopCenter('错误消息', data.message);
+                    }
+                } else {
+                    $.messager.showInfoTopCenter('系统提示', data.message);
+                }
+            },
+            complete: function () {
+                $.easyui.loaded();
+            }
+        });
+    };
+</script>
+</body>

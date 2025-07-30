@@ -1,0 +1,107 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+	<title>组织架构新增/编辑</title>
+
+</head>
+<body>
+
+	<form id="saveform" class="easyui-form" action="#"
+		th:action="@{/Organization/SaveOrganization}" th:object="${OrganizationEntity}"
+		method="post">
+		<input type="hidden" th:field="*{id}" /> 
+		<input type="hidden" th:field="*{status}" /> 
+		<input type="hidden" th:field="*{leaf}" /> 
+		<input type="hidden" th:field="*{level}" />
+		<input type="hidden" th:field="*{treeCode}" />
+		<input type="hidden" th:field="*{organizationCode}" /> 
+		
+		<input type="hidden" th:field="*{createdBy}" /> 
+		<input type="hidden" th:field="*{createdDate}" /> 
+		<input type="hidden" th:field="*{modifiedBy}" /> 
+		<input type="hidden" th:field="*{modifiedDate}" />
+		<input type="hidden" th:field="*{deleted}" />
+		<table class="dialog-form-table">
+			<tbody>
+				<tr>
+					<td><label class="required">*</label><label for="parentId">父节点：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="width:200,height:26,"
+						th:field="*{parentId}" /></td>
+				</tr>
+				
+				<tr>
+					<td><label class="required">*</label><label for="text">名称：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,validType:['length[2,50]','isSpace','existCategoryName[\'/Organization/ExistOrganizationName\']]"
+						th:field="*{text}" /></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="businessType">归属业务类型：</label></td>
+					<td><select class="easyui-combobox" 
+						data-options="width:200,height:26" 
+						th:field="*{businessType}">
+							<option th:each="BusinessType : ${BusinessTypes}"
+								th:value="${BusinessType.key}" th:text="${BusinessType.value}"></option>
+					</select></td>
+				</tr>
+
+				<tr>
+					<td><label class="required">*</label><label for="organizationType">组织类型：</label></td>
+					<td><select class="easyui-combobox" 
+						data-options="width:200,height:26" 
+						th:field="*{organizationType}">
+							<option th:each="OrganizationType : ${OrganizationTypes}"
+								th:value="${OrganizationType.key}" th:text="${OrganizationType.value}"></option>
+					</select></td>
+				</tr>
+
+				<tr>
+					<td><label for="index">排序：</label></td>
+					<td><input class="easyui-numberspinner easyui-textbox"
+						data-options="required:true,width:200,min:1,max:100"
+						th:field="*{index}" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+
+<script th:inline="javascript" type="text/javascript">
+
+    $(function () {
+        let id=[[${OrganizationEntity.id}]];
+        let pId=[[${OrganizationEntity.parentId}]];
+        $('.textbox').bind('blur', function () {
+            $(this).validatebox('enableValidation').validatebox('validate');
+        });
+        $('#parentId').combotree({
+            url: '/Organization/LoadOrganizationTree',
+            method: 'get',
+            queryParams: {
+                excludeId: id,
+                selectedId: pId,
+                hasAll: false,
+                hasRoot: true,
+                maxLevel: 2,
+            },
+            required: true,
+            editable: false,
+            valueField: 'id',
+            textField: 'text',
+            cache: false,
+            onLoadSuccess: function (node, data) {
+                $('#parentId').combotree('tree').tree('expandAll');
+                if (pId !== 0) {
+                    $('#parentId').combotree('setValue', pId);
+                } else if (data != null && data.length > 0) {
+                    //默认选中第一个
+                    $('#parentId').combotree('setValue', { id: data[0].id, text: data[0].text });
+                }
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

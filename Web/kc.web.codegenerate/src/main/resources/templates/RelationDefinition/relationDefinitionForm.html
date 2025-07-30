@@ -1,0 +1,943 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout :: common_header(~{::title},~{},~{::style})">
+    <title>新增/编辑关系模型</title>
+    <meta charset="UTF-8"/>
+    <style>
+        input[readonly] {
+            background-color: #EEEEEE !important;
+        }
+
+        #tblBasic tr td:nth-child(odd) {
+            font-weight: bold;
+        }
+
+        #tblBasic tr td:nth-child(even) {
+            /*background-color: #fff;*/
+            font-size: 14px;
+        }
+
+        /*.datagrid-row-selected {*/
+        /*    background: #CCEECC !important;*/
+        /*}*/
+
+        #datagrid .datagrid-header td, .datagrid-body td, .datagrid-footer td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <form id="saveform" class="easyui-form" action="#" method="post"
+          th:action="@{/RelationDefinition/SaveRelationDefinition}" th:object="${RelationDefinitionVM}">
+        <input type="hidden" th:field="*{isEditMode}"/>
+        <input type="hidden" th:field="*{id}"/>
+
+        <input type="hidden" th:field="*{applicationId}"/>
+        <input type="hidden" th:field="*{deleted}"/>
+        <input type="hidden" th:field="*{createdBy}"/>
+        <input type="hidden" th:field="*{createdName}"/>
+        <input type="hidden" th:field="*{createdDate}"/>
+        <input type="hidden" th:field="*{modifiedBy}"/>
+        <input type="hidden" th:field="*{modifiedName}"/>
+        <input type="hidden" th:field="*{modifiedDate}"/>
+
+        <table id="tblBasic" class="table table-bordered table-form  tr-col3">
+            <tbody>
+            <tr>
+                <td><label class="required">*</label><label for="mainModelDefId">选择主表：</label></td>
+                <td><input style="width: 260px;max-width: 300px;"
+                           data-options="required:true,width:260"
+                           th:field="*{mainModelDefId}"/></td>
+                <td><label class="required">*</label><label for="categoryId">分类：</label></td>
+                <td><input class="easyui-validatebox easyui-combotree"
+                           data-options="width:'100%',height:30,panelHeight:'auto'"
+                           th:field="*{categoryId}"/></td>
+            </tr>
+            <tr>
+                <td><label class="required">*</label><label for="name">名称：</label></td>
+                <td><input class="easyui-validatebox easyui-textbox" placeholder="Java类名驼峰命名规范，示例：UserInfo"
+                           data-options="required:true,width:'100%',height:30,prompt:'Java类名驼峰命名规范，示例：UserInfo',
+                                validType:['length[1,100]','isSpace','existModelName[\'/RelationDefinition/ExistsRelationDefName\']']"
+                           th:field="*{name}"/></td>
+                <td><label class="required">*</label><label for="displayName">显示名：</label></td>
+                <td><input class="easyui-validatebox easyui-textbox" placeholder="模型中文显示名称，示例：用户信息"
+                           data-options="required:true,width:'100%',height:30,prompt:'模型中文显示名称，示例：用户信息',
+                                validType:'length[1,255]'"
+                           th:field="*{displayName}"/></td>
+            </tr>
+            <tr>
+                <td><label for="description">描述：</label></td>
+                <td colspan="3"><input class="easyui-validatebox easyui-textbox"
+                                       data-options="multiline:true,height:60,width:'100%',validType:'length[0,2000]'"
+                                       th:field="*{description}"/></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+    <div style="min-height:420px;">
+        <div id="toolbarPlan">
+            <div class="panel-title required" style="margin-top:5px;">
+                数据模型属性（双击编辑表单）
+            </div>
+
+            <div>
+                <a href="javascript:void(0)" onclick="addEditRow()" class="easyui-linkbutton"
+                   data-options="iconCls:'fa fa-plus'">新增</a>
+            </div>
+        </div>
+        <table id="datagrid"></table>
+    </div>
+</div>
+<div style="height: 50px;"></div>
+<div class="bottom">
+    <a sec:authorize="hasAuthority('C1396AE0-5CD8-4008-B862-FDA1B34A7CCA')" href="javascript:void(0)"
+       class="easyui-linkbutton" iconcls="fa fa-floppy-o" onclick="saveForm()">保存</a>
+</div>
+<!--引入公共Js-->
+<th:block th:replace="layout :: scripts"/>
+<!--组件初始化-->
+<script type="text/javascript" th:inline="javascript">
+    $.extend($.fn.validatebox.defaults.rules, {
+        existModelName: {
+            validator: function (value, param) {
+                if ($.string.isNullOrWhiteSpace(value))
+                    return true;
+
+                let flag = true;
+                let postData = {};
+                postData.id = $('#id').val();
+                postData.appId = $('#applicationId').val();
+                postData.name = value;
+                $.ajax({
+                    async: false,
+                    type: 'POST',
+                    dataType: 'json',
+                    url: param[0],
+                    data: postData,
+                    success: function (result) {
+                        flag = !result;
+                    }
+                });
+                return flag;
+            },
+            message: '名称已经存在！'
+        }
+    });
+
+    const defaultModelType = 1; //ModelType.RelationDefinition
+    let isEditModel = [[${RelationDefinitionVM.isEditMode}]];
+    let selectedCategoryId = [[${RelationDefinitionVM.categoryId}]];
+    let selectedMainModelId = [[${RelationDefinitionVM.mainModelDefId}]];
+    let modelData = null;
+    $(function () {
+        // 文本框失去焦点后进行验证
+        $('.easyui-validatebox.easyui-textbox').textbox("textbox").blur(function () {
+            $(this).validatebox('enableValidation').validatebox('validate');
+        });
+
+        InitCategoryTree();
+
+        modelData = loadModelsData();
+
+        InitMainModelComboGrid(modelData);
+
+        InitDataGridForm();
+
+        disableMainModelComboGrid(false);
+    });
+
+    const categoryGridId = '#categoryId';
+    let InitCategoryTree = function () {
+        $(categoryGridId).combotree({
+            url: '/ModelCategory/LoadModelCategoryTree',
+            method: 'get',
+            queryParams: {
+                excludeId: '',
+                selectedId: selectedCategoryId,
+                hasAll: false,
+                hasRoot: true,
+                maxLevel: 2,
+                modelType: defaultModelType,
+            },
+            required: true,
+            editable: false,
+            valueField: 'id',
+            textField: 'text',
+            cache: false,
+            onLoadSuccess: function (node, data) {
+                $(categoryGridId).combotree('tree').tree('expandAll');
+                if (selectedCategoryId !== 0) {
+                    $(categoryGridId).combotree('setValue', selectedCategoryId);
+                } else if (data != null && data.length > 0) {
+                    //默认选中第一个
+                    $(categoryGridId).combotree('setValue', {id: data[0].id, text: data[0].text});
+                }
+            }
+        });
+    };
+
+    //获取数据模型列表数据
+    const loadModelDataUrl = '/RelationDefinition/LoadAllModelDefinitionList';
+    let loadModelsData = function () {
+        let models = null;
+        $.ajax({
+            async: false,
+            url: loadModelDataUrl,
+            type: "get",
+            dataType: "json",
+            contentType: "application/json;charset=UTF-8",
+            //contentType:"application/x-www-form-urlencoded;charset=UTF-8",
+            //data: postData,
+            success: function (data) {
+                models = data;
+            },
+            complete: function () {
+            }
+        });
+        return models;
+    };
+
+    //根据数据模型Id，获取数据模型下的属性Id列表
+    const loadModelFieldsDataUrl = '/RelationDefinition/LoadAllModelDefFieldListByDefId';
+    let loadModelFieldsData = function (defId) {
+        let modelFieldsData = null;
+        $.ajax({
+            async: false,
+            url: loadModelFieldsDataUrl + "?defId=" + defId,
+            type: "get",
+            dataType: "json",
+            contentType: "application/json;charset=UTF-8",
+            //contentType:"application/x-www-form-urlencoded;charset=UTF-8",
+            //data: postData,
+            success: function (data) {
+                modelFieldsData = data;
+            },
+            complete: function () {
+            }
+        });
+
+        return modelFieldsData;
+    };
+
+    //主表下拉框
+    let mainModelFieldsData;//主表字段数据
+    const modelComboGridId = '#mainModelDefId';
+    let InitMainModelComboGrid = function (data) {
+        $(modelComboGridId).combogrid({
+            //method: 'get',
+            //url: loadModelDataUrl,
+            mode: 'local',
+            data: data,
+            idField: 'propertyId',
+            textField: 'name',
+            required: true,
+            editable: true,
+            fit: true,
+            striped: true,
+            nowrap: true,
+            fitColumns: true,
+            columns: [
+                [
+                    {field: 'propertyId', title: 'id', width: 30, align: 'left', hidden: true},
+                    {field: 'name', title: '名称', width: 120, align: 'left'},
+                    {field: 'displayName', title: '显示名', width: 180, align: 'left'},
+                    {field: 'description', title: '描述', width: 140, align: 'left', hidden: true}
+                ]
+            ],
+            onSelect: function (index, row) {
+                let defId = row.propertyId;
+                mainModelFieldsData = loadModelFieldsData(defId);
+
+                if (!isEditModel) {
+                    //设置DTO的默认名称，默认显示名
+                    $('#name').textbox('setValue', row.name + 'DTO');
+                    $('#displayName').textbox('setValue', row.displayName + 'DTO对象');
+                }
+            },
+            onChange: function (q, row) {
+                searchMainModelComboGrid(q, modelData, ['name', 'displayName'], $(this));
+            },
+            onShowPanel: function () {
+                $(this).combogrid('grid').datagrid('loadData', modelData);
+            }
+        });
+
+        let modelId = selectedMainModelId;
+        //默认选中第一个，并加载主表下的属性列表数据
+        if (modelData && modelData.length && !isEditModel) {
+            let firstModel = modelData[0];
+            modelId = firstModel.propertyId;
+            $(modelComboGridId).combogrid("setValue", modelId);
+        } else {
+            mainModelFieldsData = loadModelFieldsData(modelId);
+        }
+    };
+    //根据条件筛选ComboGrid本地数据
+    // q为用户输入，
+    // data为远程加载的全部数据项，
+    // searchList是需要进行模糊搜索的列名的数组，
+    // ele是combogrid对象
+    let searchMainModelComboGrid = function (q, data, searchList, ele) {
+        ele.combogrid('grid').datagrid('loadData', []);
+        if (q === "") {
+            ele.combogrid('grid').datagrid('loadData', data);
+            return;
+        }
+        let rows = [];
+        $.each(data, function (i, obj) {
+            for (let p in searchList) {
+                let v = obj[searchList[p]];
+                if (!!v && v.toString().indexOf(q) >= 0) {
+                    rows.push(obj);
+                    break;
+                }
+            }
+        });
+        if (rows.length === 0) {
+            ele.combogrid('grid').datagrid('loadData', []);
+            return;
+        }
+        ele.combogrid('grid').datagrid('loadData', rows);
+    };
+    //编辑状态、已经关系设置情况下，不能再次选择主表
+    let disableMainModelComboGrid = function (isAddRow) {
+        if (isEditModel || isAddRow) {
+            $(modelComboGridId).combogrid('disable');
+            return;
+        }
+
+        let rows = $datagrid.datagrid('getData');
+        if (rows && rows.total > 0) {
+            $(modelComboGridId).combogrid('readonly', true);
+            //$(modelComboGridId).combogrid('disable');
+        } else {
+            $(modelComboGridId).combogrid('readonly', false);
+            //$(modelComboGridId).combogrid('enable');
+        }
+    };
+
+    //获取模型属性列表数据，获取主键属性Id
+    let getPrimaryKeyFieldId = function (modelFieldsData) {
+        if (modelFieldsData && modelFieldsData.length > 0) {
+            let modelPrimaryKeyField = modelFieldsData.filter(m => m.isPrimaryKey);
+            if (modelPrimaryKeyField && modelPrimaryKeyField.length > 0)
+                return modelPrimaryKeyField[0].propertyAttributeId;
+        }
+        return '';
+    };
+</script>
+<!--模型属性表单-->
+<script type="text/javascript" th:inline="javascript">
+    const $datagrid = $('#datagrid');
+    let canRemoveAtt = [[${canRemoveAtt}]];
+    let loadDataGridDataUrl = '/RelationDefinition/LoadRelationDefDetailList';
+
+    function InitDataGridForm() {
+        let relationType = '[[${RelationTypeList}]]'.replace(new RegExp('&quot;', "gm"), '"');//json格式
+        let relationTypeList = [{"value": "0", "text": "主从关系"}, {"value": "1", "text": "引用关系"}];//json格式
+
+        let id = $('#id').val();
+        if (undefined === id || null === id || "" === id)
+            id = 0;
+        $datagrid.datagrid({
+            url: loadDataGridDataUrl + "?id=" + id,
+            method: 'get',
+            idField: 'id',
+            toolbar: '#toolbarPlan',
+            striped: true,
+            fitColumns: true,
+            rowNumbers: true,
+            singleSelect: true,
+            selectOnCheck: true,
+            checkOnSelect: true,
+            nowrap: false,
+            fit: true,
+            pagination: false,
+            showFooter: false,
+            columns: [[
+                //{ field: 'propertyAttributeId', title: '是否启用', width: 60, checkbox: true },
+                {
+                    field: 'relationType', title: '关系类型', width: 80, align: 'left',
+                    formatter: function (value, row, index) {
+                        if (value === undefined || value === null || value === '') {
+                            return "";
+                        }
+                        switch (value) {
+                            case 0:
+                            case "0":
+                                return "主从关系";
+                            case 1:
+                            case "1":
+                                return "引用关系";
+                        }
+                    },
+                    editor: {
+                        type: 'combobox',
+                        options: {
+                            data: relationTypeList,
+                            valueField: "value",
+                            textField: "text",
+                            editable: false,
+                            panelHeight: 'auto',
+                            required: true
+                        }
+                    }
+                },
+                {
+                    field: 'mainModelDefFieldId', title: '主表字段', width: 100, align: 'left',
+                    formatter: function (value, row, index) {
+                        if (value === undefined || value === null || value === '') {
+                            return "";
+                        }
+
+                        if (row.mainModelDefField) {
+                            let mainField = row.mainModelDefField;
+                            if (mainField)
+                                return mainField.displayName + "[" + mainField.name + "]";
+                        } else if (mainModelFieldsData) {
+                            let mainField = mainModelFieldsData.filter(m => m.propertyAttributeId === value);
+                            if (mainField.length > 0)
+                                return mainField[0].displayName + "[" + mainField[0].name + "]";
+                        }
+                        return value;
+                    },
+                    editor: {
+                        type: 'combobox',
+                        options: {
+                            //data: mainModelFieldsData,
+                            valueField: "propertyAttributeId",
+                            textField: "displayName",
+                            editable: false,
+                            required: true,
+                            formatter: function (row) {
+                                return row.displayName + "[" + row.name + "]";
+                            }
+                        }
+                    }
+                },
+                {
+                    field: 'subModelDefId', title: '选择子表', width: 100, align: 'left',
+                    formatter: function (value, row, index) {
+                        if (value === undefined || value === null || value === '') {
+                            return "";
+                        }
+
+                        if (modelData) {
+                            let subModel = modelData.filter(m => m.propertyId === value);
+                            if (subModel.length > 0)
+                                return subModel[0].displayName + "[" + subModel[0].name + "]";
+                        }
+                        return value;
+                    },
+                    editor: {
+                        type: 'combobox',
+                        options: {
+                            data: modelData,
+                            valueField: "propertyId",
+                            textField: "displayName",
+                            editable: false,
+                            required: true
+                        }
+                    }
+                },
+                {
+                    field: 'subModelDefFieldId', title: '子表关联字段', width: 120, align: 'left',
+                    formatter: function (value, row, index) {
+                        if (value === undefined || value === null || value === '') {
+                            return "";
+                        }
+
+                        if (row.subModelDefField) {
+                            let mainField = row.subModelDefField;
+                            if (mainField)
+                                return mainField.displayName + "[" + mainField.name + "]";
+                        }
+                        return value;
+                    },
+                    editor: {
+                        type: 'combobox',
+                        options: {
+                            valueField: "propertyAttributeId",
+                            textField: "displayName",
+                            editable: false,
+                            required: true,
+                            formatter: function (row) {
+                                return row.displayName + "[" + row.name + "]";
+                            }
+                        }
+                    }
+                },
+                {
+                    field: 'name', title: '属性名称', width: 100, align: 'left',
+                    editor: {
+                        type: 'textbox',
+                        options: {
+                            text: true,
+                            required: true,
+                        }
+                    }
+                },
+                {
+                    field: 'displayName', title: '显示名称', width: 120, align: 'left',
+                    editor: {
+                        type: 'textbox',
+                        options: {
+                            text: true,
+                            required: true,
+                        }
+                    }
+                },
+                {
+                    field: 'description', title: '描述', width: 120, align: 'left',
+                    editor: {type: 'textbox',}
+                },
+                {
+                    field: 'operator', title: '操作', width: 80, align: 'center',
+                    formatter: function (value, row, index) {
+                        let specId = row.id;
+                        if (specId === undefined || specId === null || specId === "")
+                            specId = "";
+                        //debugger;
+                        let tdContext = '';
+                        if (canRemoveAtt) {
+                            tdContext += '<a class="btnDelete" style="cursor:pointer" onclick="removeField(this, \'' + specId + '\')" >删除</a>';
+                        }
+
+                        return tdContext;
+                    }
+                }
+            ]],
+            onBeforeLoad: function (param) {
+            },
+            onLoadSuccess: function (data) {
+                CommonUtil.buttonStyle();
+                $datagrid.datagrid('unselectAll');
+                $datagrid.datagrid('clearSelections');
+                $datagrid.datagrid('fixRowHeight');
+            },
+            onLoadError: function () {
+            },
+            onSelect: function (index, row) {
+                //$datagrid.datagrid('unselectAll');
+                //$datagrid.datagrid('clearSelections');
+                //$(".datagrid-row-selected").removeClass("datagrid-row-selected");
+            },
+            onDblClickRow: function (index, row) {
+                let id = row.id;
+                if (id !== 0) {
+                    $(this).datagrid('beginEdit', index);
+
+                    //处理关系类型变更
+                    initRelationTypeOnChange(index);
+
+                    //处理子表变更
+                    initSubModelOnChange(index);
+
+                    //处理子表关联字段属性
+                    initSubModelFieldOnChange(index);
+
+                    //设置关系类型的下拉值
+                    let edRelationType = getRowEdit(index, 'relationType');
+                    if (edRelationType && edRelationType.target) {
+                        $(edRelationType.target).combobox('select', row.relationType);
+                    }
+
+                    //设置主键字段的下拉值
+                    let edMainModelField = getRowEdit(index, 'mainModelDefFieldId');
+                    if (edMainModelField && edMainModelField.target) {
+                        $(edMainModelField.target).combobox('select', row.mainModelDefFieldId);
+                    }
+
+                    //设置子表的下拉值
+                    let edSubModel = getRowEdit(index, 'subModelDefId');
+                    if (edSubModel && edSubModel.target) {
+                        $(edSubModel.target).combobox('select', row.subModelDefId);
+                    }
+
+                    //设置子表的关联字段的下拉值
+                    let edSubModelField = getRowEdit(index, 'subModelDefFieldId');
+                    if (edSubModelField && edSubModelField.target) {
+                        $(edSubModelField.target).combobox('select', row.subModelDefFieldId);
+                    }
+                }
+            },
+            onBeforeEdit: function (index, row) {
+                //let tt = $(this).datagrid('getColumnOption', 'specName'); //通过列名获得此列
+                //tt.editor = {type:'textarea'}; //设置此列的编辑属性 如果禁用编辑 则设置 tt.editor={}
+
+                row.editing = true;
+            },
+            onAfterEdit: function (index, row, changes) {
+                row.editing = false;
+            },
+            onCancelEdit: function (index, row) {
+                row.editing = false;
+                $(this).datagrid('cancelEdit', index);
+            },
+            onEndEdit: function (index, row) {
+                //debugger;
+                //console.log('--onEndEdit---row.isPrimaryKey: ' + row.isPrimaryKey + '---row.isNotNull: ' + row.isNotNull + '---row.isUnique: ' + row.isUnique);
+            }
+        });
+    }
+
+    // 处理引用类型OnChange事件过程：
+    //      1. 设置默认值；
+    //      2. 主从关系，主键属性下拉框值默认设置为主键字段；
+    //      3. 引用关系，主键属性下拉框值为唯一字段；
+    let initRelationTypeOnChange = function (index) {
+        //处理数据类型的onchange事件
+        let edRelationType = getRowEdit(index, 'relationType');
+        if (edRelationType && edRelationType.target) {
+            $(edRelationType.target).combobox({
+                onSelect: function (record) {
+                    //debugger;
+                    //单击的编辑对象向上一直朝找，找到正在编辑的行的索引：index
+                    let isOneByMany = record.value === '0'; //是否为主从关系
+                    let currentEditRowIndex = getRowIndex(this);
+                    console.log(currentEditRowIndex + '--RelationType combobox onChange isOneByMany: ' + isOneByMany);
+
+                    // 根据关系类型，设置主键属性下拉框值
+                    let edMainFieldId = getRowEdit(currentEditRowIndex, 'mainModelDefFieldId');
+                    if (edMainFieldId && edMainFieldId.target) {
+                        //主从关系，主键属性下拉框值默认设置为主键字段
+                        //引用关系，主键属性下拉框值为唯一字段
+                        if (mainModelFieldsData && mainModelFieldsData.length > 0) {
+                            let modelFields = isOneByMany
+                                ? mainModelFieldsData.filter(m => m.isPrimaryKey)
+                                : mainModelFieldsData.filter(m => m.isUnique);
+                            if (modelFields && modelFields.length > 0) {
+                                $(edMainFieldId.target).combobox('loadData', modelFields);
+                                $(edMainFieldId.target).combobox('select', modelFields[0].propertyAttributeId);
+                            }
+                        }
+
+                        // 根据关系类型，设置主表关联字段属性是否可用
+                        if (isOneByMany) {
+                            $(edMainFieldId.target).combobox('readonly', true);
+                        } else {
+                            $(edMainFieldId.target).combobox('readonly', false);
+                        }
+                    }
+                }
+            });
+        }
+    };
+
+    // 处理子表OnChange事件过程：
+    //      1. 主从关系，子表关联属性下拉框值为唯一字段；
+    //      2. 引用关系，子表关联属性下拉框值默认设置为主键字段；
+    let initSubModelOnChange = function (index) {
+        //处理是否主键的onchange事件
+        let edSubModelId = getRowEdit(index, 'subModelDefId');
+        if (edSubModelId && edSubModelId.target) {
+            $(edSubModelId.target).combobox({
+                onSelect: function (record) {
+                    let isOneByMany = true;
+                    //单击的编辑对象向上一直朝找，找到正在编辑的行的索引：index
+                    let currentEditRowIndex = getRowIndex(this);
+                    let edRelationType = getRowEdit(currentEditRowIndex, 'relationType');
+                    if (edRelationType && edRelationType.target) {
+                        let relationValue = $(edRelationType.target).combobox('getValue');
+                        isOneByMany = relationValue === '0'; //是否为主从关系
+                    }
+
+                    //根据选中的子表获取子表关联字段属性数据
+                    let subModelFields = loadModelFieldsData(record.propertyId);
+                    console.log(currentEditRowIndex + '--subModelDefId checkbox  onChange isOneByMany: ' + isOneByMany);
+
+                    // 根据关系类型，设置子表关联字段属性下拉框值
+                    let edSubFieldId = getRowEdit(currentEditRowIndex, 'subModelDefFieldId');
+                    if (edSubFieldId && edSubFieldId.target) {
+                        if (subModelFields && subModelFields.length > 0) {
+                            //主从关系，子表关联属性下拉框值为唯一字段；
+                            //引用关系，子表关联属性下拉框值默认设置为主键字段；
+                            let modelFields = isOneByMany
+                                ? subModelFields.filter(m => m.isUnique)
+                                : subModelFields.filter(m => m.isPrimaryKey);
+                            if (modelFields && modelFields.length > 0) {
+                                $(edSubFieldId.target).combobox('loadData', modelFields);
+                                $(edSubFieldId.target).combobox('select', modelFields[0].propertyAttributeId);
+                            }
+                        }
+                    }
+
+                    // 根据关系类型，设置子表关联字段属性下拉框值
+                    let edName = getRowEdit(currentEditRowIndex, 'name');
+                    if (edName && edName.target && !isEditModel) {
+                        if (isOneByMany) {
+                            $(edName.target).textbox('setValue', record.name + 'List');
+                        } else {
+                            $(edName.target).textbox('setValue', record.name);
+                        }
+                    }
+
+                    // 根据关系类型，设置子表关联字段属性下拉框值
+                    let edDisplayName = getRowEdit(currentEditRowIndex, 'displayName');
+                    if (edDisplayName && edDisplayName.target && !isEditModel) {
+                        if (isOneByMany) {
+                            $(edDisplayName.target).textbox('setValue', record.name + '列表');
+                        } else {
+                            $(edDisplayName.target).textbox('setValue', record.name);
+                        }
+                    }
+                }
+            });
+        }
+    };
+
+    // 处理子表字段属性OnChange事件过程：
+    //      1. 主从关系，子表关联属性名称+List；
+    //      2. 引用关系，子表关联属性显示名；
+    let initSubModelFieldOnChange = function (index) {
+        //处理是否主键的onchange事件
+        let edSubModelFieldId = getRowEdit(index, 'subModelDefFieldId');
+        if (edSubModelFieldId && edSubModelFieldId.target) {
+            $(edSubModelFieldId.target).combobox({
+                onSelect: function (record) {
+                    let isOneByMany = true;
+                    //单击的编辑对象向上一直朝找，找到正在编辑的行的索引：index
+                    let currentEditRowIndex = getRowIndex(this);
+                    let edRelationType = getRowEdit(currentEditRowIndex, 'relationType');
+                    if (edRelationType && edRelationType.target) {
+                        let relationValue = $(edRelationType.target).combobox('getValue');
+                        isOneByMany = relationValue === '0'; //是否为主从关系
+                    }
+                }
+            });
+        }
+    };
+
+    //获取DataGrid的行编辑器
+    let getRowEdit = function (index, fieldName) {
+        return $datagrid.datagrid('getEditor', {index: index, field: fieldName});
+    };
+    //获取行索引
+    let getRowIndex = function (target) {
+        let tr = $(target).closest('tr.datagrid-row');
+        return parseInt(tr.attr('datagrid-row-index'));
+    };
+
+    let editIndex = undefined;
+    let isEndEditing = function (dgId) {
+        if (editIndex === undefined) {
+            return true
+        }
+        if ($datagrid.datagrid('validateRow', editIndex)) {
+            $datagrid.datagrid('endEdit', editIndex);
+            editIndex = undefined;
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    //新增一行
+    let addEditRow = function () {
+        let rowIndex = 0;
+        let defId = $('#id').val();
+        $datagrid.datagrid('insertRow', {
+            index: rowIndex,   // 索引从0开始
+            row: {
+                'relationDefId': defId,
+                'relationType': 0,                  //OneToMany：主从关系
+                'mainModelDefFieldId': 'id',
+            }
+        });
+        $datagrid.datagrid('selectRow', rowIndex);
+        $datagrid.datagrid('beginEdit', rowIndex);
+
+        //处理数据类型
+        initRelationTypeOnChange(rowIndex);
+
+        //处理子表模型
+        initSubModelOnChange(rowIndex);
+
+        //处理子表关联字段属性
+        initSubModelFieldOnChange(rowIndex);
+
+        //新增关系后，主表不能再次选择
+        disableMainModelComboGrid(true);
+
+        //默认设置主从关系为下拉框第一项
+        let edRelationType = getRowEdit(rowIndex, 'relationType');
+        if (edRelationType && edRelationType.target) {
+            let data = $(edRelationType.target).combobox('getData');
+            if (data.length > 0) {
+                $(edRelationType.target).combobox('select', data[0].value);
+            }
+        }
+
+        //默认设置主表的主键字段为下拉框第一项
+        let edMainFieldId = getRowEdit(rowIndex, 'mainModelDefFieldId');
+        if (edMainFieldId && edMainFieldId.target) {
+            let mainPrimaryKeyId = getPrimaryKeyFieldId(mainModelFieldsData);
+            if (mainPrimaryKeyId) {
+                $(edMainFieldId.target).combobox('select', mainPrimaryKeyId);
+                $(edMainFieldId.target).combobox('disable');
+            }
+        }
+
+        //加载子表数据，并默认选中第一条记录
+        let edSubModelId = getRowEdit(rowIndex, 'subModelDefId');
+        if (edSubModelId && edSubModelId.target) {
+            if (modelData && modelData.length > 0) {
+                $(edSubModelId.target).combobox('loadData', modelData);
+                $(edSubModelId.target).combobox('select', modelData[0].propertyId);
+                $(edSubModelId.target).combobox('enable');
+            }
+        }
+
+        editIndex = rowIndex;
+        CommonUtil.buttonStyle();
+    };
+    //取消编辑
+    let rejectEditRow = function () {
+        $datagrid.datagrid('rejectChanges');
+        editIndex = undefined;
+    };
+    //获取列表数据
+    let getFieldData = function () {
+        let fields = [];
+        let defId = $('#id').val();
+        let rows = $datagrid.datagrid('getRows');
+        for (let i = 0; i < rows.length; i++) {
+            let row = rows[i];
+            let isEditing = row.editing;
+            let isValid = $datagrid.datagrid('validateRow', i);
+            if (isValid && isEditing) {
+                //关闭第i行的编辑
+                $datagrid.datagrid('selectRow', i).datagrid('endEdit', i);
+            }
+
+            //debugger;
+            let field = {};
+            field.relationDefId = defId;
+            field.id = row.id;
+            field.relationType = row.relationType;
+            field.name = row.name;
+            field.displayName = row.displayName;
+            field.mainModelDefFieldId = row.mainModelDefFieldId;
+            field.subModelDefId = row.subModelDefId;
+            field.subModelDefFieldId = row.subModelDefFieldId;
+            field.index = row.index ?? 0;
+            field.isDeleted = row.isDeleted ?? false;
+            field.createdBy = row.createdBy ?? null;
+            field.createdName = row.createdName ?? null;
+            field.createdDate = row.createdDate ?? null;
+
+            fields.push(field);
+
+            //console.log('--getFieldData---row.isPrimaryKey: ' + row.isPrimaryKey + '---row.isUnique: ' + row.isUnique + '---row.isUnique: ' + row.isUnique);
+        }
+        return fields;
+    };
+
+    //删除表单字段定义
+    const removeFieldUrl = '/RelationDefinition/RemoveRelationDefDetail';
+    let removeField = function (target, id) {
+        let rowIndex = getRowIndex(target);
+        if (id === undefined || id === null || id === "" || id === 0) {
+            $datagrid.datagrid('deleteRow', rowIndex);
+            //删除数据后，判断主表是否不能再次选择
+            disableMainModelComboGrid(false);
+            return;
+        }
+        $.messager.confirm('确认', '是否确定删除该表单字段?', function (r) {
+            if (r) {
+                $.easyui.loading({msg: '正在保存数据，请稍等...'});
+                $.post(removeFieldUrl, {id: id}, function (data) {
+                    if (data.success) {
+                        if (data.result) {
+                            $datagrid.datagrid('clearSelections');
+                            $datagrid.datagrid('reload'); // reload the user data
+
+                            //删除数据后，判断主表是否不能再次选择
+                            disableMainModelComboGrid(false);
+                            $.messager.showInfoTopCenter('系统提示', '删除数据成功。', 1000);
+                        } else {
+                            $.messager.showErrorTopCenter('错误消息', '删除数据失败。', 1000);
+                        }
+                    } else {
+                        $.messager.showErrorTopCenter('错误消息', data.message, 1000);
+                    }
+                    $.easyui.loaded();
+                }, 'json');
+            }
+        })
+            .panel('move', {right: '', top: document.body.scrollTop, bottom: ''});
+    }
+</script>
+<!--保存数据模型-->
+<script type="text/javascript" th:inline="javascript">
+    const formId = "#saveform";
+    const saveFormUrl = '/RelationDefinition/SaveRelationDefinition';
+    const indexUrl = '/RelationDefinition/Index';
+    //保存数据
+    let saveForm = function () {
+        let categoryId = $.string.toInteger($(categoryGridId).val());
+        if (categoryId <= 0) {
+            $.messager.showErrorTopCenter('数据验证失败，错误消息：', '请选择模型的分类！');
+            return;
+        }
+        //验证
+        let validate = $(formId).form("enableValidation").form("validate");
+        if (!validate) {
+            let errorMsg = '';
+            let invalidComps = $(formId).find(".validatebox-invalid");
+            $.each(invalidComps, function (i, invalidComp) {
+                errorMsg += 'id=' + invalidComp.id + ', ';
+            });
+            console.error("---验证失败的组件Id：" + errorMsg);
+            $.messager.showErrorTopCenter('数据验证失败，错误消息：', errorMsg);
+            return;
+        }
+
+        //debugger;
+        //获取主表下列列表数据
+        let cbGrid = $(modelComboGridId).combogrid('grid');
+        let mainModelId = $(modelComboGridId).combogrid('getValue');
+
+        //获取表单数据
+        let postData = $(formId).form("getData");
+        postData.mainModelDefId = mainModelId;
+        postData.defDetails = getFieldData();
+        console.log(postData);
+        let jsonData = JSON.stringify(postData);
+        $.ajax({
+            //async: true,
+            url: saveFormUrl,
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=UTF-8",
+            data: jsonData,
+            //contentType:"application/x-www-form-urlencoded;charset=UTF-8",
+            //data: postData,
+            success: function (data) {
+                if (data.success) {
+                    if (data.result) {
+                        $('#IsEditMode').val('true');
+                        //$.messager.showInfoTopCenter('系统提示', '保存数据成功。', 1000);
+                        MainPage_PostMessage("refreshPage", indexUrl);
+                        setTimeout("closePage()", 50);
+                    } else {
+                        $.messager.showErrorTopCenter('错误消息', data.message);
+                    }
+                } else {
+                    $.messager.showInfoTopCenter('系统提示', data.message);
+                }
+            },
+            complete: function () {
+                $.easyui.loaded();
+            }
+        });
+    };
+
+    const getFormUrl = '/RelationDefinition/GetRelationDefinitionForm';
+    let closePage = function () {
+        MainPage_PostMessage("closeSubPage", getFormUrl);
+    };
+</script>
+</body>
+</html>

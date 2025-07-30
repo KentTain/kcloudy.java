@@ -1,0 +1,82 @@
+﻿<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+
+</head>
+<body>
+
+<form id="saveform" class="easyui-form" action="#" method="post"
+      th:action="@{/NewsManage/SaveOfferingCategory}" th:object="${ArticleCategoryEntity}">
+    <input type="hidden" th:field="*{id}"/>
+    <input type="hidden" th:field="*{leaf}"/>
+    <input type="hidden" th:field="*{level}"/>
+    <input type="hidden" th:field="*{treeCode}"/>
+
+    <input type="hidden" th:field="*{createdBy}"/>
+    <input type="hidden" th:field="*{createdDate}"/>
+    <input type="hidden" th:field="*{modifiedBy}"/>
+    <input type="hidden" th:field="*{modifiedDate}"/>
+    <input type="hidden" th:field="*{deleted}"/>
+    <table class="dialog-form-table">
+        <tbody>
+        <tr>
+            <td><label class="required">*</label><label for="parentId">父节点：</label></td>
+            <td><input class="easyui-validatebox textbox"
+                       data-options="width:200,height:26,"
+                       th:field="*{parentId}"/></td>
+        </tr>
+
+        <tr>
+            <td><label class="required">*</label><label for="text">名称：</label></td>
+            <td><input class="easyui-validatebox textbox"
+                       data-options="required:true,width:200,validType:['length[2,50]']"
+                       th:field="*{text}"/></td>
+        </tr>
+
+        <tr>
+            <td><label class="required">*</label><label for="articleType">帮助类型：</label></td>
+            <td><select class="easyui-combobox" name="articleType"
+                        data-options="width:200,height:26" >
+                <option th:each="type : ${ArticleTypes}" style="cursor:pointer;"
+                        th:selected="${type.key == ArticleCategoryEntity.articleType.getIndex()}"
+                        th:value="${type.key}" th:text="${type.value}"></option>
+            </select></td>
+        </tr>
+
+        <tr>
+            <td><label for="description">描述：</label></td>
+            <td><input class="easyui-textbox" style="height: 60px; width: 230px;"
+                       data-options="multiline:true,width:200,height:160"
+                       th:field="*{description}"></td>
+        </tr>
+
+        <tr>
+            <td><label for="index">排序：</label></td>
+            <td><input class="easyui-numberspinner easyui-textbox"
+                       data-options="required:true,width:200,min:1,max:100"
+                       th:field="*{index}"/></td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+<script>
+
+    $(function () {
+        $('.textbox').bind('blur', function () {
+            $(this).validatebox('enableValidation').validatebox('validate');
+        });
+        var id = $("#parentId").val();
+        $('#parentId').combotree({
+            url: '/NewsManage/LoadArticleCategoryTree',
+            method: 'get',
+            queryParams: {
+                pid: id
+            },
+            required: true
+        });
+    });
+
+</script>
+</body>
+</html>

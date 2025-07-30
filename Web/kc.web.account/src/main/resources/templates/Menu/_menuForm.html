@@ -1,0 +1,182 @@
+﻿<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+<meta charset="UTF-8">
+
+</head>
+<body>
+
+	<form id="saveform" class="easyui-form" action="#"
+		th:action="@{/Menu/SaveMenu}" th:object="${MenuEntity}"
+		method="post">
+		<input type="hidden" th:field="*{id}" /> 
+		<input type="hidden" th:field="*{ApplicationId}" /> 
+		<input type="hidden" th:field="*{ApplicationName}" /> 
+		<input type="hidden" th:field="*{leaf}" /> 
+		<input type="hidden" th:field="*{level}" />
+		<input type="hidden" th:field="*{treeCode}" />
+		
+		<input type="hidden" th:field="*{createdBy}" /> 
+		<input type="hidden" th:field="*{createdDate}" /> 
+		<input type="hidden" th:field="*{modifiedBy}" /> 
+		<input type="hidden" th:field="*{modifiedDate}" />
+		<input type="hidden" th:field="*{deleted}" />
+		<table class="dialog-form-table">
+			<tbody>
+				<tr>
+					<td><label class="required">*</label><label for="ParentId">父节点：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="width:200,height:26,"
+						th:field="*{ParentId}" /></td>
+				</tr>
+				
+				<tr>
+					<td><label class="required">*</label><label for="text">名称：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,validType:['length[2,50]']"
+						th:field="*{text}" /></td>
+				</tr>
+				<tr>
+					<td><label for="AreaName">Area名称：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="width:200"
+						th:field="*{AreaName}" /></td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="ControllerName">Controller名称：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,validType:['length[2,50]']"
+						th:field="*{ControllerName}" /></td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="ActionName">Action名称：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,validType:['length[2,50]']"
+						th:field="*{ActionName}" /></td>
+				</tr>
+				<tr>
+					<td><label for="Parameters">QueryString参数：</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="width:200"
+						th:field="*{Parameters}" /></td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="SmallIcon">小图标:</label></td>
+					<td><input class="easyui-validatebox easyui-textbox"
+						data-options="required:true,width:200,validType:['length[2,50]']"
+						th:field="*{SmallIcon}" /></td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="TenantType">系统类型：</label></td>
+					<td><select class="easyui-combobox"
+						data-options="width:200,height:26"
+						th:field="*{TenantType}">
+							<option th:each="TenantType : ${TenantTypes}"
+								th:value="${TenantType.key}" th:text="${TenantType.value}"></option>
+					</select></td>
+				</tr>
+				<tr>
+					<td><label class="required">*</label><label for="Version">版本类型(可多选)：</label></td>
+					<td><select class="easyui-combobox" 
+						data-options="width:200,height:26" 
+						th:field="*{Version}">
+							<option th:each="Version : ${Versions}"
+								th:value="${Version.key}" th:text="${Version.value}"></option>
+					</select></td>
+				</tr>
+
+				<tr>
+					<td><label for="Index">排序：</label></td>
+					<td><input class="easyui-numberspinner easyui-textbox"
+						data-options="required:true,width:200,min:1,max:100"
+						th:field="*{index}" /></td>
+				</tr>
+				<tr>
+					<td><label for="Description">描述:</label></td>
+					<td><input class="easyui-textbox"
+						data-options="multiline:true" style="height: 60px; width: 195px;"
+						th:field="*{Description}" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+	<script>
+
+	let selectedVersionIds = [[${SelectedVersionIds}]];
+    $(function () {
+        $('.textbox').bind('blur', function () {
+            $(this).validatebox('enableValidation').validatebox('validate');
+        });
+        let id = $("#ParentId").val();
+        $('#ParentId').combotree({
+            url: '/Menu/LoadMenuTree',
+            method: 'get',
+            queryParams: {
+                pid: id
+            },
+            required: true
+        });
+
+        $('#TenantType').combobox();
+
+        $('#Version').combobox({
+            required: true,
+            multiple: true,
+            formatter: function (row) {
+                let opts = $(this).combobox('options');
+                return '<input type="checkbox" class="combobox-checkbox">' + row[opts.textField];
+            },
+            onLoadSuccess: function (node, data) {
+                $(this).combobox('setValues', selectedVersionIds);
+
+                let opts = $(this).combobox('options');
+                let target = this;
+                let values = $(target).combobox('getValues');
+                $.map(values, function (value) {
+                    let el = opts.finder.getEl(target, value);
+                    el.find('input.combobox-checkbox')._propAttr('checked', true);
+                });
+            },
+            onSelect: function (row) {
+                console.log(row)
+                let opts = $(this).combobox('options');
+                let el = opts.finder.getEl(this, row[opts.valueField]);
+                el.find('input.combobox-checkbox')._propAttr('checked', true);
+            },
+            onUnselect: function (row) {
+                let opts = $(this).combobox('options');
+                let el = opts.finder.getEl(this, row[opts.valueField]);
+                el.find('input.combobox-checkbox')._propAttr('checked', false);
+            }
+        });
+    });
+
+
+    $.extend($.fn.validatebox.defaults.rules, {
+        validOrgValue: {
+            validator: function (value, param) {
+                let flag = true;
+                let postData = {};
+                postData[param[1]]= value;
+                postData.Id = $('#id').val();
+                $.ajax({
+                    async: false,
+                    type: 'POST',
+                    dataType: 'json',
+                    url: param[0],
+                    data: postData,
+                    success: function (result) {
+                        if (result.toString() === "false") {
+                            flag = false;
+                        }
+                    }
+                });
+                return flag;
+            },
+            message: '{2}'
+        }
+    });
+
+</script>
+</body>
+</html>
