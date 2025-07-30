@@ -1,0 +1,103 @@
+package kc.framework.extension;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import kc.framework.base.Apple;
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+class ListExtensionsTest {
+
+	private static List<Apple> appleList; // 苹果2, 苹果1, 苹果1, 香蕉, 荔枝, 苹果3
+
+	@BeforeAll
+	static void setUpBeforeClass() throws Exception {
+	}
+
+	@BeforeEach
+	void setUp() throws Exception {
+		appleList = new ArrayList<>();// 存放apple对象集合
+
+		Apple apple1 = new Apple(1, "苹果1", new BigDecimal("3.25"), 10);
+		Apple apple12 = new Apple(1, "苹果2", new BigDecimal("1.35"), 20);
+		Apple apple13 = new Apple(1, "苹果3", new BigDecimal("1.35"), 20);
+		Apple apple2 = new Apple(2, "香蕉", new BigDecimal("2.89"), 30);
+		Apple apple3 = new Apple(3, "荔枝", new BigDecimal("9.99"), 40);
+
+		appleList.add(apple12);
+		appleList.add(apple1);
+		appleList.add(apple1);
+		appleList.add(apple2);
+		appleList.add(apple3);
+		appleList.add(apple13);
+
+		//String result = ListExtensions.toCommaSeparatedStringByFilter(appleList, s -> s.getName());
+		//System.out.println("\nappleList: " + result);
+	}
+
+	@Test
+	void testDistinct() {
+		List<Apple> appleResult = ListExtensions.distinct(appleList, s -> s.getName());
+		String except = "苹果2,苹果1,香蕉,荔枝,苹果3";
+		String result = ListExtensions.toCommaSeparatedStringByFilter(appleResult, s -> s.getName());
+		//System.out.println("\ntestDistinct appleResult: " + result);
+
+		assertEquals(except, result);
+	}
+
+	@Test
+	void testOrderBy() {
+		ListExtensions.orderBy(appleList, s -> s.getName(), false);
+		String except = "香蕉,荔枝,苹果3,苹果2,苹果1,苹果1";
+		String result = ListExtensions.toCommaSeparatedStringByFilter(appleList, s -> s.getName());
+		//System.out.println("\ntestOrderBy appleList: " + result);
+
+		assertEquals(except, result);
+	}
+
+	@Test
+	void testToCommaSeparatedStringByFilter() {
+		String except = "1.苹果2,1.苹果1,1.苹果1,2.香蕉,3.荔枝,1.苹果3";
+		String result = ListExtensions.toCommaSeparatedStringByFilter(appleList, s -> s.getId() + "." + s.getName());
+		//System.out.println("\ntestToCommaSeparatedStringByFilter result: " + result);
+		
+		assertEquals(except, result);
+	}
+
+	@Test
+	void testToCommaSeparatedString() {
+		List<String> strList = Arrays.asList("bb", "ab", "aa", "cc", "bc");
+		String except = "bb,ab,aa,cc,bc";
+		
+		String result = ListExtensions.toCommaSeparatedString(strList);
+		//System.out.println("\ntestToCommaSeparatedString result: " + result);
+		
+		assertEquals(except, result);
+	}
+
+	@Test
+	void testToCommaSeparatedWhereString() {
+		List<String> strList = Arrays.asList("bb", "ab", "aa", "cc", "bc");
+		String except = "N'bb',N'ab',N'aa',N'cc',N'bc'";
+		
+		String result = ListExtensions.toCommaSeparatedWhereString(strList);
+		//System.out.println("\ntestToCommaSeparatedString result: " + result);
+
+		assertEquals(except, result);
+	}
+
+	@Test
+	void testToCommaSeparatedInt() {
+		List<Integer> strList = Arrays.asList(1, 2, 3, 4, 5);
+		String except = "1,2,3,4,5";
+		
+		String result = ListExtensions.toCommaSeparatedInt(strList);
+		//System.out.println("\ntestToCommaSeparatedInt result: " + result);
+
+		assertEquals(except, result);
+	}
+
+}

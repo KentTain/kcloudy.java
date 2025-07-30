@@ -1,0 +1,119 @@
+USE [master]
+GO
+
+/****** Object:  Database [MSSqlKCContext]    Script Date: 2019/4/18 17:12:42 ******/
+CREATE DATABASE [MSSqlKCContext]
+GO
+
+CREATE LOGIN [cDba] with password=N'P@ssw0rd'
+GO
+
+USE [MSSqlKCContext]
+GO
+
+/****** Object:  Schema [cDba]    Script Date: 2019/4/18 17:11:48 ******/
+IF NOT EXISTS (
+  SELECT name FROM sys.schemas WHERE name = N'cDba' ) 
+BEGIN
+  EXEC (N'CREATE SCHEMA [cDba]')
+END
+GO
+CREATE USER [U_cDba] FOR LOGIN [cDba] WITH DEFAULT_SCHEMA=[cDba]
+GO
+GRANT ALTER, CREATE SEQUENCE, DELETE, EXECUTE, INSERT, REFERENCES, SELECT, TAKE OWNERSHIP, UPDATE, VIEW CHANGE TRACKING, VIEW DEFINITION  ON SCHEMA::[cDba] TO [U_cDba]
+GO
+
+CREATE TABLE [cDba].[test_user](
+	[user_id] [int] IDENTITY(1,1) NOT NULL,
+	[user_name] [nvarchar](50) NULL,
+	[user_birthday] [datetime] NULL,
+	[user_salary] [decimal](18, 4) NULL,
+ CONSTRAINT [PK_test_user] PRIMARY KEY CLUSTERED 
+(
+	[user_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [cDba].[test_menu](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[ParentId] [int] NULL,
+	[Name] [nvarchar](128) NULL,
+	[TreeCode] [nvarchar](128) NULL,
+	[Leaf] [bit] NOT NULL,
+	[Level] [int] NOT NULL,
+	[Desc] [nvarchar](512) NULL,
+	[Index] [int] NOT NULL,
+	[IsDeleted] [bit] NOT NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedDate] [datetime] NOT NULL,
+	[ModifiedBy] [nvarchar](max) NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_cDba.test_menu] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+
+USE [master]
+GO
+
+CREATE LOGIN [cTest] with password=N'P@ssw0rd'
+GO
+
+USE [MSSqlKCContext]
+GO
+/****** Object:  Schema [cTest]    Script Date: 2019/4/18 17:11:48 ******/
+IF NOT EXISTS (
+  SELECT name FROM sys.schemas WHERE name = N'cTest' ) 
+BEGIN
+  EXEC (N'CREATE SCHEMA [cTest]')
+END
+GO
+CREATE USER [U_cTest] FOR LOGIN [cTest] WITH DEFAULT_SCHEMA=[cTest]
+GO
+GRANT ALTER, CREATE SEQUENCE, DELETE, EXECUTE, INSERT, REFERENCES, SELECT, TAKE OWNERSHIP, UPDATE, VIEW CHANGE TRACKING, VIEW DEFINITION  ON SCHEMA::[cTest] TO [U_cTest]
+GO
+
+
+CREATE TABLE [cTest].[test_user](
+	[user_id] [int] IDENTITY(1,1) NOT NULL,
+	[user_name] [nvarchar](50) NULL,
+	[user_birthday] [datetime] NULL,
+	[user_salary] [decimal](18, 4) NULL,
+ CONSTRAINT [PK_test_user] PRIMARY KEY CLUSTERED 
+(
+	[user_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [cTest].[test_menu](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[ParentId] [int] NULL,
+	[Name] [nvarchar](128) NULL,
+	[TreeCode] [nvarchar](128) NULL,
+	[Leaf] [bit] NOT NULL,
+	[Level] [int] NOT NULL,
+	[Desc] [nvarchar](512) NULL,
+	[Index] [int] NOT NULL,
+	[IsDeleted] [bit] NOT NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedDate] [datetime] NOT NULL,
+	[ModifiedBy] [nvarchar](max) NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_cTest.test_menu] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [cTest].[test_menu]  WITH CHECK ADD  CONSTRAINT [FKj7yqf8w892sil646e0g9bhtsm] FOREIGN KEY([ParentId])
+REFERENCES [cTest].[test_menu] ([Id])
+GO
+
+ALTER TABLE [cTest].[test_menu] CHECK CONSTRAINT [FKj7yqf8w892sil646e0g9bhtsm]
+GO

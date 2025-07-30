@@ -1,0 +1,74 @@
+#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+server:
+  port: 1103
+  #tomcat 请求设置
+  tomcat:
+    uri-encoding: UTF-8
+    max-connections: 3000
+    max-threads: 1000
+  max-http-header-size: 1048576
+spring:
+  application:
+    name: Bootstrap Spring Boot
+  devtools:
+    restart:
+      enabled: true
+      #exclude: WEB-INF/**
+  output:
+    ansi:
+      enabled: DETECT
+  thymeleaf:
+    cache: false
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+  redis:
+    # 地址
+    host: kcloudy-redis.redis.rds.aliyuncs.com
+    # 端口号
+    port: 6379
+    # 密码
+    password: a2J3F7p5VXC4oST0xsoR
+    # 超时时间，单位毫秒
+    timeout: 3000
+    # 数据库编号
+    database: 0
+    # 配置lettuce
+    lettuce:
+      pool:
+        # 连接池中的最小空闲连接
+        min-idle: 1
+        # 连接池中的最大空闲连接
+        max-idle: 6
+        # 连接池最大连接数（使用负值表示没有限制,不要配置过大，否则可能会影响redis的性能）
+        max-active: 30
+        # 连接池最大阻塞等待时间（使用负值表示没有限制）；单位毫秒
+        max-wait: 5000
+      #关闭超时时间；单位毫秒
+      shutdown-timeout: 200
+logging:
+  level:
+    org.springframework.boot.autoconfigure: ERROR
+    
+GlobalConfig:
+  ApplicationId: 9158A492-C6AE-4C50-87A4-7ADB8BB8D36D
+  EncryptKey: dev-cfwin-EncryptKey
+  DatabaseConnectionString: Server=localhost;Database=MSSqlKCContext;User ID=sa;Password=P@ssw0rd;MultipleActiveResultSets=true;
+  MySqlConnectionString: Server=localhost;Database=NetTest;User ID=root;Password=P@ssw0rd;Port=3306;
+  StorageConnectionString: BlobEndpoint=https://cfwinstorage.blob.core.chinacloudapi.cn/;DefaultEndpointsProtocol=https;AccountName=cfwinstorage;AccountKey=cF0V6oCzMrat9RYDOyRfuVdUKI64x5mOfFipfUzVklho/Y2EEVyZ21Ip3zxYoHrw7U9nuF3wzNt/QvFSH1NIZQ==
+  QueueConnectionString: QueueEndpoint=https://cfwinstorage.queue.core.chinacloudapi.cn/;DefaultEndpointsProtocol=https;AccountName=cfwinstorage;AccountKey=cF0V6oCzMrat9RYDOyRfuVdUKI64x5mOfFipfUzVklho/Y2EEVyZ21Ip3zxYoHrw7U9nuF3wzNt/QvFSH1NIZQ==
+  NoSqlConnectionString: TableEndpoint=https://cfwinstorage.table.core.chinacloudapi.cn/;DefaultEndpointsProtocol=https;AccountName=cfwinstorage;AccountKey=cF0V6oCzMrat9RYDOyRfuVdUKI64x5mOfFipfUzVklho/Y2EEVyZ21Ip3zxYoHrw7U9nuF3wzNt/QvFSH1NIZQ==
+  RedisConnectionString: cfwindev.redis.cache.chinacloudapi.cn:6380,password=UbXrf1YqzhXOPB5yD7OLga4r3IkneHrcwc17t3LCCRY=,ssl=True,abortConnect=False,allowAdmin=true
+  ServiceBusConnectionString: Endpoint=sb://devcfwin.servicebus.chinacloudapi.cn/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ZaJwd3XnDnswDlgw/NLd/zksQ4P3BnNzMDqLrBRmDFY=
+  ClientId: CFWinAPP
+  ClientSecret: app_password
+  WeixinAppKey: 
+  WeixinAppSecret: 
+  WeixinAppToken: 
+  SSOWebDomain: http://localhost:1001/
+  CfgWebDomain: http://subdomain.localhost:1101/
+  UploadConfig:
+    ImageMaxSize: 20
+    ImageExt: jpg,jpeg,png,gif,bmp
+    FileMaxSize: 20
+    FileExt: txt,doc,docx,xls,xlsx,ppt,pptx,pdf

@@ -1,0 +1,75 @@
+#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+server:
+  port: 1101
+  #tomcat 请求设置
+  tomcat:
+    uri-encoding: UTF-8
+    max-connections: 3000
+    max-http-post-size: 1048576
+    max-threads: 1000
+  max-http-header-size: 1048576
+spring:
+  application:
+    name: Bootstrap Spring Boot
+  datasource: #数据库连接
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://127.0.0.1;databaseName=MSSqlKCContext;
+    username: sa
+    password: P@ssw0rd
+    maxPoolSize: 10
+  jpa:
+    show-sql: true
+    hibernate:
+      naming:
+          implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        dialect: kc.database.core.CustomSqlServer2012Dialect
+        format_sql: true
+        hbm2ddl:
+          auto: update
+        multiTenancy: SCHEMA
+        multi_tenant_connection_provider: kc.database.multitenancy.MsSqlMultiTenantConnectionProviderImpl
+        tenant_identifier_resolver: kc.database.multitenancy.MultiTenantIdentifierResolver
+        globally_quoted_identifiers: true
+        enable_lazy_load_no_trans: true
+  devtools:
+    restart:
+      enabled: true
+      #exclude: WEB-INF/**
+  output:
+    ansi:
+      enabled: DETECT
+  thymeleaf:
+    cache: false
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+logging:
+  level:
+    org.springframework.boot.autoconfigure: ERROR
+    
+GlobalConfig:
+  ApplicationId: 9158A492-C6AE-4C50-87A4-7ADB8BB8D36D
+  EncryptKey: dev-cfwin-EncryptKey
+  DatabaseConnectionString: Server=localhost;Database=MSSqlKCContext;User ID=sa;Password=0QVw0yFoX2GuwkMSQyz1tg==;MultipleActiveResultSets=true;
+  MySqlConnectionString: Server=localhost;Database=NetTest;User ID=root;Password=0QVw0yFoX2GuwkMSQyz1tg==;Port=3306;
+  StorageConnectionString: BlobEndpoint=https://cfwinstorage.blob.core.chinacloudapi.cn/;DefaultEndpointsProtocol=https;AccountName=cfwinstorage;AccountKey=cF0V6oCzMrat9RYDOyRfuVdUKI64x5mOfFipfUzVklho/Y2EEVyZ21Ip3zxYoHrw7U9nuF3wzNt/QvFSH1NIZQ==
+  QueueConnectionString: QueueEndpoint=https://cfwinstorage.queue.core.chinacloudapi.cn/;DefaultEndpointsProtocol=https;AccountName=cfwinstorage;AccountKey=cF0V6oCzMrat9RYDOyRfuVdUKI64x5mOfFipfUzVklho/Y2EEVyZ21Ip3zxYoHrw7U9nuF3wzNt/QvFSH1NIZQ==
+  NoSqlConnectionString: TableEndpoint=https://cfwinstorage.table.core.chinacloudapi.cn/;DefaultEndpointsProtocol=https;AccountName=cfwinstorage;AccountKey=cF0V6oCzMrat9RYDOyRfuVdUKI64x5mOfFipfUzVklho/Y2EEVyZ21Ip3zxYoHrw7U9nuF3wzNt/QvFSH1NIZQ==
+  RedisConnectionString: cfwindev.redis.cache.chinacloudapi.cn:6380,password=UbXrf1YqzhXOPB5yD7OLga4r3IkneHrcwc17t3LCCRY=,ssl=True,abortConnect=False,allowAdmin=true
+  ServiceBusConnectionString: Endpoint=sb://devcfwin.servicebus.chinacloudapi.cn/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ZaJwd3XnDnswDlgw/NLd/zksQ4P3BnNzMDqLrBRmDFY=
+  ClientId: CFWinAPP
+  ClientSecret: app_password
+  WeixinAppKey: 
+  WeixinAppSecret: 
+  WeixinAppToken: 
+  SSOWebDomain: http://localhost:1001/
+  CfgWebDomain: http://subdomain.localhost:1101/
+  UploadConfig:
+    ImageMaxSize: 20
+    ImageExt: jpg,jpeg,png,gif,bmp
+    FileMaxSize: 20
+    FileExt: txt,doc,docx,xls,xlsx,ppt,pptx,pdf
