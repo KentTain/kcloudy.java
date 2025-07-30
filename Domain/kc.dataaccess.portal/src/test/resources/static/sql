@@ -1,0 +1,157 @@
+USE [MSSqlKCContext]
+GO
+
+CREATE TABLE [cDba].[cfg_SysSequence](
+	[SequenceName] [nvarchar](32) NOT NULL,
+	[CurrentValue] [int] NOT NULL,
+	[InitValue] [int] NOT NULL,
+	[MaxValue] [int] NOT NULL,
+	[StepValue] [int] NOT NULL,
+	[PreFixString] [nvarchar](12) NULL,
+	[PostFixString] [nvarchar](12) NULL,
+	[Comments] [nvarchar](256) NULL,
+	[CurrDate] [nvarchar](max) NULL,
+ CONSTRAINT [PK_cfg_SysSequence] PRIMARY KEY CLUSTERED 
+(
+	[SequenceName] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+CREATE TABLE [cDba].[cfg_ConfigEntity](
+	[ConfigId] [int] IDENTITY(1,1) NOT NULL,
+	[ConfigType] [int] NOT NULL,
+	[ConfigSign] [int] NOT NULL,
+	[ConfigName] [nvarchar](50) NULL,
+	[ConfigDescription] [nvarchar](4000) NULL,
+	[ConfigXml] [nvarchar](max) NULL,
+	[ConfigImgUrl] [nvarchar](max) NULL,
+	[State] [int] NOT NULL,
+	[ConfigCode] [nvarchar](max) NULL,
+	[IsDeleted] [bit] NOT NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedDate] [datetime2](7) NOT NULL,
+	[ModifiedBy] [nvarchar](max) NULL,
+	[ModifiedDate] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_cfg_ConfigEntity] PRIMARY KEY CLUSTERED 
+(
+	[ConfigId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+CREATE TABLE [cDba].[cfg_ConfigAttribute](
+	[PropertyAttributeId] [int] IDENTITY(1,1) NOT NULL,
+	[DataType] [int] NOT NULL,
+	[Name] [nvarchar](256) NULL,
+	[Value] [nvarchar](max) NULL,
+	[Value1] [nvarchar](max) NULL,
+	[Value2] [nvarchar](max) NULL,
+	[CanEdit] [bit] NOT NULL,
+	[IsProviderAttr] [bit] NOT NULL,
+	[Index] [int] NOT NULL,
+	[DisplayName] [nvarchar](256) NULL,
+	[Description] [nvarchar](1024) NULL,
+	[ConfigId] [int] NOT NULL,
+	[IsFileAttr] [bit] NOT NULL,
+	[IsDeleted] [bit] NOT NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedDate] [datetime2](7) NOT NULL,
+	[ModifiedBy] [nvarchar](max) NULL,
+	[ModifiedDate] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_cfg_ConfigAttribute] PRIMARY KEY CLUSTERED 
+(
+	[PropertyAttributeId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [cDba].[cfg_ConfigAttribute]  WITH CHECK ADD  CONSTRAINT [FK_cfg_ConfigAttribute_cfg_ConfigEntity_ConfigId] FOREIGN KEY([ConfigId])
+REFERENCES [cDba].[cfg_ConfigEntity] ([ConfigId])
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [cDba].[cfg_ConfigAttribute] CHECK CONSTRAINT [FK_cfg_ConfigAttribute_cfg_ConfigEntity_ConfigId]
+GO
+
+
+
+USE [MSSqlKCContext]
+GO
+
+CREATE TABLE [cTest].[cfg_SysSequence](
+	[SequenceName] [nvarchar](32) NOT NULL,
+	[CurrentValue] [int] NOT NULL,
+	[InitValue] [int] NOT NULL,
+	[MaxValue] [int] NOT NULL,
+	[StepValue] [int] NOT NULL,
+	[PreFixString] [nvarchar](12) NULL,
+	[PostFixString] [nvarchar](12) NULL,
+	[Comments] [nvarchar](256) NULL,
+	[CurrDate] [nvarchar](max) NULL,
+ CONSTRAINT [PK_cfg_SysSequence] PRIMARY KEY CLUSTERED 
+(
+	[SequenceName] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+CREATE TABLE [cTest].[cfg_ConfigEntity](
+	[ConfigId] [int] IDENTITY(1,1) NOT NULL,
+	[ConfigType] [int] NOT NULL,
+	[ConfigSign] [int] NOT NULL,
+	[ConfigName] [nvarchar](50) NULL,
+	[ConfigDescription] [nvarchar](4000) NULL,
+	[ConfigXml] [nvarchar](max) NULL,
+	[ConfigImgUrl] [nvarchar](max) NULL,
+	[State] [int] NOT NULL,
+	[ConfigCode] [nvarchar](max) NULL,
+	[IsDeleted] [bit] NOT NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedDate] [datetime2](7) NOT NULL,
+	[ModifiedBy] [nvarchar](max) NULL,
+	[ModifiedDate] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_cfg_ConfigEntity] PRIMARY KEY CLUSTERED 
+(
+	[ConfigId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+CREATE TABLE [cTest].[cfg_ConfigAttribute](
+	[PropertyAttributeId] [int] IDENTITY(1,1) NOT NULL,
+	[DataType] [int] NOT NULL,
+	[Name] [nvarchar](256) NULL,
+	[Value] [nvarchar](max) NULL,
+	[Value1] [nvarchar](max) NULL,
+	[Value2] [nvarchar](max) NULL,
+	[CanEdit] [bit] NOT NULL,
+	[IsProviderAttr] [bit] NOT NULL,
+	[Index] [int] NOT NULL,
+	[DisplayName] [nvarchar](256) NULL,
+	[Description] [nvarchar](1024) NULL,
+	[ConfigId] [int] NOT NULL,
+	[IsFileAttr] [bit] NOT NULL,
+	[IsDeleted] [bit] NOT NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedDate] [datetime2](7) NOT NULL,
+	[ModifiedBy] [nvarchar](max) NULL,
+	[ModifiedDate] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_cfg_ConfigAttribute] PRIMARY KEY CLUSTERED 
+(
+	[PropertyAttributeId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [cTest].[cfg_ConfigAttribute]  WITH CHECK ADD  CONSTRAINT [FK_cfg_ConfigAttribute_cfg_ConfigEntity_ConfigId] FOREIGN KEY([ConfigId])
+REFERENCES [cTest].[cfg_ConfigEntity] ([ConfigId])
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [cTest].[cfg_ConfigAttribute] CHECK CONSTRAINT [FK_cfg_ConfigAttribute_cfg_ConfigEntity_ConfigId]
+GO
+
+
+
+
