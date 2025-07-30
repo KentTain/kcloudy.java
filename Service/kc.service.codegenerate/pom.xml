@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>kcloudy.business</groupId>
+		<artifactId>kcloudy.business</artifactId>
+		<version>1.0.0.1</version>
+		<relativePath />    <!-- lookup parent from repository -->
+	</parent>
+	<artifactId>kc.service.codegenerate</artifactId>
+	<name>kc.service.codegenerate</name>
+	<url>http://maven.apache.org</url>
+	<packaging>jar</packaging>
+	<properties>
+		<!-- automatically run annotation processors within the incremental compilation -->
+		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>kcloudy.business</groupId>
+			<artifactId>kc.framework</artifactId>
+			<version>1.0.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>kcloudy.business</groupId>
+			<artifactId>kc.service</artifactId>
+			<version>1.0.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>kcloudy.business</groupId>
+			<artifactId>kc.dataaccess.codegenerate</artifactId>
+			<version>1.0.0.1</version>
+		</dependency>
+		<!-- 根据实体变更记录生成增量sql -->
+		<dependency>
+			<groupId>info.picocli</groupId>
+			<artifactId>picocli</artifactId>
+			<version>4.6.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+			<version>4.7.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.dom4j/dom4j -->
+		<dependency>
+			<groupId>org.dom4j</groupId>
+			<artifactId>dom4j</artifactId>
+			<version>2.1.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.gitlab4j</groupId>
+			<artifactId>gitlab4j-api</artifactId>
+			<version>4.19.0</version>
+		</dependency>
+
+		<!--java文件编译class-->
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>org.eclipse.jdt.core</artifactId>
+			<version>3.20.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>5.13.1.202206130422-r</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit.archive</artifactId>
+			<version>5.13.1.202206130422-r</version>
+
+		</dependency>
+        <dependency>
+            <groupId>kcloudy.business</groupId>
+            <artifactId>kc.web</artifactId>
+            <version>1.0.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+</project>

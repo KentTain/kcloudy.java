@@ -1,0 +1,55 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="13682381319 (generated)" id="1642046210711-1">
+        <createTable tableName="group">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValue="默认值" name="groupName" type="VARCHAR(255)"/>
+            <column name="desc" type="VARCHAR(4000)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="13682381319 (generated)" id="1642046210711-2">
+        <createTable tableName="nrole">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="roleName" remarks="默认姓名" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="13682381319 (generated)" id="1642046210711-3">
+        <createTable tableName="person">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" remarks="姓名" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="charName" type="CHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sex" remarks="性别" type="BIT(1)"/>
+            <column name="birthday" type="date"/>
+            <column name="createtime" type="datetime"/>
+            <column name="smallAge" type="SMALLINT"/>
+            <column name="intAge" type="INT"/>
+            <column name="bigAge" type="BIGINT"/>
+            <column name="decimalAmount" type="DECIMAL(10, 2)"/>
+            <column name="floatAmount" type="FLOAT(32, 4)"/>
+            <column name="doubleAmount" type="DOUBLE(64, 8)"/>
+            <column name="numericAmount" type="DECIMAL(64, 4)"/>
+            <column name="textDesc" type="TEXT"/>
+            <column name="groupId" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="13682381319 (generated)" id="1642046210711-4">
+        <createIndex indexName="f_groupId" tableName="person">
+            <column name="groupId"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="13682381319 (generated)" id="1642046210711-5">
+        <addForeignKeyConstraint baseColumnNames="groupId" baseTableName="person" constraintName="f_groupId" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="group" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

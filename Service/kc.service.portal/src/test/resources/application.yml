@@ -1,0 +1,57 @@
+#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+server:
+  port: 9081
+spring:
+  application:
+    name: Bootstrap Spring Boot
+  datasource: #数据库连接
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost;databaseName=MSSqlKCContext;
+    username: sa
+    password: P@ssw0rd
+  jpa:
+    show-sql: true
+    hibernate:
+      naming:
+          implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        dialect: kc.database.core.CustomSqlServer2012Dialect
+        format_sql: true
+        hbm2ddl:
+          auto: update
+        multiTenancy: SCHEMA
+        multi_tenant_connection_provider: kc.database.multitenancy.MsSqlMultiTenantConnectionProviderImpl
+        tenant_identifier_resolver: kc.database.multitenancy.MultiTenantIdentifierResolver
+        globally_quoted_identifiers: true
+        enable_lazy_load_no_trans: true
+  output:
+    ansi:
+      enabled: DETECT
+  thymeleaf:
+    cache: false
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+
+GlobalConfig:
+  EncryptKey: dev-cfwin-EncryptKey
+
+  SSOWebDomain: http://localhost:1001/
+  ResWebDomain: http://localhost:9999/
+  PortalWebDomain: http://subdomain.localhost:1101/
+
+  ClientId: CFWinAPP
+  ClientSecret: app_password
+  TempFilePath: /tmp,
+  WeixinAppKey:
+  WeixinAppSecret:
+  WeixinAppToken:
+  UploadConfig:
+    ImageMaxSize: 20
+    ImageExt: jpg,jpeg,png,gif,bmp
+    FileMaxSize: 20
+    FileExt: txt,doc,docx,xls,xlsx,ppt,pptx,pdf
+
