@@ -24,7 +24,7 @@ HTTPS port to run the container on, default is 0 (not specified)
 Deployment environment, default is "Production"
 
 .EXAMPLE
-.\build-dotnet-web.ps1 -solutionName "KC.Web.Resource" -versionNum 1 -httpPort 9999 -httpsPort 10000 -env "Production"
+.\build-java-web.ps1 -solutionType "Web" -solutionName "kc.web.account" -versionNum 1 -httpPort 2001 -httpsPort 0 -env "Production"
 #>
 
 param(
@@ -128,19 +128,21 @@ function Build-Java-Web {
     }
 
     # judge solutionType is Web or not, if not Web, then use 5.WebApi
+    $projectRoot = Split-Path -Path $PSScriptRoot -Parent
     if ($solutionType -ne "Web") {
         $projectPath = "\$solutionType\$solutionName\"
     }
 
     # Build java project
-    cd $PSScriptRoot
+    cd $projectRoot
+    
     # replace version
     #mvn clean versions:set -DnewVersion=$newVersion
     Write-Info "Building project: mvn clean package -pl $solutionName -am -DskipTests --no-transfer-progress source:jar"
     mvn clean package -pl :$solutionName -am -DskipTests --no-transfer-progress source:jar
 
     # copy jar to publish directory
-    $targetDir = "$PSScriptRoot\$projectPath\target"
+    $targetDir = "$projectRoot\$projectPath\target"
     if (Test-Path $targetDir) {
         Write-Info "Copying jar file: from $targetDir/$solutionName-$newVersion.jar to $webDir"
         Copy-Item -Path "$targetDir/$solutionName-$newVersion.jar" -Destination $webDir -Recurse -Force
@@ -149,7 +151,7 @@ function Build-Java-Web {
     }
 
     # Copy font files if they exist
-    $fontsSourceDir = "$PSScriptRoot\Fonts"
+    $fontsSourceDir = "$projectRoot\Fonts"
     $fontsDestDir = "$webDir\Fonts"
     if (Test-Path $fontsSourceDir) {
         Write-Info "Copying font files: from $fontsSourceDir to $fontsDestDir"
@@ -162,7 +164,7 @@ function Build-Java-Web {
     }
 
     # Copy Dockerfile if it exists
-    $dockerfileSource = "$PSScriptRoot\$projectPath\Dockerfile"
+    $dockerfileSource = "$projectRoot\$projectPath\Dockerfile"
     if (Test-Path $dockerfileSource) {
         Write-Info "Copying Dockerfile: from $dockerfileSource to $webDir"
         Copy-Item -Path $dockerfileSource -Destination $webDir -Force
@@ -333,16 +335,16 @@ function Build-Java-Web {
         docker rmi -f "$imageName`:$newVersion" | Out-Null
     }
 
-    Set-Location "D:\Project\kcloudy\core\java\kcloudy.business"
     Write-Success "Deployment completed successfully!"
 }
 
 # Main script
 try {
     Build-Java-Web -solutionType $solutionType -solutionName $solutionName -versionNum $versionNum -httpPort $httpPort -httpsPort $httpsPort -env $env
+    Set-Location "D:\Project\kcloudy\java\Shell"
     exit 0
 } catch {
     Write-Error "Script execution failed: $_"
-    Set-Location "D:\Project\kcloudy\core\java\kcloudy.business"
+    Set-Location "D:\Project\kcloudy\java\Shell"
     exit 1
 }

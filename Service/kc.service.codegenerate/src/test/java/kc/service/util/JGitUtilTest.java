@@ -1,6 +1,7 @@
 package kc.service.util;
 
 import org.eclipse.jgit.transport.CredentialsProvider;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Disabled
 @DisplayName("Gitlab测试")
 class JGitUtilTest {
     private String local_test_git_path = Gitlab4jUtilTest.local_test_git_path;

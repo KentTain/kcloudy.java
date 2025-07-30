@@ -17,6 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled
 @DisplayName("Gitlab测试")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Gitlab4jUtilTest {

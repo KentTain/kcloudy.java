@@ -1,3 +1,11 @@
+server:
+  port: 2001
+  #tomcat 请求设置
+  tomcat:
+    uri-encoding: UTF-8
+    max-connections: 3000
+    max-threads: 1000
+  max-http-header-size: 1024000
 spring:
   datasource: #数据库连接
     type: com.zaxxer.hikari.HikariDataSource
@@ -18,4 +26,4 @@ GlobalConfig:
 
   SSOWebDomain: http://localhost:1001/
   ResWebDomain: http://localhost:9999/
-  CfgWebDomain: http://subdomain.localhost:1101/
+  AccWebDomain: http://subdomain.localhost:1101/

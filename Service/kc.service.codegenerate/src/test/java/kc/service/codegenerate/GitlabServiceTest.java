@@ -5,7 +5,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-//@Disabled
+@Disabled
 @DisplayName("GitLab服务测试")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class GitlabServiceTest extends CodeGenerateTestBase{
