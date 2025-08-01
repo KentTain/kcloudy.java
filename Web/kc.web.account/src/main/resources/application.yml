@@ -11,7 +11,7 @@ spring:
   profiles:
     active: dev
   main:
-    allow-bean-definition-overriding: true  #当遇到同样的名字时，是否允许覆盖注册
+    allow-bean-definition-overriding: true #当遇到同样的名字时，是否允许覆盖注册
   application:
     name: 账户管理
   servlet:
@@ -19,15 +19,15 @@ spring:
       enabled: true
       max-file-size: 1024000
   jackson:
-      default-property-inclusion: non_null
-      time-zone: GMT+8
-      date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
   jpa:
     show-sql: true
     hibernate:
       naming:
-          implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
         dialect: kc.database.core.CustomSqlServer2012Dialect
@@ -66,9 +66,9 @@ GlobalConfig:
   ClientId: CFWinAPP
   ClientSecret: app_password
   TempFilePath: /tmp,
-  WeixinAppKey: 
-  WeixinAppSecret: 
-  WeixinAppToken: 
+  WeixinAppKey:
+  WeixinAppSecret:
+  WeixinAppToken:
   UploadConfig:
     ImageMaxSize: 20
     ImageExt: jpg,jpeg,png,gif,bmp

@@ -17,7 +17,7 @@ spring:
 logging:
   level:
     org.springframework.boot.autoconfigure: ERROR
-    
+
 GlobalConfig:
   EncryptKey: KCloudy-Microsoft-EncryptKey
 

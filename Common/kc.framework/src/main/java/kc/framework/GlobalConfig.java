@@ -1,15 +1,20 @@
 package kc.framework;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-import kc.framework.security.EncryptPasswordUtil;
-import kc.framework.tenant.ConnectionKeyConstant;
 import org.springframework.core.env.Environment;
 
 import kc.framework.base.ApplicationInfo;
 import kc.framework.extension.StringExtensions;
+import kc.framework.security.EncryptPasswordUtil;
 import kc.framework.tenant.ApplicationConstant;
+import kc.framework.tenant.ConnectionKeyConstant;
 import kc.framework.tenant.TenantConstant;
+import kc.framework.util.PrintLogUtil;
 
 public class GlobalConfig implements java.io.Serializable {
 
@@ -208,8 +213,7 @@ public class GlobalConfig implements java.io.Serializable {
      */
     public static String WXWebDomain;
     /**
-     * subdomain的资源地址：http://resource.kcloudy.com/
-     * 本地测试接口地址：http://localhost:9999/
+     * subdomain的资源地址：http://resource.kcloudy.com/ 本地测试接口地址：http://localhost:9999/
      */
     public static String ResWebDomain;
 
@@ -232,17 +236,11 @@ public class GlobalConfig implements java.io.Serializable {
 
         String tenantWebDomain = webDomain.replace(TenantConstant.SubDomain, tenantName);
         String busName = StringExtensions.getBusNameByHost(tenantWebDomain);
-        List<String> level2Domains = Arrays.asList(
-                "http://localhost:1001/",
-                "http://sso.kcloudy.com/",
-                "http://ssotest.kcloudy.com/",
-                "http://ssobeta.kcloudy.com/",
-                "http://ssodemo.kcloudy.com/"
-        );
+        List<String> level2Domains = Arrays.asList("http://localhost:1001/", "http://sso.kcloudy.com/",
+                "http://ssotest.kcloudy.com/", "http://ssobeta.kcloudy.com/", "http://ssodemo.kcloudy.com/");
         boolean isLocal = tenantWebDomain.contains("localhost");
         if (level2Domains.contains(webDomain)) {
-            return isLocal
-                    ? tenantWebDomain.replace("localhost", tenantName + ".localhost")
+            return isLocal ? tenantWebDomain.replace("localhost", tenantName + ".localhost")
                     : tenantWebDomain.replace(busName + ".", tenantName + "." + busName + ".");
         }
 
@@ -262,17 +260,11 @@ public class GlobalConfig implements java.io.Serializable {
 
         String tenantWebDomain = webDomain.replace(TenantConstant.SubDomain, tenantName);
         String busName = StringExtensions.getBusNameByHost(tenantWebDomain);
-        List<String> level2Domains = Arrays.asList(
-                "http://localhost:1001/",
-                "http://sso.kcloudy.com/",
-                "http://ssotest.kcloudy.com/",
-                "http://ssobeta.kcloudy.com/",
-                "http://ssodemo.kcloudy.com/"
-        );
+        List<String> level2Domains = Arrays.asList("http://localhost:1001/", "http://sso.kcloudy.com/",
+                "http://ssotest.kcloudy.com/", "http://ssobeta.kcloudy.com/", "http://ssodemo.kcloudy.com/");
         boolean isLocal = tenantWebDomain.toLowerCase().contains("localhost");
         if (level2Domains.contains(webDomain)) {
-            tenantWebDomain = isLocal
-                    ? tenantWebDomain.replace("localhost", tenantName + ".localhost")
+            tenantWebDomain = isLocal ? tenantWebDomain.replace("localhost", tenantName + ".localhost")
                     : tenantWebDomain.replace(busName + ".", tenantName + "." + busName + ".");
         }
 
@@ -320,22 +312,21 @@ public class GlobalConfig implements java.io.Serializable {
         if (StringExtensions.isNullOrEmpty(DatabaseConnectionString))
             return "";
         try {
-            Dictionary<String, String> keyValues = StringExtensions.keyValuePairFromConnectionString(DatabaseConnectionString);
+            Dictionary<String, String> keyValues = StringExtensions
+                    .keyValuePairFromConnectionString(DatabaseConnectionString);
             String endpoint = keyValues.get(ConnectionKeyConstant.DatabaseEndpoint);
             String name = keyValues.get(ConnectionKeyConstant.DatabaseName);
             String user = keyValues.get(ConnectionKeyConstant.DatabaseUserID);
             String pwd = keyValues.get(ConnectionKeyConstant.DatabasePassword);
 
-            if (StringExtensions.isNullOrEmpty(endpoint)
-                    || StringExtensions.isNullOrEmpty(name)
-                    || StringExtensions.isNullOrEmpty(user)
-                    || StringExtensions.isNullOrEmpty(pwd))
+            if (StringExtensions.isNullOrEmpty(endpoint) || StringExtensions.isNullOrEmpty(name)
+                    || StringExtensions.isNullOrEmpty(user) || StringExtensions.isNullOrEmpty(pwd))
                 return "";
 
             String azureConn = "Server=%s;Database=%s;User ID=%s;Password=%s;MultipleActiveResultSets=true;";
             return String.format(azureConn, endpoint, name, user, EncryptPasswordUtil.DecryptPassword(pwd, EncryptKey));
         } catch (Exception ex) {
-            //System..WriteLine(ex.Message);
+            PrintLogUtil.printError(ex.getMessage());
             return "";
         }
     }
@@ -347,23 +338,23 @@ public class GlobalConfig implements java.io.Serializable {
         if (StringExtensions.isNullOrEmpty(MySqlConnectionString))
             return "";
         try {
-            Dictionary<String, String> keyValues = StringExtensions.keyValuePairFromConnectionString(MySqlConnectionString);
+            Dictionary<String, String> keyValues = StringExtensions
+                    .keyValuePairFromConnectionString(MySqlConnectionString);
             String endpoint = keyValues.get(ConnectionKeyConstant.DatabaseEndpoint);
             String name = keyValues.get(ConnectionKeyConstant.DatabaseName);
             String user = keyValues.get(ConnectionKeyConstant.DatabaseUserID);
             String pwd = keyValues.get(ConnectionKeyConstant.DatabasePassword);
             String port = keyValues.get(ConnectionKeyConstant.DatabasePort);
 
-            if (StringExtensions.isNullOrEmpty(endpoint)
-                    || StringExtensions.isNullOrEmpty(name)
-                    || StringExtensions.isNullOrEmpty(user)
-                    || StringExtensions.isNullOrEmpty(pwd))
+            if (StringExtensions.isNullOrEmpty(endpoint) || StringExtensions.isNullOrEmpty(name)
+                    || StringExtensions.isNullOrEmpty(user) || StringExtensions.isNullOrEmpty(pwd))
                 return "";
 
             String azureConn = "Server=%s;Database=%s;User ID=%s;Password=%s;Port=%s;sslMode=None;";
-            return String.format(azureConn, endpoint, name, user, EncryptPasswordUtil.DecryptPassword(pwd, EncryptKey), port);
+            return String.format(azureConn, endpoint, name, user, EncryptPasswordUtil.DecryptPassword(pwd, EncryptKey),
+                    port);
         } catch (Exception ex) {
-            //System..WriteLine(ex.Message);
+            PrintLogUtil.printError(ex.getMessage());
             return "";
         }
     }
@@ -375,20 +366,20 @@ public class GlobalConfig implements java.io.Serializable {
         if (StringExtensions.isNullOrEmpty(StorageConnectionString))
             return "";
         try {
-            Dictionary<String, String> keyValues = StringExtensions.keyValuePairFromConnectionString(StorageConnectionString);
+            Dictionary<String, String> keyValues = StringExtensions
+                    .keyValuePairFromConnectionString(StorageConnectionString);
             String endpoint = keyValues.get(ConnectionKeyConstant.BlobEndpoint);
             String name = keyValues.get(ConnectionKeyConstant.AccessName);
             String key = keyValues.get(ConnectionKeyConstant.AccessKey);
 
-            if (StringExtensions.isNullOrEmpty(endpoint)
-                    || StringExtensions.isNullOrEmpty(name)
+            if (StringExtensions.isNullOrEmpty(endpoint) || StringExtensions.isNullOrEmpty(name)
                     || StringExtensions.isNullOrEmpty(key))
                 return "";
 
             String azureConn = "DefaultEndpointsProtocol=https;BlobEndpoint=%s;AccountName=%s;AccountKey=%s";
             return String.format(azureConn, endpoint, name, EncryptPasswordUtil.DecryptPassword(key, EncryptKey));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            PrintLogUtil.printError(ex.getMessage());
             return "";
         }
     }
@@ -400,20 +391,20 @@ public class GlobalConfig implements java.io.Serializable {
         if (StringExtensions.isNullOrEmpty(QueueConnectionString))
             return "";
         try {
-            Dictionary<String, String> keyValues = StringExtensions.keyValuePairFromConnectionString(QueueConnectionString);
+            Dictionary<String, String> keyValues = StringExtensions
+                    .keyValuePairFromConnectionString(QueueConnectionString);
             String endpoint = keyValues.get(ConnectionKeyConstant.QueueEndpoint);
             String name = keyValues.get(ConnectionKeyConstant.AccessName);
             String key = keyValues.get(ConnectionKeyConstant.AccessKey);
 
-            if (StringExtensions.isNullOrEmpty(endpoint)
-                    || StringExtensions.isNullOrEmpty(name)
+            if (StringExtensions.isNullOrEmpty(endpoint) || StringExtensions.isNullOrEmpty(name)
                     || StringExtensions.isNullOrEmpty(key))
                 return "";
 
             String azureConn = "DefaultEndpointsProtocol=https;QueueEndpoint=%s;AccountName=%s;AccountKey=%s";
             return String.format(azureConn, endpoint, name, EncryptPasswordUtil.DecryptPassword(key, EncryptKey));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            PrintLogUtil.printError(ex.getMessage());
             return "";
         }
     }
@@ -425,20 +416,20 @@ public class GlobalConfig implements java.io.Serializable {
         if (StringExtensions.isNullOrEmpty(NoSqlConnectionString))
             return "";
         try {
-            Dictionary<String, String> keyValues = StringExtensions.keyValuePairFromConnectionString(NoSqlConnectionString);
+            Dictionary<String, String> keyValues = StringExtensions
+                    .keyValuePairFromConnectionString(NoSqlConnectionString);
             String endpoint = keyValues.get(ConnectionKeyConstant.NoSqlEndpoint);
             String name = keyValues.get(ConnectionKeyConstant.AccessName);
             String key = keyValues.get(ConnectionKeyConstant.AccessKey);
 
-            if (StringExtensions.isNullOrEmpty(endpoint)
-                    || StringExtensions.isNullOrEmpty(name)
+            if (StringExtensions.isNullOrEmpty(endpoint) || StringExtensions.isNullOrEmpty(name)
                     || StringExtensions.isNullOrEmpty(key))
                 return "";
 
             String azureConn = "DefaultEndpointsProtocol=https;TableEndpoint=%s;AccountName=%s;AccountKey=%s";
             return String.format(azureConn, endpoint, name, EncryptPasswordUtil.DecryptPassword(key, EncryptKey));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            PrintLogUtil.printError(ex.getMessage());
             return "";
         }
     }
@@ -450,20 +441,20 @@ public class GlobalConfig implements java.io.Serializable {
         if (StringExtensions.isNullOrEmpty(ServiceBusConnectionString))
             return "";
         try {
-            Dictionary<String, String> keyValues = StringExtensions.keyValuePairFromConnectionString(ServiceBusConnectionString);
+            Dictionary<String, String> keyValues = StringExtensions
+                    .keyValuePairFromConnectionString(ServiceBusConnectionString);
             String endpoint = keyValues.get(ConnectionKeyConstant.ServiceBusEndpoint);
             String name = keyValues.get(ConnectionKeyConstant.ServiceBusAccessName);
             String key = keyValues.get(ConnectionKeyConstant.ServiceBusAccessKey);
 
-            if (StringExtensions.isNullOrEmpty(endpoint)
-                    || StringExtensions.isNullOrEmpty(name)
+            if (StringExtensions.isNullOrEmpty(endpoint) || StringExtensions.isNullOrEmpty(name)
                     || StringExtensions.isNullOrEmpty(key))
                 return "";
 
             String azureConn = "Endpoint=%s;SharedAccessKeyName=%s;SharedAccessKey=%s";
             return String.format(azureConn, endpoint, name, EncryptPasswordUtil.DecryptPassword(key, EncryptKey));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            PrintLogUtil.printError(ex.getMessage());
             return "";
         }
     }
@@ -475,20 +466,20 @@ public class GlobalConfig implements java.io.Serializable {
         if (StringExtensions.isNullOrEmpty(VodConnectionString))
             return "";
         try {
-            Dictionary<String, String> keyValues = StringExtensions.keyValuePairFromConnectionString(VodConnectionString);
+            Dictionary<String, String> keyValues = StringExtensions
+                    .keyValuePairFromConnectionString(VodConnectionString);
             String endpoint = keyValues.get(ConnectionKeyConstant.VodEndpoint);
             String name = keyValues.get(ConnectionKeyConstant.AccessName);
             String key = keyValues.get(ConnectionKeyConstant.AccessKey);
 
-            if (StringExtensions.isNullOrEmpty(endpoint)
-                    || StringExtensions.isNullOrEmpty(name)
+            if (StringExtensions.isNullOrEmpty(endpoint) || StringExtensions.isNullOrEmpty(name)
                     || StringExtensions.isNullOrEmpty(key))
                 return "";
 
             String azureConn = "VodEndpoint=%s;AccountName=%s;AccountKey=%s";
             return String.format(azureConn, endpoint, name, EncryptPasswordUtil.DecryptPassword(key, EncryptKey));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            PrintLogUtil.printError(ex.getMessage());
             return "";
         }
     }
@@ -500,20 +491,20 @@ public class GlobalConfig implements java.io.Serializable {
         if (StringExtensions.isNullOrEmpty(CodeConnectionString))
             return "";
         try {
-            Dictionary<String, String> keyValues = StringExtensions.keyValuePairFromConnectionString(CodeConnectionString);
+            Dictionary<String, String> keyValues = StringExtensions
+                    .keyValuePairFromConnectionString(CodeConnectionString);
             String endpoint = keyValues.get(ConnectionKeyConstant.CodeEndpoint);
             String name = keyValues.get(ConnectionKeyConstant.AccessName);
             String key = keyValues.get(ConnectionKeyConstant.AccessKey);
 
-            if (StringExtensions.isNullOrEmpty(endpoint)
-                    || StringExtensions.isNullOrEmpty(name)
+            if (StringExtensions.isNullOrEmpty(endpoint) || StringExtensions.isNullOrEmpty(name)
                     || StringExtensions.isNullOrEmpty(key))
                 return "";
 
             String azureConn = "CodeEndpoint=%s;AccountName=%s;AccountKey=%s";
             return String.format(azureConn, endpoint, name, EncryptPasswordUtil.DecryptPassword(key, EncryptKey));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            PrintLogUtil.printError(ex.getMessage());
             return "";
         }
     }
@@ -525,20 +516,20 @@ public class GlobalConfig implements java.io.Serializable {
         if (StringExtensions.isNullOrEmpty(RedisConnectionString))
             return "";
         try {
-            Dictionary<String, String> keyValues = StringExtensions.keyValuePairFromConnectionString(RedisConnectionString);
+            Dictionary<String, String> keyValues = StringExtensions
+                    .keyValuePairFromConnectionString(RedisConnectionString);
             String endpoint = keyValues.get(ConnectionKeyConstant.RedisEndpoint);
             String name = keyValues.get(ConnectionKeyConstant.AccessName);
             String key = keyValues.get(ConnectionKeyConstant.AccessKey);
 
-            if (StringExtensions.isNullOrEmpty(endpoint)
-                    || StringExtensions.isNullOrEmpty(name)
+            if (StringExtensions.isNullOrEmpty(endpoint) || StringExtensions.isNullOrEmpty(name)
                     || StringExtensions.isNullOrEmpty(key))
                 return "";
 
             String azureConn = "RedisEndpoint=%s;AccountName=%s;AccountKey=%s";
             return String.format(azureConn, endpoint, name, EncryptPasswordUtil.DecryptPassword(key, EncryptKey));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            PrintLogUtil.printError(ex.getMessage());
             return "";
         }
     }
@@ -591,9 +582,9 @@ public class GlobalConfig implements java.io.Serializable {
         if (data == null)
             return;
 
-        EncryptKey  = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.EncryptKey"))
-                 ? (data.getEncryptKey())
-                 : env.getProperty("GlobalConfig.EncryptKey");
+        EncryptKey = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.EncryptKey"))
+                ? (data.getEncryptKey())
+                : env.getProperty("GlobalConfig.EncryptKey");
         BlobStorage = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.BlobStorage"))
                 ? (data.getBlobStorage())
                 : env.getProperty("GlobalConfig.BlobStorage");
@@ -604,33 +595,42 @@ public class GlobalConfig implements java.io.Serializable {
                 ? (data.getTempFilePath())
                 : env.getProperty("GlobalConfig.TempFilePath");
 
-        DatabaseConnectionString = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.DatabaseConnectionString"))
-                ? (data.getDatabaseConnectionString())
-                : env.getProperty("GlobalConfig.DatabaseConnectionString");
-        MySqlConnectionString = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.MySqlConnectionString"))
-                ? (data.getMySqlConnectionString())
-                : env.getProperty("GlobalConfig.MySqlConnectionString");
-        StorageConnectionString = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.StorageConnectionString"))
-                ? (data.getStorageConnectionString())
-                : env.getProperty("GlobalConfig.StorageConnectionString");
-        QueueConnectionString = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.QueueConnectionString"))
-                ? (data.getQueueConnectionString())
-                : env.getProperty("GlobalConfig.QueueConnectionString");
-        NoSqlConnectionString = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.NoSqlConnectionString"))
-                ? (data.getNoSqlConnectionString())
-                : env.getProperty("GlobalConfig.NoSqlConnectionString");
-        RedisConnectionString = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.RedisConnectionString"))
-                ? (data.getRedisConnectionString())
-                : env.getProperty("GlobalConfig.RedisConnectionString");
-        ServiceBusConnectionString = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.ServiceBusConnectionString"))
-                ? (data.getServiceBusConnectionString())
-                : env.getProperty("GlobalConfig.ServiceBusConnectionString");
-        VodConnectionString = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.VodConnectionString"))
-                ? (data.getVodConnectionString())
-                : env.getProperty("GlobalConfig.VodConnectionString");
-        CodeConnectionString = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.CodeConnectionString"))
-                ? (data.getCodeConnectionString())
-                : env.getProperty("GlobalConfig.CodeConnectionString");
+        DatabaseConnectionString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.DatabaseConnectionString"))
+                        ? (data.getDatabaseConnectionString())
+                        : env.getProperty("GlobalConfig.DatabaseConnectionString");
+        MySqlConnectionString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.MySqlConnectionString"))
+                        ? (data.getMySqlConnectionString())
+                        : env.getProperty("GlobalConfig.MySqlConnectionString");
+        StorageConnectionString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.StorageConnectionString"))
+                        ? (data.getStorageConnectionString())
+                        : env.getProperty("GlobalConfig.StorageConnectionString");
+        QueueConnectionString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.QueueConnectionString"))
+                        ? (data.getQueueConnectionString())
+                        : env.getProperty("GlobalConfig.QueueConnectionString");
+        NoSqlConnectionString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.NoSqlConnectionString"))
+                        ? (data.getNoSqlConnectionString())
+                        : env.getProperty("GlobalConfig.NoSqlConnectionString");
+        RedisConnectionString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.RedisConnectionString"))
+                        ? (data.getRedisConnectionString())
+                        : env.getProperty("GlobalConfig.RedisConnectionString");
+        ServiceBusConnectionString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.ServiceBusConnectionString"))
+                        ? (data.getServiceBusConnectionString())
+                        : env.getProperty("GlobalConfig.ServiceBusConnectionString");
+        VodConnectionString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.VodConnectionString"))
+                        ? (data.getVodConnectionString())
+                        : env.getProperty("GlobalConfig.VodConnectionString");
+        CodeConnectionString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.CodeConnectionString"))
+                        ? (data.getCodeConnectionString())
+                        : env.getProperty("GlobalConfig.CodeConnectionString");
 
         SSOWebDomain = null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.SSOWebDomain"))
                 ? StringExtensions.endWithSlash(data.getSsoWebDomain())
@@ -731,21 +731,19 @@ public class GlobalConfig implements java.io.Serializable {
                 ? StringExtensions.endWithSlash(data.getApiWebDomain())
                 : env.getProperty("GlobalConfig.ApiWebDomain");
 
-        Applications = null != data.getApplications() && data.getApplications().size() > 0
-                ? data.getApplications()
+        Applications = null != data.getApplications() && data.getApplications().size() > 0 ? data.getApplications()
                 : ApplicationConstant.GetAllApplications();
-        Optional<ApplicationInfo> optApp = Applications.stream().filter(m -> m.getAppId().equalsIgnoreCase(ApplicationId))
-                .findFirst();
+        Optional<ApplicationInfo> optApp = Applications.stream()
+                .filter(m -> m.getAppId().equalsIgnoreCase(ApplicationId)).findFirst();
 
         optApp.ifPresent(applicationInfo -> CurrentApplication = applicationInfo);
 
         setSystemType();
 
-        String imageMaxSizeString =
-                null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.UploadConfig.ImageMaxSize"))
-                        ? data.getUploadConfig() != null
-                            ? Integer.toString(data.getUploadConfig().getImageMaxSize())
-                            : "10"
+        String imageMaxSizeString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.UploadConfig.ImageMaxSize"))
+                        ? data.getUploadConfig() != null ? Integer.toString(data.getUploadConfig().getImageMaxSize())
+                                : "10"
                         : env.getProperty("GlobalConfig.UploadConfig.ImageMaxSize");
         int imageMaxSize = 10;
         if (!StringExtensions.isNullOrEmpty(imageMaxSizeString)) {
@@ -756,11 +754,10 @@ public class GlobalConfig implements java.io.Serializable {
             }
         }
 
-        String fileMaxSizeString =
-                null == env || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.UploadConfig.FileMaxSize"))
-                        ? data.getUploadConfig() != null
-                            ? Integer.toString(data.getUploadConfig().getFileMaxSize())
-                            : "10"
+        String fileMaxSizeString = null == env
+                || StringExtensions.isNullOrEmpty(env.getProperty("GlobalConfig.UploadConfig.FileMaxSize"))
+                        ? data.getUploadConfig() != null ? Integer.toString(data.getUploadConfig().getFileMaxSize())
+                                : "10"
                         : env.getProperty("GlobalConfig.UploadConfig.FileMaxSize");
         int fileMaxSize = 10;
         if (!StringExtensions.isNullOrEmpty(fileMaxSizeString)) {

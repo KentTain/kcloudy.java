@@ -16,14 +16,14 @@ spring:
 logging:
   charset:
     console: UTF-8
-  file: 
+  file:
     charset: UTF-8
   level:
     org.springframework.boot.autoconfigure: INFO
-    
+
 GlobalConfig:
   EncryptKey: dev-cfwin-EncryptKey
 
   SSOWebDomain: http://localhost:1001/
   ResWebDomain: http://localhost:9999/
-  AccWebDomain: http://subdomain.localhost:1101/
+  AccWebDomain: http://subdomain.localhost:2001/

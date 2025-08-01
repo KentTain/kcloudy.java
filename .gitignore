@@ -120,3 +120,5 @@ WebApi/kc.webapi.config/target/kc.webapi.config-1.0.0.1.jar.original
 
 !packages/**
 application.pid
+
+logs/**

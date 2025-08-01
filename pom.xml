@@ -134,7 +134,7 @@
 		<repository>
 			<id>kcloudy-repo</id>
 			<name>kcloudy-repo</name>
-			<url>http://nexus.kcloudy.com/repository/maven-public/</url>
+			<url>https://nexus.kcloudy.com/repository/maven-public/</url>
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
@@ -149,7 +149,7 @@
 		<pluginRepository>
 			<id>kcloudy-repo</id>
 			<name>kcloudy-repo</name>
-			<url>http://nexus.kcloudy.com/repository/maven-public/</url>
+			<url>https://nexus.kcloudy.com/repository/maven-public/</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>

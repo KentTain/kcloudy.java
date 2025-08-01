@@ -84,10 +84,21 @@ kcloudy.business
 #### 2.4.1 设置版本号并打包
 * 替换版本号, 会修改pom.xml中的版本号  
 mvn clean versions:set -DnewVersion={版本号}
-* maven cli 相关参数：https://maven.apache.org/ref/3.6.1/maven-embedder/cli.html，针对指定项目（-pl）并构建所需的项目（-am），采用跳过测试（-DskipTests）并包含源码（source:jar）方式进行发布，不显示下载进度（--no-transfer-progress）  
+
+* maven cli 相关参数：https://maven.apache.org/ref/3.8.1/maven-embedder/cli.html  
 mvn clean package -pl {项目编码} -am -DskipTests --no-transfer-progress source:jar
+  - -pl：针对指定项目
+  - -am：并构建所需的项目
+  - -DskipTests：采用跳过测试
+  - --no-transfer-progress：不显示下载进度
+  - source:jar：并包含源码方式进行发布
+
 * 复制Jar包到发布目录  
 cp -rf {项目编码}/target/{项目编码}-{版本号}.jar  D:\Publish\Java\{项目编码}\v-{版本号}
+* 复制Dockerfile到发布目录  
+cp -rf {项目编码}/Dockerfile  D:\Publish\Java\{项目编码}\v-{版本号}
+* 复制字体文件到发布目录  
+cp -rf Fonts/*  D:\Publish\Java\{项目编码}\v-{版本号}\Fonts
 
 #### 2.4.2 构建Docker镜像
 * 进入项目目录  
@@ -113,7 +124,7 @@ docker push registry.zhangjiakou.aliyuncs.com/kcloudy-java/{项目编码}:{版�
 # 1.1 替换版本号, 会修改pom.xml中的版本号，版本号格式为1.0.0.1，备注：执行后所有模块都会修改，以便统一版本号
 mvn clean versions:set -DnewVersion=1.0.0.1
 
-# 1.2 清理并打包项目，包含源码，maven cli 相关参数：https://maven.apache.org/ref/3.6.1/maven-embedder/cli.html，针对指定项目（-pl）并构建所需的项目（-am），采用跳过测试（-DskipTests）并包含源码（source:jar）方式进行发布，不显示下载进度（--no-transfer-progress）
+# 1.2 清理并打包项目，包含源码，maven cli 相关参数：https://maven.apache.org/ref/3.6.1/maven-embedder/cli.html，-pl：针对指定项目，-am：并构建所需的项目，-DskipTests：采用跳过测试，--no-transfer-progress：不显示下载进度，source:jar：并包含源码方式进行发布
 mvn clean package -pl :kc.web.demo -am -DskipTests --no-transfer-progress source:jar
 
 # 1.3 复制Jar包到发布目录

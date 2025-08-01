@@ -105,7 +105,8 @@ function Build-Java-Web {
 
     # Define variables
     $projectPath = "\$solutionType\$solutionName\"
-    $localNuget = "https://nexus.kcloudy.com/repository/maven-public/"
+    $localRepository = "https://nexus.kcloudy.com/repository/maven-public/"
+    $publicRepository = "https://maven.aliyun.com/repository/central"
     $containerName = $solutionName.ToLower()
     $acrUrl = "registry.cn-zhangjiakou.aliyuncs.com"
     $acrName = "kcloudy-java"  # Your ACR name
@@ -251,8 +252,8 @@ function Build-Java-Web {
 
     # Log the command and run it
     $commandString = "docker " + ($dockerRunCmd -join " ")
-    #Write-Info "Running container: $commandString"
-    #& docker $dockerRunCmd
+    Write-Info "Running container: $commandString"
+    & docker $dockerRunCmd
 
     # Show container logs
     #docker logs $containerName
