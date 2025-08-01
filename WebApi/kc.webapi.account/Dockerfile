@@ -40,6 +40,7 @@ RUN fc-cache -fv
 # 设置工作目录
 WORKDIR /app
 
+# 复制发布文件到容器
 COPY ./kc.webapi.account-${version}.jar app.jar
 
 # 暴露端口
