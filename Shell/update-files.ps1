@@ -85,9 +85,9 @@ function Update-Files {
     )
 
     # Get the template file content with correct encoding
-    $projectRoot = Split-Path -Path $PSScriptRoot -Parent
     $fileName = Split-Path -Path $fileFullPath -Leaf
     $filePath = Split-Path -Path $fileFullPath -Parent
+    $projectRoot = Split-Path -Path $PSScriptRoot -Parent
     $copyFullPath = "$projectRoot\Web\$solutionName\$fileFullPath"
     $copyFileContent = [System.IO.File]::ReadAllText($copyFullPath, [System.Text.Encoding]::UTF8)
 
