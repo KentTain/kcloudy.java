@@ -1,11 +1,11 @@
 # Java项目构建和部署脚本
 ## 1. 脚本目录结构
 ```bash
-kcloudy.business
+kcloudy.java
 |-- Shell
 |   |-- build-java-web.ps1     # 构建 Java Web 应用并部署到 Docker 容器
 |   |-- update-files.ps1       # 统一管理项目标准配置文件，包括：Dockerfile、logback.xml
-|   |-- clear-lastupdated.bat   # 清理 Maven 本地仓库中的临时文件
+|   |-- clear-lastupdated.bat  # 清理 Maven 本地仓库中的临时文件
 |   |-- jenkins-build.sh       # Jenkins 持续集成/持续部署脚本
 ```
 ## 2. 脚本说明
@@ -45,7 +45,7 @@ kcloudy.business
 .\update-files.ps1 -solutionType "Web" -solutionName "kc.web.account" -fileFullPath "src\main\resources\logback.xml" -isLowercase $true
 ```
 
-## 3. clearLastUpdated.bat
+## 3. clear-lastupdated.bat
 #### 功能说明
 清除 Maven 本地仓库中的 .lastUpdated 文件，解决 Maven 依赖更新问题
 
@@ -64,7 +64,7 @@ rem 搜索完毕
 pause
 ```
 
-## 4. jenkins.sh
+## 4. jenkins-build.sh
 
 ### 功能说明
 Jenkins 构建脚本，用于自动化构建和部署项目
