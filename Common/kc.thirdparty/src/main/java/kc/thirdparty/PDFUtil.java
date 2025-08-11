@@ -28,13 +28,13 @@ import com.itextpdf.tool.xml.XMLWorkerHelper;
 @lombok.extern.slf4j.Slf4j
 public class PDFUtil {
 
-	private final static String DEFAULT_LOGO_IMAGE_PATH ="/logo.png";
-	public static ByteArrayOutputStream getWatermark(InputStream originalPdf, String watermarkContent)
-	{
+	private final static String DEFAULT_LOGO_IMAGE_PATH = "/logo.png";
+
+	public static ByteArrayOutputStream getWatermark(InputStream originalPdf, String watermarkContent) {
 		try {
 			// read existing pdf
 			PdfReader reader = new PdfReader(originalPdf);
-			
+
 			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 			PdfStamper stamper = new PdfStamper(reader, outStream);
 
@@ -82,27 +82,24 @@ public class PDFUtil {
 
 			return outStream;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 			return null;
 		}
 	}
-	
+
 	public static boolean addWatermark(String originalPdfPath, String targetPdfPath, String watermarkContent) {
 		try {
 			// read existing pdf
 			InputStream inStream = new FileInputStream(originalPdfPath);
-			try(ByteArrayOutputStream byteArrayOutputStream = getWatermark(inStream, watermarkContent))
-			{
-			try(OutputStream outputStream = new FileOutputStream(targetPdfPath)) {
-				  byteArrayOutputStream.writeTo(outputStream);
+			try (ByteArrayOutputStream byteArrayOutputStream = getWatermark(inStream, watermarkContent)) {
+				try (OutputStream outputStream = new FileOutputStream(targetPdfPath)) {
+					byteArrayOutputStream.writeTo(outputStream);
 				}
 			}
 			inStream.close();
-			
+
 			return true;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 			return false;
 		}
@@ -128,7 +125,6 @@ public class PDFUtil {
 
 			return true;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 
 			return false;

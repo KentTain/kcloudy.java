@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -23,6 +21,8 @@ import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 
 import kc.framework.extension.DateExtensions;
 import kc.framework.extension.StringExtensions;
@@ -73,10 +73,10 @@ public class POIExcelWriter extends POIExcelAbstract {
 		}
 	}
 
-	public void setCellValueByName(String workSheetName, String cellName, String cellValue)
-			throws IOException {
+	public void setCellValueByName(String workSheetName, String cellName, String cellValue) throws IOException {
 		setCellValueByName(workSheetName, cellName, cellValue, null);
 	}
+
 	/**
 	 * 设置某个单元格（例如：A1）的值
 	 * 
@@ -349,9 +349,10 @@ public class POIExcelWriter extends POIExcelAbstract {
 
 		int wrapNumber = matcher.groupCount();
 
-		//String rule2 = "\\d";
+		// String rule2 = "\\d";
 		// 验证
-		//Pattern pattern2 = Pattern.compile(rule2.toString(), Pattern.CASE_INSENSITIVE);
+		// Pattern pattern2 = Pattern.compile(rule2.toString(),
+		// Pattern.CASE_INSENSITIVE);
 		Matcher matcher2 = pattern.matcher(value);
 
 		int blankNumber = matcher2.groupCount();
@@ -365,8 +366,7 @@ public class POIExcelWriter extends POIExcelAbstract {
 			try {
 				bytes = m.getBytes("UTF-8");
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e.getMessage(), e);
 			}
 			if (bytes != null) {
 				int item = bytes.length + blankNumber * 1;

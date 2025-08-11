@@ -5,20 +5,22 @@ import java.util.Dictionary;
 import kc.framework.extension.StringExtensions;
 import kc.framework.security.DesProvider;
 import kc.framework.security.EncryptPasswordUtil;
-
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@lombok.extern.slf4j.Slf4j
 public class ServiceRequestToken implements java.io.Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -7061037037197778332L;
 	private String _key = EncryptPasswordUtil.DEFAULT_Key;
-	public ServiceRequestToken() {}
-	
+
+	public ServiceRequestToken() {
+	}
+
 	public ServiceRequestToken(int userId, String memberId, String key) {
 		if (!StringExtensions.isNullOrEmpty(key))
 			this._key = key;
@@ -36,7 +38,7 @@ public class ServiceRequestToken implements java.io.Serializable {
 				this._key = key;
 			String encrypt = DesProvider.DecryptString(signatureJson, _key);
 
-            InitObject(encrypt);
+			InitObject(encrypt);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -53,8 +55,7 @@ public class ServiceRequestToken implements java.io.Serializable {
 			String objStr = ObjToString();
 			return DesProvider.EncryptString(objStr, _key);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("------GetEncrptSignature ", e);
 			return "";
 		}
 	}
@@ -90,27 +91,22 @@ public class ServiceRequestToken implements java.io.Serializable {
 
 		return result;
 	}
-	
-	private String ObjToString()
-    {
-        return String.format("key=%s;UserId=%s;MemberId=%s;RandomId=%s", _key, UserId, MemberId, RandomId);
-    }
 
-    private boolean InitObject(String objStr)
-    {
-        try
-        {
-            Dictionary<String, String> dictObj = StringExtensions.keyValuePairFromConnectionString(objStr);
-            _key = dictObj.get("key");
-            UserId = Integer.parseInt(dictObj.get("userid"));
-            MemberId = dictObj.get("memberid");
-            RandomId = dictObj.get("randomid");
-            return true;
-        }
-        catch (Exception ex)
-        {
-        	ex.printStackTrace();
-            return false;
-        }
-    }
+	private String ObjToString() {
+		return String.format("key=%s;UserId=%s;MemberId=%s;RandomId=%s", _key, UserId, MemberId, RandomId);
+	}
+
+	private boolean InitObject(String objStr) {
+		try {
+			Dictionary<String, String> dictObj = StringExtensions.keyValuePairFromConnectionString(objStr);
+			_key = dictObj.get("key");
+			UserId = Integer.parseInt(dictObj.get("userid"));
+			MemberId = dictObj.get("memberid");
+			RandomId = dictObj.get("randomid");
+			return true;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return false;
+		}
+	}
 }

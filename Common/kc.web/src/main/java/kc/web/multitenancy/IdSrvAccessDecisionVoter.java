@@ -2,6 +2,7 @@ package kc.web.multitenancy;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDecisionVoter;
@@ -10,7 +11,6 @@ import org.springframework.security.access.prepost.PreInvocationAttribute;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.FilterInvocation;
-import org.springframework.util.StringUtils;
 
 public class IdSrvAccessDecisionVoter implements AccessDecisionVoter<Object> {
 	private Logger logger = LoggerFactory.getLogger(IdSrvAccessDecisionVoter.class);
@@ -40,13 +40,13 @@ public class IdSrvAccessDecisionVoter implements AccessDecisionVoter<Object> {
 		String httpMethod = getMethod(object);
 		PreInvocationAttribute preAttr = findPreInvocationAttribute(attributes);
 
-		logger.debug(String.format("----IdSrvAccessDecisionManager decide with url: %s, method: %s, preAttribute: %s", 
+		logger.debug(String.format("----IdSrvAccessDecisionManager decide with url: %s, method: %s, preAttribute: %s",
 				url, httpMethod, preAttr.getAttribute()));
-		
-		//int result = ACCESS_ABSTAIN;
+
+		// int result = ACCESS_ABSTAIN;
 		for (ConfigAttribute attribute : attributes) {
 			if (this.supports(attribute)) {
-				//result = ACCESS_DENIED;
+				// result = ACCESS_DENIED;
 
 				// Attempt to find a matching granted authority
 				for (GrantedAuthority authority : authorities) {
@@ -63,13 +63,13 @@ public class IdSrvAccessDecisionVoter implements AccessDecisionVoter<Object> {
 			if (!(authority instanceof IdSrvGrantedAuthority))
 				continue;
 			IdSrvGrantedAuthority urlGrantedAuthority = (IdSrvGrantedAuthority) authority;
-			if (StringUtils.isEmpty(urlGrantedAuthority.getAuthority()))
+			if (ObjectUtils.isEmpty(urlGrantedAuthority.getAuthority()))
 				continue;
 			// 如果method为null，则默认为所有类型都支持
-			String httpMethod2 = (!StringUtils.isEmpty(urlGrantedAuthority.getAuthorityId()))
+			String httpMethod2 = (!ObjectUtils.isEmpty(urlGrantedAuthority.getAuthorityId()))
 					? urlGrantedAuthority.getAuthorityId()
 					: httpMethod;
-					
+
 			logger.debug(httpMethod2);
 		}
 

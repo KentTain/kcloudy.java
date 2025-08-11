@@ -3,7 +3,6 @@ package kc.web.util;
 import java.io.IOException;
 import java.util.Map;
 
-
 @lombok.extern.slf4j.Slf4j
 public class TemplateUtil {
 	/**
@@ -46,8 +45,7 @@ public class TemplateUtil {
 			try {
 				stringWriter.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("------processTemplate " + template + ": ", e);
 			}
 		}
 	}
@@ -82,14 +80,13 @@ public class TemplateUtil {
 			// 输出html
 			return stringWriter.toString();
 		} catch (Exception e) {
-			log.error("------processTemplate " + templateString + ": ", e);
+			log.error("------processString " + templateString + ": ", e);
 			return null;
 		} finally {
 			try {
 				stringWriter.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("------processString " + templateString + ": ", e);
 			}
 		}
 	}

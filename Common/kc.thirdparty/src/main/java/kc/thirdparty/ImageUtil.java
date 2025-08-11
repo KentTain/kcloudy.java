@@ -43,7 +43,6 @@ public class ImageUtil {
 			ByteArrayInputStream in = new ByteArrayInputStream(bytes); // 将b作为输入流；
 			return (BufferedImage) ImageIO.read(in); // 将in作为输入流，读取图片存入image中，而这里in可以为ByteArrayInputStream();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 			return null;
 		}
@@ -61,7 +60,6 @@ public class ImageUtil {
 			ImageIO.write(image, "png", bos);
 			return bos.toByteArray();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 			return null;
 		}
@@ -98,7 +96,6 @@ public class ImageUtil {
 			Image image = ImageIO.read(new File(imagePath));
 			return (BufferedImage) image;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 			return null;
 		}
@@ -125,7 +122,6 @@ public class ImageUtil {
 		try {
 			return Thumbnails.of(originalImage).size(width, height).asBufferedImage();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 
 			return null;
@@ -149,7 +145,6 @@ public class ImageUtil {
 		try {
 			return Thumbnails.of(originalImage).scale(scale).asBufferedImage();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 
 			return null;
@@ -180,7 +175,6 @@ public class ImageUtil {
 			Thumbnails.of(originalImagePath).size(width, height).toFile(thumbnailPath);
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 			return false;
 		}
@@ -206,7 +200,6 @@ public class ImageUtil {
 			Thumbnails.of(originalImagePath).scale(scale).toFile(thumbnailPath);
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 			return false;
 		}
@@ -241,7 +234,6 @@ public class ImageUtil {
 
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 			return false;
 		}
@@ -263,7 +255,6 @@ public class ImageUtil {
 			return Thumbnails.of(originalImage).watermark(Positions.BOTTOM_RIGHT, watermarkImage, 0.5f)
 					.asBufferedImage();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 
 			return null;
@@ -289,7 +280,6 @@ public class ImageUtil {
 			return Thumbnails.of(originalImagePath).watermark(Positions.BOTTOM_RIGHT, watermarkImage, 0.5f)
 					.asBufferedImage();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 			return null;
 		}
@@ -318,7 +308,6 @@ public class ImageUtil {
 			return true;
 
 		} catch (Exception e) {
-			// TODO: handle exception
 			log.error(e.getMessage(), e);
 			return false;
 		}
@@ -340,7 +329,6 @@ public class ImageUtil {
 			return addWatermark((BufferedImage) srcImg, waterMarkContent);
 
 		} catch (Exception e) {
-			// TODO: handle exception
 			log.error(e.getMessage(), e);
 			return null;
 		}
@@ -379,7 +367,6 @@ public class ImageUtil {
 			return bufImg;
 
 		} catch (Exception e) {
-			// TODO: handle exception
 			log.error(e.getMessage(), e);
 			return null;
 		}
@@ -430,7 +417,6 @@ public class ImageUtil {
 
 			return getBufferedImage(sourceImage);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 
 			return null;
@@ -447,8 +433,7 @@ public class ImageUtil {
 	 * @throws Exception
 	 */
 	public static boolean insertImage(String sourceImagePath, String targetImagePath, String logoImagePath) {
-		if (StringExtensions.isNullOrEmpty(targetImagePath) 
-				|| StringExtensions.isNullOrEmpty(targetImagePath)
+		if (StringExtensions.isNullOrEmpty(targetImagePath) || StringExtensions.isNullOrEmpty(targetImagePath)
 				|| StringExtensions.isNullOrEmpty(logoImagePath))
 			return false;
 
@@ -466,7 +451,6 @@ public class ImageUtil {
 
 			return true;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage(), e);
 
 			return false;

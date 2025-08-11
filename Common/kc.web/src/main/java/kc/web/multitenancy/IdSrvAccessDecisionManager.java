@@ -2,6 +2,7 @@ package kc.web.multitenancy;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDecisionManager;
@@ -12,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 @Service
 public class IdSrvAccessDecisionManager implements AccessDecisionManager {
@@ -44,9 +44,10 @@ public class IdSrvAccessDecisionManager implements AccessDecisionManager {
 
 		PreInvocationAttribute preAttr = findPreInvocationAttribute(attributes);
 
-		logger.debug(String.format("----IdSrvAccessDecisionManager decide with url: %s, method: %s, preAttribute: %s, full url: %s", 
-				url, httpMethod, preAttr.getAttribute(), fullUrl));
-		
+		logger.debug(String.format(
+				"----IdSrvAccessDecisionManager decide with url: %s, method: %s, preAttribute: %s, full url: %s", url,
+				httpMethod, preAttr.getAttribute(), fullUrl));
+
 		boolean hasPerm = false;
 
 		// request请求路径和httpMethod 和权限列表比对。
@@ -54,12 +55,13 @@ public class IdSrvAccessDecisionManager implements AccessDecisionManager {
 			if (!IdSrvGrantedAuthority.class.isInstance(authority))
 				continue;
 			IdSrvGrantedAuthority urlGrantedAuthority = (IdSrvGrantedAuthority) authority;
-			if (StringUtils.isEmpty(urlGrantedAuthority.getAuthority()))
+			if (ObjectUtils.isEmpty(urlGrantedAuthority.getAuthority()))
 				continue;
 			// 如果method为null，则默认为所有类型都支持
-			//String httpMethod2 = (!StringUtils.isEmpty(urlGrantedAuthority.getAuthorityId()))
-			//		? urlGrantedAuthority.getAuthorityId()
-			//		: httpMethod;
+			// String httpMethod2 =
+			// (!StringUtils.isEmpty(urlGrantedAuthority.getAuthorityId()))
+			// ? urlGrantedAuthority.getAuthorityId()
+			// : httpMethod;
 			// AntPathRequestMatcher进行匹配，url支持ant风格（如：/user/**）
 			// AntPathRequestMatcher antPathRequestMatcher = new
 			// AntPathRequestMatcher(urlGrantedAuthority.getAuthority(), httpMethod2);
