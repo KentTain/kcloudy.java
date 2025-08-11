@@ -1,3 +1,4 @@
+#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 server:
   port: 2001
   #tomcat 请求设置
@@ -14,10 +15,6 @@ spring:
     username: sa
     password: P@ssw0rd
 logging:
-  charset:
-    console: UTF-8
-  file:
-    charset: UTF-8
   level:
     org.springframework.boot.autoconfigure: INFO
 

@@ -11,7 +11,7 @@ spring:
   profiles:
     active: dev
   main:
-    allow-bean-definition-overriding: true  #当遇到同样的名字时，是否允许覆盖注册
+    allow-bean-definition-overriding: true #当遇到同样的名字时，是否允许覆盖注册
   application:
     name: 应用管理
   servlet:
@@ -26,8 +26,8 @@ spring:
     show-sql: false
     hibernate:
       naming:
-          implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
         dialect: kc.database.core.CustomSqlServer2012Dialect
@@ -55,9 +55,13 @@ spring:
   liquibase:
     enabled: false
 logging:
+  charset:
+    console: UTF-8
+  file:
+    charset: UTF-8
   level:
     org.springframework.boot.autoconfigure: ERROR
-    
+
 GlobalConfig:
   ApplicationId: 1F301943-268F-4940-8BFB-900E0E6E0D35
 

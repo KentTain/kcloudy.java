@@ -21,10 +21,10 @@ http port to run the container on
 HTTPS port to run the container on, default is 0 (not specified)
 
 .PARAMETER env
-Deployment environment, default is "Production"
+Deployment environment, default is "prod"
 
 .EXAMPLE
-.\build-java-web.ps1 -solutionType "Web" -solutionName "kc.web.account" -versionNum 1 -httpPort 2001 -httpsPort 0 -env "Production"
+.\build-java-web.ps1 -solutionType "Web" -solutionName "kc.web.account" -versionNum 1 -httpPort 2001 -httpsPort 0 -env "prod"
 #>
 
 param(
@@ -44,7 +44,7 @@ param(
     [int]$httpsPort = 0,
 
     [Parameter(Mandatory=$false)]
-    [string]$env = "Production"
+    [string]$env = "prod"
 )
 
 # Set console output encoding to UTF-8

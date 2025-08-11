@@ -42,9 +42,9 @@
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.hibernate" level="WARN"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
-    <logger name="kc" level="DEBUG"/>
-    <logger name="kc.web" level="DEBUG"/>
-    <logger name="kc.framework" level="DEBUG"/>
+    <logger name="kc" level="INFO"/>
+    <logger name="kc.web" level="INFO"/>
+    <logger name="kc.framework" level="INFO"/>
 
     <!-- 根日志配置 -->
     <root level="INFO">

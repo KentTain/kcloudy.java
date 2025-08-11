@@ -3,32 +3,15 @@
 ```bash
 kcloudy.java
 |-- Shell
-|   |-- build-java-web.ps1     # 构建 Java Web 应用并部署到 Docker 容器
 |   |-- update-files.ps1       # 统一管理项目标准配置文件，包括：Dockerfile、logback.xml
+|   |-- build-java-web.ps1     # 构建 Java Web 应用并部署到 Docker 容器
 |   |-- clear-lastupdated.bat  # 清理 Maven 本地仓库中的临时文件
 |   |-- jenkins-build.sh       # Jenkins 持续集成/持续部署脚本
 ```
 ## 2. 脚本说明
-### 2.1 build-java-web.ps1
+### 2.1 update-files.ps1
 #### 功能说明
-构建和部署 Java Web 应用到 Docker 容器
-
-#### 参数说明
-* `solutionType`：解决方案类型，默认为 "Web"
-* `solutionName`：需要构建的解决方案名称
-* `versionNum`：版本号
-* `httpPort`：容器运行的 HTTP 端口
-* `httpsPort`：容器运行的 HTTPS 端口，默认为 0（不启用）
-* `env`：部署环境，默认为 "Production"
-
-#### 使用示例
-```powershell
-.\build-java-web.ps1 -solutionType "Web" -solutionName "kc.web.account" -versionNum 1 -httpPort 2001 -httpsPort 0 -env "Production"
-```
-
-## 2. update-files.ps1
-#### 功能说明
-将标准文件（如 Dockerfile、logback.xml 等）从模板项目复制到其他项目
+将标准文件（如 Dockerfile、logback.xml 等）从模板项目（Web目录下的 kc.web.account 项目）复制到其他项目
 
 #### 参数说明
 * `solutionType`：解决方案类型，默认为 "Web"
@@ -38,14 +21,35 @@ kcloudy.java
 
 ### 使用示例
 ```powershell
-# 更新 Dockerfile
-.\update-files.ps1 -solutionType "Web" -solutionName "kc.web.account" -fileFullPath "Dockerfile" -isLowercase $true
+# 使用函数Update-Files，更新 Dockerfile
+Update-Files -solutionType "Web" -solutionName "kc.web.account" -fileFullPath "Dockerfile" -isLowercase $true
 
-# 更新 logback.xml
-.\update-files.ps1 -solutionType "Web" -solutionName "kc.web.account" -fileFullPath "src\main\resources\logback.xml" -isLowercase $true
+# 使用函数Update-Files，更新 logback.xml
+Update-Files -solutionType "Web" -solutionName "kc.web.account" -fileFullPath "src\main\resources\logback.xml" -isLowercase $true
+
+# 使用Main方法，更新所有 Dockerfile、logback.xml
+.\update-files.ps1
 ```
 
-## 3. clear-lastupdated.bat
+### 2.2 build-java-web.ps1
+#### 功能说明
+构建和部署 Java Web 应用到 Docker 容器
+
+#### 参数说明
+* `solutionType`：解决方案类型，默认为 "Web"
+* `solutionName`：需要构建的解决方案名称
+* `versionNum`：版本号
+* `httpPort`：容器运行的 HTTP 端口
+* `httpsPort`：容器运行的 HTTPS 端口，默认为 0（不启用）
+* `env`：部署环境，默认为 "prod"
+
+#### 使用示例
+```powershell
+# 使用脚本build-java-web.ps1，构建及部署应用
+build-java-web.ps1 -solutionType "Web" -solutionName "kc.web.account" -versionNum 1 -httpPort 2001 -httpsPort 0 -env "prod"
+```
+
+### 2.3 clear-lastupdated.bat
 #### 功能说明
 清除 Maven 本地仓库中的 .lastUpdated 文件，解决 Maven 依赖更新问题
 
@@ -64,12 +68,12 @@ rem 搜索完毕
 pause
 ```
 
-## 4. jenkins-build.sh
+### 2.4 jenkins-build.sh
 
-### 功能说明
+#### 功能说明
 Jenkins 构建脚本，用于自动化构建和部署项目
 
-### 功能概述
+#### 功能概述
 1. 构建 kcloudy.demo.core 项目并发布到 Nexus 仓库
 2. 构建 kcloudy.demo.web 项目并发布到本地路径
 3. 生成 Docker 镜像
