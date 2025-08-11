@@ -1,23 +1,25 @@
 package kc.database.multitenancy;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import kc.database.TenantConnection;
-import kc.framework.tenant.Tenant;
-import kc.framework.tenant.TenantConstant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.sql.DataSource;
+
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+import kc.database.TenantConnection;
+import kc.framework.tenant.Tenant;
+import kc.framework.tenant.TenantConstant;
 
 //import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -28,8 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 1.0
  */
 @Component
+@lombok.extern.slf4j.Slf4j
 public class TenantDataSourceProvider {
-    private static Logger logger = LoggerFactory.getLogger(TenantDataSourceProvider.class.getName());
+    // private static Logger logger =
+    // LoggerFactory.getLogger(TenantDataSourceProvider.class.getName());
     static String DEFAULT_TENANT_NAME = TenantConstant.TestTenantName;
 
     private static String defaultDatabaseJdbcUrl = "jdbc:sqlserver://rm-8vb7ip9632ck1tt4l.mssql.zhangbei.rds.aliyuncs.com:3433;databaseName=MSSqlKCContext";
@@ -52,39 +56,40 @@ public class TenantDataSourceProvider {
 
     // 根据传进来的tenantId决定返回的数据源
     static DataSource getTenantDataSource(String tenantId) {
-        String key = dataSourceMap.containsKey(tenantId)
-                ? tenantId
-                : DEFAULT_POOL_CONFIG;
+        String key = dataSourceMap.containsKey(tenantId) ? tenantId : DEFAULT_POOL_CONFIG;
         DataSource result = dataSourceMap.get(key);
-//        if (result instanceof HikariDataSource) {
-//            HikariDataSource hikariDs = (HikariDataSource) result;
-//            System.out.println("-----TenantDataSourceProvider GetDataSource: " + key + ", connect: " + hikariDs.getJdbcUrl());
-//        }
+        if (result instanceof HikariDataSource) {
+            HikariDataSource hikariDs = (HikariDataSource) result;
+            log.info(String.format("===TenantDataSourceProvider getTenantDataSource==%s==%s==", key,
+                    hikariDs.getJdbcUrl()));
+        }
 
         return result;
     }
 
     // 初始化的时候用于添加数据源的方法
     public static void addDataSource(Tenant tenantInfo) {
-        //System.out.println("-----TenantDataSourceProvider ConnectionString: " + tenantInfo.ConnectionString());
+        log.info("-----TenantDataSourceProvider addDataSource: " + tenantInfo.ConnectionString());
 
         String dbType = TenantConnection.DEFAULT_SQLSERVER_DRIVER_CLASS;
-        switch (tenantInfo.getDatabaseType()){
-            case MySql:
-                dbType = TenantConnection.DEFAULT_MYSQL_DRIVER_CLASS;
-                break;
-            case SqlServer:
-                dbType = TenantConnection.DEFAULT_SQLSERVER_DRIVER_CLASS;
-                break;
-            case Oracle:
-                dbType = TenantConnection.DEFAULT_ORACLE_DRIVER_CLASS;
-                break;
-            case PostgreSQL:
-                dbType = TenantConnection.DEFAULT_POSTGRESQL_DRIVER_CLASS;
-                break;
+        switch (tenantInfo.getDatabaseType()) {
+        case MySql:
+            dbType = TenantConnection.DEFAULT_MYSQL_DRIVER_CLASS;
+            break;
+        case SqlServer:
+            dbType = TenantConnection.DEFAULT_SQLSERVER_DRIVER_CLASS;
+            break;
+        case Oracle:
+            dbType = TenantConnection.DEFAULT_ORACLE_DRIVER_CLASS;
+            break;
+        case PostgreSQL:
+            dbType = TenantConnection.DEFAULT_POSTGRESQL_DRIVER_CLASS;
+            break;
+        default:
+            break;
         }
 
-        //com.zaxxer.hikari
+        // com.zaxxer.hikari
         HikariConfig config = getDefaultHikariConfig();
         config.setPoolName(tenantInfo.getTenantName());
         if (tenantInfo.getDatabaseType() == kc.framework.enums.DatabaseType.MySql)
@@ -107,7 +112,7 @@ public class TenantDataSourceProvider {
     }
 
     private static void initDataSource() {
-        //com.zaxxer.hikari
+        // com.zaxxer.hikari
         HikariConfig config = getDefaultHikariConfig();
 
         HikariDataSource ds = new HikariDataSource(config);
@@ -117,27 +122,27 @@ public class TenantDataSourceProvider {
 
     private static HikariConfig getDefaultHikariConfig() {
         String driverClass = getValueFromYamlKey("spring.datasource.driver-class-name");
-        if (StringUtils.hasLength(driverClass))
-            defaultDatabaseDriverClass = driverClass;
+        if (ObjectUtils.isEmpty(driverClass))
+            driverClass = defaultDatabaseDriverClass;
         String dbUrl = getValueFromYamlKey("spring.datasource.url");
-        if (StringUtils.hasLength(dbUrl))
-            defaultDatabaseJdbcUrl = dbUrl;
+        if (ObjectUtils.isEmpty(dbUrl))
+            dbUrl = defaultDatabaseJdbcUrl;
         String dbUserName = getValueFromYamlKey("spring.datasource.username");
-        if (StringUtils.hasLength(dbUserName))
-            defaultDatabaseUserName = dbUserName;
+        if (ObjectUtils.isEmpty(dbUserName))
+            dbUserName = defaultDatabaseUserName;
         String dbPassword = getValueFromYamlKey("spring.datasource.password");
-        if (StringUtils.hasLength(dbPassword))
-            defaultDatabasePassword = dbPassword;
+        if (ObjectUtils.isEmpty(dbPassword))
+            dbPassword = defaultDatabasePassword;
 
-//        System.out.println(String.format("=====%s==%s==%s==%s=======",
-//                defaultDatabaseDriverClass, defaultDatabaseJdbcUrl, defaultDatabaseUserName, defaultDatabasePassword));
+        log.info(String.format("===getDefaultHikariConfig driverClass：%s，dbUrl：%s，dbUserName：%s，dbPassword：%s",
+                driverClass, dbUrl, dbUserName, dbPassword));
         HikariConfig config = new HikariConfig();
         config.setPoolName(DEFAULT_POOL_CONFIG);
-        //config.setSchema(DEFAULT_TENANT_NAME);
-        config.setDriverClassName(defaultDatabaseDriverClass);
-        config.setJdbcUrl(defaultDatabaseJdbcUrl);
-        config.setUsername(defaultDatabaseUserName);
-        config.setPassword(defaultDatabasePassword);
+        // config.setSchema(DEFAULT_TENANT_NAME);
+        config.setDriverClassName(driverClass);
+        config.setJdbcUrl(dbUrl);
+        config.setUsername(dbUserName);
+        config.setPassword(dbPassword);
         config.setConnectionTimeout(30000);
         config.setIdleTimeout(600000);
         config.setMaxLifetime(1800000);
@@ -152,22 +157,52 @@ public class TenantDataSourceProvider {
     }
 
     /**
-     *  获取Web应用的application.yml文件的配置值
+     * 获取Web应用的application.yml文件的配置值
+     * 
      * @param keyPath application.yml文件的配置Key，例如：spring.profiles.active
      * @return application.yml文件的配置值
      */
-    public static String getValueFromYamlKey(String keyPath){
-        Resource resource = new ClassPathResource("application.yml");
-        String result = getValueFromYamlKey(resource, keyPath);
-        if (StringUtils.hasLength(result))
-            return result;
+    public static String getValueFromYamlKey(String keyPath) {
+        // 1. 首先尝试从环境变量或系统属性中获取
+        String envValue = System.getenv(keyPath.replace('.', '_').toUpperCase());
+        if (StringUtils.hasText(envValue)) {
+            log.debug("===Found value for {} in environment variables", keyPath);
+            return envValue;
+        }
 
-        String active = getValueFromYamlKey(resource, "spring.profiles.active");
-        if (!StringUtils.hasLength(active))
-            active = "dev";
+        // 2. 获取当前激活的 profile
+        String activeProfile = System.getProperty("spring.profiles.active");
+        if (!StringUtils.hasText(activeProfile)) {
+            activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
+            if (!StringUtils.hasText(activeProfile)) {
+                // 3. 从 application.yml 中获取激活的 profile
+                Resource resource = new ClassPathResource("application.yml");
+                activeProfile = getValueFromYamlKey(resource, "spring.profiles.active");
+                if (!StringUtils.hasText(activeProfile)) {
+                    activeProfile = "dev"; // 默认值
+                }
+            }
+        }
 
-        resource = new ClassPathResource("application-" + active + ".yml");
-        return getValueFromYamlKey(resource, keyPath);
+        log.info("===Loading configuration for profile: {}", activeProfile);
+
+        // 4. 尝试从 application-{profile}.yml 中获取
+        String profileSpecificFile = "application-" + activeProfile + ".yml";
+        try {
+            Resource profileResource = new ClassPathResource(profileSpecificFile);
+            if (profileResource.exists()) {
+                String value = getValueFromYamlKey(profileResource, keyPath);
+                if (StringUtils.hasText(value)) {
+                    return value;
+                }
+            }
+        } catch (Exception e) {
+            log.error("===Error loading profile-specific config: " + profileSpecificFile, e);
+        }
+
+        // 5. 最后尝试从 application.yml 中获取
+        Resource defaultResource = new ClassPathResource("application.yml");
+        return getValueFromYamlKey(defaultResource, keyPath);
     }
 
     private static String getValueFromYamlKey(Resource resource, String keyPath) {
@@ -175,9 +210,10 @@ public class TenantDataSourceProvider {
             List<PropertySource<?>> load = new YamlPropertySourceLoader().load(keyPath, resource);
             if (load == null || load.size() <= 0)
                 return null;
-            return load.get(0).getProperty(keyPath) == null ? "" : load.get(0).getProperty(keyPath).toString();
+            return load.get(0) == null || load.get(0).getProperty(keyPath) == null ? ""
+                    : load.get(0).getProperty(keyPath).toString();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            log.error("===Error loading profile-specific config: " + resource.getFilename(), ex);
             return null;
         }
     }

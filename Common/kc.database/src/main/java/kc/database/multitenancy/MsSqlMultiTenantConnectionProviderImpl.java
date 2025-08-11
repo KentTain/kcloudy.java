@@ -1,14 +1,17 @@
 package kc.database.multitenancy;
 
-import com.zaxxer.hikari.HikariDataSource;
-import kc.framework.tenant.Tenant;
-import kc.framework.tenant.TenantContext;
+import javax.sql.DataSource;
+
 import org.hibernate.engine.jdbc.connections.spi.AbstractDataSourceBasedMultiTenantConnectionProviderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
-import javax.sql.DataSource;
+import com.zaxxer.hikari.HikariDataSource;
+
+import kc.framework.tenant.Tenant;
+import kc.framework.tenant.TenantContext;
 
 /**
  * 指定了 ConnectionProvider，即 Hibernate 需要知道如何以租户特有的方式获取数据连接
@@ -26,8 +29,7 @@ public class MsSqlMultiTenantConnectionProviderImpl extends AbstractDataSourceBa
      */
     @Override
     protected DataSource selectAnyDataSource() {
-        System.out.println("-----MsSqlMultiTenantConnectionProviderImpl selectAnyDataSource by default tenant: "
-                + TenantDataSourceProvider.DEFAULT_TENANT_NAME);
+        log.info("===selectAnyDataSource by default tenant: " + TenantDataSourceProvider.DEFAULT_TENANT_NAME);
         return TenantDataSourceProvider.getTenantDataSource(TenantDataSourceProvider.DEFAULT_TENANT_NAME);
     }
 
@@ -42,20 +44,21 @@ public class MsSqlMultiTenantConnectionProviderImpl extends AbstractDataSourceBa
      */
     @Override
     protected DataSource selectDataSource(String tenantIdentifier) {
-        System.out.println("-----MsSqlMultiTenantConnectionProviderImpl selectDataSource by tenant: " + tenantIdentifier);
+        log.info("===selectDataSource by tenant: " + tenantIdentifier);
 
         DataSource ds = TenantDataSourceProvider.getTenantDataSource(tenantIdentifier);
         if (ds instanceof HikariDataSource) {
-            HikariDataSource hikariDs = (HikariDataSource) ds;
-            if (hikariDs.getPoolName().equalsIgnoreCase(tenantIdentifier))
-                return ds;
+            try (HikariDataSource hikariDs = (HikariDataSource) ds) {
+                if (hikariDs.getPoolName().equalsIgnoreCase(tenantIdentifier))
+                    return ds;
+            }
         }
 
         Tenant tenant = TenantContext.getCurrentTenant();
-        if (tenant == null)
+        if (ObjectUtils.isEmpty(tenant))
             tenant = tenantResolver.Resolve(tenantIdentifier);
 
-        if (tenant == null)
+        if (ObjectUtils.isEmpty(tenant))
             throw new NullPointerException(String.format("未找到相关租户: %s 的数据源", tenantIdentifier));
 
         TenantDataSourceProvider.addDataSource(tenant);
