@@ -2,13 +2,13 @@ spring:
   datasource: #数据库连接
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://127.0.0.1;databaseName=MSSqlKCContext;
+    url: jdbc:sqlserver://127.0.0.1:1433;databaseName=MSSqlKCContext
     username: sa
-    password: P@ssw0rd
+    password: 0QVw0yFoX2GuwkMSQyz1tg==
 logging:
   level:
     org.springframework.boot.autoconfigure: INFO
-    
+
 GlobalConfig:
   EncryptKey: dev-cfwin-EncryptKey
 

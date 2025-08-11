@@ -100,7 +100,7 @@ function Build-Java-Web {
         [int]$httpsPort = 0,
 
         [Parameter(Mandatory=$false)]
-        [string]$env = "Production"
+        [string]$env = "prod"
     )
 
     # Define variables

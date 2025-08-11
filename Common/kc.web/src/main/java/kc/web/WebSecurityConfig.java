@@ -109,7 +109,7 @@ public class WebSecurityConfig {
 		// IdSrvAuthorizationRequestResolver.REGISTRATION_ID_URI_VARIABLE_NAME);
 		String redirectUrl = String.format("{baseUrl}/login/oauth2/code/{%s}",
 				IdSrvAuthorizationRequestResolver.REGISTRATION_ID_URI_VARIABLE_NAME);
-		log.info(String.format("-----WebSecurityConfig idsvrClientRegistration: %s in sso domain: %s to redirect: %s",
+		log.info(String.format("===WebSecurityConfig idsvrClientRegistration: %s in sso domain: %s to redirect: %s",
 				OpenIdConnectConstants.ClientAuthScheme, ssoWebDomain, redirectUrl));
 
 		return ClientRegistration.withRegistrationId(OpenIdConnectConstants.ClientAuthScheme).clientId("Y0RiYQ==")

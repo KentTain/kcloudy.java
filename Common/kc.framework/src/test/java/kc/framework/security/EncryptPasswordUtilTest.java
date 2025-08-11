@@ -1,15 +1,20 @@
 package kc.framework.security;
 
-import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import kc.framework.GlobalConfig;
 import kc.framework.TestBase;
 import kc.framework.base.ServiceRequestToken;
 import kc.framework.enums.SystemType;
 import kc.framework.extension.StringExtensions;
-import kc.framework.tenant.*;
+import kc.framework.tenant.TenantConstant;
 
 @DisplayName("加密解密测试")
 class EncryptPasswordUtilTest extends TestBase {
@@ -29,40 +34,76 @@ class EncryptPasswordUtilTest extends TestBase {
     }
 
     @Test
+    void test_default_EncryptPasswordUtil() {
+        // 生产环境
+        String key = "KCloudy-Microsoft-EncryptKey";
+        String pwd = "NG6lJCNxSxZHrihmlyXS";
+        String encrypPwd = "Hcqqkeum+lPvQlPHyHOhM33xffnXWK2P";
+        System.out.println("--test_EncryptPasswordUtil key: " + key);
+        System.out.println("--test_EncryptPasswordUtil pwd: " + pwd);
+
+        String encryptString = EncryptPasswordUtil.EncryptPassword(pwd, key);
+        System.out.println("--test_EncryptPasswordUtil encryptString: " + encryptString);
+        assertEquals(encrypPwd, encryptString);
+
+        String decryptString = EncryptPasswordUtil.DecryptPassword(encryptString, key);
+        assertEquals(pwd, decryptString);
+
+        // 开发环境
+        key = "dev-cfwin-EncryptKey";
+        pwd = "P@ssw0rd";
+        encrypPwd = "0QVw0yFoX2GuwkMSQyz1tg==";
+        System.out.println("--test_EncryptPasswordUtil key: " + key);
+        System.out.println("--test_EncryptPasswordUtil pwd: " + pwd);
+
+        encryptString = EncryptPasswordUtil.EncryptPassword(pwd, key);
+        System.out.println("--test_EncryptPasswordUtil encryptString: " + encryptString);
+        assertEquals(encrypPwd, encryptString);
+
+        decryptString = EncryptPasswordUtil.DecryptPassword(encryptString, key);
+        assertEquals(pwd, decryptString);
+    }
+
+    @Test
     void test_EncryptPasswordUtil() {
         String key = "L3c132f119l";
         String pwd = "Yv3RtfeR/OF7DK+6Y9a13zQoZEoKNLphqo/NKm1NLMfnnvtoJMx3s42fEdHotcj39uFQ93ifXU4B9EJAFG3dFA==";
 
-        //System.out.println("--test_EncryptPasswordUtil pwd: " + pwd);
-        //System.out.println("--test_EncryptPasswordUtil key: " + key);
+        // System.out.println("--test_EncryptPasswordUtil pwd: " + pwd);
+        // System.out.println("--test_EncryptPasswordUtil key: " + key);
         String encryptString = EncryptPasswordUtil.EncryptPassword(pwd, key);
-        //System.out.println("--test_EncryptPasswordUtil encryptString: " + encryptString);
+        // System.out.println("--test_EncryptPasswordUtil encryptString: " +
+        // encryptString);
 
         String decryptString = EncryptPasswordUtil.DecryptPassword(encryptString, key);
-        //System.out.println("--test_EncryptPasswordUtil decryptString: " + decryptString);
+        // System.out.println("--test_EncryptPasswordUtil decryptString: " +
+        // decryptString);
 
         assertEquals(pwd, decryptString);
 
-        String encryptStringWithNet = "OfPxrtMdGomTB5ZKD2X/RdPt8gd0v0MMERAdfnohJuGmR6K8vBF+7H8TY2g/yYP+vH9Aqjw+YcDfttUcbGtBbKZvh0Pm4DwZBDsTQTPLpGYLurAr2d5NfOh9PgdyRehj";//C#
+        String encryptStringWithNet = "OfPxrtMdGomTB5ZKD2X/RdPt8gd0v0MMERAdfnohJuGmR6K8vBF+7H8TY2g/yYP+vH9Aqjw+YcDfttUcbGtBbKZvh0Pm4DwZBDsTQTPLpGYLurAr2d5NfOh9PgdyRehj";// C#
         assertEquals(encryptString, encryptStringWithNet);
-        //System.out.println();
+        // System.out.println();
     }
 
     @Test
     void test_TenantEncryptPassword() {
         String decExcept = "4+jbEzR3oUB9k8s+n1gOTifJ40FnghwhobaekoLzruTR0GM6sDnKzZiIHDzE8eN7grq5e5QwQxwcvzoTZeTh/kOTrJWSwGcaroHrEwQ4qPnYDWmzRHd/zoj1x218NLeI";
         String decryptString = EncryptPasswordUtil.DecryptPassword(decExcept, "L3c132f119l");
-        //System.out.println("--test_TenantEncryptPassworddecryptString: " + decryptString);
+        // System.out.println("--test_TenantEncryptPassworddecryptString: " +
+        // decryptString);
 
         String encryptString = EncryptPasswordUtil.EncryptPassword(decryptString, "L3c65fd29");
-        //System.out.println("--test_TenantEncryptPasswordencryptString: " + encryptString);
+        // System.out.println("--test_TenantEncryptPasswordencryptString: " +
+        // encryptString);
 
         String decryptString2 = EncryptPasswordUtil.DecryptPassword(encryptString, "L3c65fd29");
-        //System.out.println("--test_TenantEncryptPassworddecryptString2: " + decryptString2);
+        // System.out.println("--test_TenantEncryptPassworddecryptString2: " +
+        // decryptString2);
 
         String database = EncryptPasswordUtil.DecryptPassword("ld9km+/hXXgxD9YgsPSnrA==", "Ad9525565");
-        //System.out.println("--test_TenantEncryptPassworddatabase: " + database);
-        //System.out.println();
+        // System.out.println("--test_TenantEncryptPassworddatabase: " + database);
+        // System.out.println();
 
         assertEquals(decryptString, decryptString2);
         assertEquals("P@ssw0rd", database);
@@ -135,11 +176,13 @@ class EncryptPasswordUtilTest extends TestBase {
         encryptKey = "dev-cfwin-EncryptKey";
         String encryptGitlabKey = EncryptPasswordUtil.EncryptPassword(gitlabKey, encryptKey);
         String decryptGitlabKey = EncryptPasswordUtil.DecryptPassword(encryptGitlabKey, encryptKey);
-        System.out.println("gitlab decrypt key: " + encryptGitlabKey + " with encrypt: " + encryptKey + " with decrypt: " + decryptGitlabKey);
+        System.out.println("gitlab decrypt key: " + encryptGitlabKey + " with encrypt: " + encryptKey
+                + " with decrypt: " + decryptGitlabKey);
         encryptKey = "KCloudy-Microsoft-EncryptKey";
         encryptGitlabKey = EncryptPasswordUtil.EncryptPassword(gitlabKey, encryptKey);
         decryptGitlabKey = EncryptPasswordUtil.DecryptPassword(encryptGitlabKey, encryptKey);
-        System.out.println("gitlab decrypt key: " + encryptGitlabKey + " with encrypt: " + encryptKey + " with decrypt: " + decryptGitlabKey);
+        System.out.println("gitlab decrypt key: " + encryptGitlabKey + " with encrypt: " + encryptKey
+                + " with decrypt: " + decryptGitlabKey);
 
         String gitlabConnString = GlobalConfig.GetDecryptCodeConnectionString();
         System.out.println("gitlab ConnectionString: " + gitlabConnString);
@@ -194,54 +237,70 @@ class EncryptPasswordUtilTest extends TestBase {
                 TenantConstant.BuyTenantApiAccessInfo.getPrivateEncryptKey());
         assertFalse(StringExtensions.isNullOrEmpty(BuyQueueConnect));
         System.out.println("----Buy's Queue connect string: " + BuyQueueConnect);
-        //System.out.println();
+        // System.out.println();
     }
 
     @Test
     void test_TenantSignature() throws Exception {
-        //String DbaSignatureObj = new KC.Framework.Base.ServiceRequestToken(TenantConstant.DbaTenantId.ToString(), TenantConstant.DbaTenantName, TenantConstant.DefaultPrivateEncryptKey);
-        //String DbaSignature = DbaSignatureObj.GetEncrptSignature();
+        // String DbaSignatureObj = new
+        // KC.Framework.Base.ServiceRequestToken(TenantConstant.DbaTenantId.ToString(),
+        // TenantConstant.DbaTenantName, TenantConstant.DefaultPrivateEncryptKey);
+        // String DbaSignature = DbaSignatureObj.GetEncrptSignature();
         String DbaSignature = TenantConstant.DbaTenantApiAccessInfo.GenerateSignature();
         String DbaSignatureWithNet = "W8mKe7ozff0E1OIHtodfC4+E7yEmIIpCG0ist4RJhCaGDgAZoGcZWgn/c56g8tFLI0tpJsQM18SNUhYSma1WODXzPxPHwpRowAsCd2ATiak=";
         assertFalse(StringExtensions.isNullOrEmpty(DbaSignature));
-        //System.out.println("----Dba's Signature: " + DbaSignature);
-        //System.out.println("----Dba's Signature: " + DbaSignatureWithNet);
+        // System.out.println("----Dba's Signature: " + DbaSignature);
+        // System.out.println("----Dba's Signature: " + DbaSignatureWithNet);
         assertEquals(DbaSignature, DbaSignatureWithNet);
-        //String exceptDbaSignature = new KC.Framework.Base.ServiceRequestToken(DbaSignature, TenantConstant.DefaultPrivateEncryptKey);
+        // String exceptDbaSignature = new
+        // KC.Framework.Base.ServiceRequestToken(DbaSignature,
+        // TenantConstant.DefaultPrivateEncryptKey);
         ServiceRequestToken exceptDbaSignature = TenantConstant.DbaTenantApiAccessInfo.GetServiceToken();
         assertTrue(StringExtensions.isNullOrEmpty(exceptDbaSignature.IsValid(TenantConstant.DbaTenantName)));
         assertEquals(TenantConstant.DbaTenantApiAccessInfo.getTenantName(), exceptDbaSignature.MemberId);
 
-        //String DevDbSignatureObj = new KC.Framework.Base.ServiceRequestToken(TenantConstant.TestTenantId.ToString(), TenantConstant.TestTenantName, TenantConstant.DefaultPrivateEncryptKey);
-        //String DevDbSignature = DevDbSignatureObj.GetEncrptSignature();
+        // String DevDbSignatureObj = new
+        // KC.Framework.Base.ServiceRequestToken(TenantConstant.TestTenantId.ToString(),
+        // TenantConstant.TestTenantName, TenantConstant.DefaultPrivateEncryptKey);
+        // String DevDbSignature = DevDbSignatureObj.GetEncrptSignature();
         String DevDbSignature = TenantConstant.TestTenantApiAccessInfo.GenerateSignature();
         assertFalse(StringExtensions.isNullOrEmpty(DevDbSignature));
-        //System.out.println("----DevDb's Signature: " + DevDbSignature);
-        //String exceptDevDBSignature = new KC.Framework.Base.ServiceRequestToken(DevDbSignature, TenantConstant.DefaultPrivateEncryptKey);
+        // System.out.println("----DevDb's Signature: " + DevDbSignature);
+        // String exceptDevDBSignature = new
+        // KC.Framework.Base.ServiceRequestToken(DevDbSignature,
+        // TenantConstant.DefaultPrivateEncryptKey);
         ServiceRequestToken exceptDevDBSignature = TenantConstant.TestTenantApiAccessInfo.GetServiceToken();
         assertTrue(StringExtensions.isNullOrEmpty(exceptDevDBSignature.IsValid(TenantConstant.TestTenantName)));
         assertEquals(TenantConstant.TestTenantApiAccessInfo.getTenantName(), exceptDevDBSignature.MemberId);
 
-        //String BuySignatureObj = new KC.Framework.Base.ServiceRequestToken(TenantConstant.BuyTenantId.ToString(), TenantConstant.BuyTenantName, TenantConstant.DefaultPrivateEncryptKey);
-        //String BuySignature = BuySignatureObj.GetEncrptSignature();
+        // String BuySignatureObj = new
+        // KC.Framework.Base.ServiceRequestToken(TenantConstant.BuyTenantId.ToString(),
+        // TenantConstant.BuyTenantName, TenantConstant.DefaultPrivateEncryptKey);
+        // String BuySignature = BuySignatureObj.GetEncrptSignature();
         String BuySignature = TenantConstant.BuyTenantApiAccessInfo.GenerateSignature();
         assertFalse(StringExtensions.isNullOrEmpty(BuySignature));
-        //System.out.println("----Buy's Signature: " + BuySignature);
-        //String exceptBuySignature = new KC.Framework.Base.ServiceRequestToken(BuySignature, TenantConstant.DefaultPrivateEncryptKey);
+        // System.out.println("----Buy's Signature: " + BuySignature);
+        // String exceptBuySignature = new
+        // KC.Framework.Base.ServiceRequestToken(BuySignature,
+        // TenantConstant.DefaultPrivateEncryptKey);
         ServiceRequestToken exceptBuySignature = TenantConstant.BuyTenantApiAccessInfo.GetServiceToken();
         assertTrue(StringExtensions.isNullOrEmpty(exceptBuySignature.IsValid(TenantConstant.BuyTenantName)));
         assertEquals(TenantConstant.BuyTenantApiAccessInfo.getTenantName(), exceptBuySignature.MemberId);
 
-        //String SaleSignatureObj = new KC.Framework.Base.ServiceRequestToken(TenantConstant.SaleTenantId.ToString(), TenantConstant.SaleTenantName, TenantConstant.DefaultPrivateEncryptKey);
-        //String SaleSignature = SaleSignatureObj.GetEncrptSignature();
+        // String SaleSignatureObj = new
+        // KC.Framework.Base.ServiceRequestToken(TenantConstant.SaleTenantId.ToString(),
+        // TenantConstant.SaleTenantName, TenantConstant.DefaultPrivateEncryptKey);
+        // String SaleSignature = SaleSignatureObj.GetEncrptSignature();
         String SaleSignature = TenantConstant.SaleTenantApiAccessInfo.GenerateSignature();
         assertTrue(!StringExtensions.isNullOrEmpty(SaleSignature));
-        //System.out.println("----Sale's Signature: " + SaleSignature);
-        //String exceptSaleSignature = new KC.Framework.Base.ServiceRequestToken(SaleSignature, TenantConstant.DefaultPrivateEncryptKey);
+        // System.out.println("----Sale's Signature: " + SaleSignature);
+        // String exceptSaleSignature = new
+        // KC.Framework.Base.ServiceRequestToken(SaleSignature,
+        // TenantConstant.DefaultPrivateEncryptKey);
         ServiceRequestToken exceptSaleSignature = TenantConstant.SaleTenantApiAccessInfo.GetServiceToken();
         assertTrue(StringExtensions.isNullOrEmpty(exceptSaleSignature.IsValid(TenantConstant.SaleTenantName)));
         assertEquals(TenantConstant.SaleTenantApiAccessInfo.getTenantName(), exceptSaleSignature.MemberId);
-        //System.out.println();
+        // System.out.println();
     }
 
     @Test
@@ -266,7 +325,6 @@ class EncryptPasswordUtilTest extends TestBase {
         String product_enString = EncryptPasswordUtil.EncryptPassword(product_password, product_key);
         System.out.println("-----product_enString: " + product_enString);
     }
-
 
     @Test
     void testGetRandomString() {

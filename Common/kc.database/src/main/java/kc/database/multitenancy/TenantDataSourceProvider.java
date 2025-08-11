@@ -18,6 +18,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import kc.database.TenantConnection;
+import kc.framework.security.EncryptPasswordUtil;
 import kc.framework.tenant.Tenant;
 import kc.framework.tenant.TenantConstant;
 
@@ -36,10 +37,10 @@ public class TenantDataSourceProvider {
     // LoggerFactory.getLogger(TenantDataSourceProvider.class.getName());
     static String DEFAULT_TENANT_NAME = TenantConstant.TestTenantName;
 
-    private static String defaultDatabaseJdbcUrl = "jdbc:sqlserver://rm-8vb7ip9632ck1tt4l.mssql.zhangbei.rds.aliyuncs.com:3433;databaseName=MSSqlKCContext";
+    private static String defaultDatabaseJdbcUrl = "jdbc:sqlserver://121.89.220.143,1433;databaseName=MSSqlKCContext";
     private static String defaultDatabaseDriverClass = TenantConnection.DEFAULT_SQLSERVER_DRIVER_CLASS;
-    private static String defaultDatabaseUserName = TenantConstant.TestTenantName;
-    private static String defaultDatabasePassword = "NG6lJCNxSxZHrihmlyXS";
+    private static String defaultDatabaseUserName = "sa";
+    private static String defaultDatabasePassword = "Hcqqkeum+lPvQlPHyHOhM33xffnXWK2P";
 
     // 使用一个map来存储我们租户和对应的数据源，租户和数据源的信息就是从我们的tenant_info表中读出来
     private static ConcurrentHashMap<String, DataSource> dataSourceMap = new ConcurrentHashMap<>();
@@ -60,8 +61,7 @@ public class TenantDataSourceProvider {
         DataSource result = dataSourceMap.get(key);
         if (result instanceof HikariDataSource) {
             HikariDataSource hikariDs = (HikariDataSource) result;
-            log.info(String.format("===TenantDataSourceProvider getTenantDataSource==%s==%s==", key,
-                    hikariDs.getJdbcUrl()));
+            log.info(String.format("===getTenantDataSource==%s==%s==", key, hikariDs.getJdbcUrl()));
         }
 
         return result;
@@ -133,16 +133,21 @@ public class TenantDataSourceProvider {
         String dbPassword = getValueFromYamlKey("spring.datasource.password");
         if (ObjectUtils.isEmpty(dbPassword))
             dbPassword = defaultDatabasePassword;
+        String encryptKey = getValueFromYamlKey("GlobalConfig.EncryptKey");
+        if (ObjectUtils.isEmpty(encryptKey))
+            encryptKey = EncryptPasswordUtil.DEFAULT_Key;
 
+        String decryptDbPasswrod = EncryptPasswordUtil.DecryptPassword(dbPassword, encryptKey);
         log.info(String.format("===getDefaultHikariConfig driverClass：%s，dbUrl：%s，dbUserName：%s，dbPassword：%s",
-                driverClass, dbUrl, dbUserName, dbPassword));
+                driverClass, dbUrl, dbUserName, decryptDbPasswrod));
+
         HikariConfig config = new HikariConfig();
         config.setPoolName(DEFAULT_POOL_CONFIG);
         // config.setSchema(DEFAULT_TENANT_NAME);
         config.setDriverClassName(driverClass);
         config.setJdbcUrl(dbUrl);
         config.setUsername(dbUserName);
-        config.setPassword(dbPassword);
+        config.setPassword(decryptDbPasswrod);
         config.setConnectionTimeout(30000);
         config.setIdleTimeout(600000);
         config.setMaxLifetime(1800000);

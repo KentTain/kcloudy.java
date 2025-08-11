@@ -104,7 +104,7 @@ cp -rf Fonts/*  D:\Publish\Java\{项目编码}\v-{版本号}\Fonts
 * 进入项目目录  
 cd D:\Publish\Java\{项目编码}\v-{版本号}
 * 构建Docker镜像  
-docker build -t {项目编码}:{版本号} --build-arg env=Production .
+docker build -t {项目编码}:{版本号} --build-arg env=prod .
 * 运行容器  
 docker run -d -p 9999:8080 --name {项目编码} {项目编码}:{版本号}
 
@@ -134,7 +134,7 @@ cp ./Fonts/*  D:\Publish\Java\kc.web.demo\v-1.0.0.1\Fonts
 
 # 2.构建docker镜像
 cd D:\Publish\Java\kc.web.demo\v-1.0.0.1
-docker build -t kc.web.demo:1.0.0.1  --build-arg env=Production .
+docker build -t kc.web.demo:1.0.0.1  --build-arg env=prod .
 docker run -d -p 9999:9999 -p 10000:10000 --name kc.web.demo kc.web.demo:1.0.0.1
 
 # 3.推送docker镜像

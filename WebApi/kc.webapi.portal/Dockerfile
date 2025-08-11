@@ -2,7 +2,7 @@ FROM openjdk:8-jdk-slim-bullseye
 
 # 设置默认端口、环境及版本号
 ARG port=80
-ARG env=production
+ARG env=prod
 ARG version=1.0.0.1
 
 # 设置时区、语言环境和编码

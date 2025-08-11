@@ -72,9 +72,8 @@ public class WebApiSecurityConfig extends ResourceServerConfigurerAdapter {
 		// IdSrvAuthorizationRequestResolver.REGISTRATION_ID_URI_VARIABLE_NAME);
 		String redirectUrl = String.format("{baseUrl}/login/oauth2/code/{%s}",
 				IdSrvAuthorizationRequestResolver.REGISTRATION_ID_URI_VARIABLE_NAME);
-		log.info(
-				String.format("-----WebApiSecurityConfig idsvrClientRegistration: %s in sso domain: %s to redirect: %s",
-						OpenIdConnectConstants.ClientAuthScheme, ssoWebDomain, redirectUrl));
+		log.info(String.format("===WebApiSecurityConfig idsvrClientRegistration: %s in sso domain: %s to redirect: %s",
+				OpenIdConnectConstants.ClientAuthScheme, ssoWebDomain, redirectUrl));
 
 		return ClientRegistration.withRegistrationId(OpenIdConnectConstants.ClientAuthScheme).clientId("Y0RiYQ==")
 				.clientName("cDba").clientSecret("MmJmNWIyM2Q5ZjY4OWU5YzFmYWVkZTUwNzY2ZWJkNTg=")
