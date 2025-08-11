@@ -1,8 +1,8 @@
 spring:
-  datasource:
+  datasource: #数据库连接
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://127.0.0.1:1433;databaseName=MSSqlKCContext
+    url: jdbc:sqlserver://127.0.0.1;databaseName=MSSqlKCContext;
     username: sa
     password: 0QVw0yFoX2GuwkMSQyz1tg==
 logging:
