@@ -16,7 +16,7 @@ spring:
     password: 0QVw0yFoX2GuwkMSQyz1tg==
 logging:
   level:
-    org.springframework.boot.autoconfigure: DEBUG
+    org.springframework.boot.autoconfigure: INFO
 
 GlobalConfig:
   EncryptKey: dev-cfwin-EncryptKey

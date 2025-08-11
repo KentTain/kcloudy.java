@@ -60,8 +60,10 @@ public class TenantDataSourceProvider {
         String key = dataSourceMap.containsKey(tenantId) ? tenantId : DEFAULT_POOL_CONFIG;
         DataSource result = dataSourceMap.get(key);
         if (result instanceof HikariDataSource) {
-            HikariDataSource hikariDs = (HikariDataSource) result;
-            log.info(String.format("===getTenantDataSource==%s==%s==", key, hikariDs.getJdbcUrl()));
+            // try (HikariDataSource hikariDs = (HikariDataSource) result) {
+            // log.info(String.format("===%s getTenantDataSource dburl：%s", key,
+            // hikariDs.getJdbcUrl()));
+            // }
         }
 
         return result;
