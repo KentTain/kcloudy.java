@@ -2,12 +2,12 @@
 spring:
   jpa:
     show-sql: false
-  datasource: #数据库连接
+  datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: jdbc:sqlserver://121.89.220.143:1433;databaseName=MSSqlKCContext
     username: sa
-    password: Hcqqkeum+lPvQlPHyHOhM33xffnXWK2Pncs
+    password: Hcqqkeum+lPvQlPHyHOhM33xffnXWK2P
 logging:
   level:
     org.springframework.boot.autoconfigure: INFO

@@ -8,7 +8,7 @@ server:
     max-threads: 1000
   max-http-header-size: 1024000
 spring:
-  datasource: #数据库连接
+  datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: jdbc:sqlserver://121.89.220.143:1433;databaseName=MSSqlKCContext
