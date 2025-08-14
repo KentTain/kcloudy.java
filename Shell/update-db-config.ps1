@@ -46,7 +46,7 @@ $dbConfigs = @{
     }
     # 生产环境配置
     prod = @{
-        url = "jdbc:sqlserver://121.89.220.143,1433;databaseName=MSSqlKCContext"
+        url = "jdbc:sqlserver://121.89.220.143:1433;databaseName=MSSqlKCContext"
         username = "sa"
         password = "Hcqqkeum+lPvQlPHyHOhM33xffnXWK2P"
     }
