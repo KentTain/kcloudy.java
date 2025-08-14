@@ -1,4 +1,4 @@
-server:
+﻿server:
   port: 2001
   tomcat:
     uri-encoding: UTF-8
