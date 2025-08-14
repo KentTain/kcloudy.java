@@ -1,25 +1,31 @@
-server:
+﻿server:
   port: 2001
   tomcat:
     uri-encoding: UTF-8
     max-connections: 3000
     max-threads: 1000
   max-http-header-size: 1024000
+
 spring:
-  application:
-    name: 账户管理
   profiles:
     active: dev
+  application:
+    name: 账户管理
   main:
     allow-bean-definition-overriding: true
   servlet:
     multipart:
       enabled: true
       max-file-size: 1024000
+  devtools:
+    restart:
+      enabled: true
   jackson:
     default-property-inclusion: non_null
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
+  liquibase:
+    enabled: false
   jpa:
     show-sql: true
     hibernate:
@@ -37,9 +43,9 @@ spring:
         tenant_identifier_resolver: kc.database.multitenancy.MultiTenantIdentifierResolver
         globally_quoted_identifiers: true
         enable_lazy_load_no_trans: true
-  devtools:
-    restart:
-      enabled: true
+        event:
+          merge:
+            entity_copy_observer: allow
   output:
     ansi:
       enabled: DETECT
@@ -48,6 +54,7 @@ spring:
     enabled: true
     prefix: classpath:/templates/
     suffix: .html
+
 logging:
   charset:
     console: UTF-8
@@ -67,9 +74,6 @@ GlobalConfig:
   ClientId: CFWinAPP
   ClientSecret: app_password
   TempFilePath: /tmp,
-  WeixinAppKey:
-  WeixinAppSecret:
-  WeixinAppToken:
   UploadConfig:
     ImageMaxSize: 20
     ImageExt: jpg,jpeg,png,gif,bmp

@@ -1,25 +1,31 @@
-server:
+﻿server:
   port: 3005
   tomcat:
     uri-encoding: UTF-8
     max-connections: 3000
     max-threads: 1000
   max-http-header-size: 1024000
+
 spring:
   profiles:
     active: dev
-  main:
-    allow-bean-definition-overriding: true
   application:
     name: 商品管理
+  main:
+    allow-bean-definition-overriding: true
   servlet:
     multipart:
       enabled: true
       max-file-size: 1024000
+  devtools:
+    restart:
+      enabled: true
   jackson:
     default-property-inclusion: non_null
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
+  liquibase:
+    enabled: false
   jpa:
     show-sql: true
     hibernate:
@@ -40,9 +46,6 @@ spring:
         event:
           merge:
             entity_copy_observer: allow
-  devtools:
-    restart:
-      enabled: true
   output:
     ansi:
       enabled: DETECT
@@ -51,8 +54,7 @@ spring:
     enabled: true
     prefix: classpath:/templates/
     suffix: .html
-  liquibase:
-    enabled: false
+
 logging:
   charset:
     console: UTF-8
@@ -63,17 +65,15 @@ logging:
 
 GlobalConfig:
   ApplicationId: 211D74B3-A43F-4167-8BAD-924AF898D570
+  EncryptKey: KCloudy-Microsoft-EncryptKey
 
   SSOWebDomain: https://sso.kcloudy.com/
   ResWebDomain: https://resource.kcloudy.com/
-  ProdWebDomain: https://subdomain.prd.kcloudy.com/
+  AccWebDomain: https://subdomain.acc.kcloudy.com/
 
   ClientId: CFWinAPP
   ClientSecret: app_password
   TempFilePath: /tmp,
-  WeixinAppKey:
-  WeixinAppSecret:
-  WeixinAppToken:
   UploadConfig:
     ImageMaxSize: 20
     ImageExt: jpg,jpeg,png,gif,bmp

@@ -1,23 +1,31 @@
-server:
+﻿server:
   port: 1102
   tomcat:
     uri-encoding: UTF-8
     max-connections: 3000
     max-threads: 1000
   max-http-header-size: 1024000
+
 spring:
   profiles:
     active: dev
   application:
     name: 配置管理接口
+  main:
+    allow-bean-definition-overriding: true
   servlet:
     multipart:
       enabled: true
       max-file-size: 1024000
+  devtools:
+    restart:
+      enabled: true
   jackson:
     default-property-inclusion: non_null
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
+  liquibase:
+    enabled: false
   jpa:
     show-sql: true
     hibernate:
@@ -29,7 +37,7 @@ spring:
         dialect: kc.database.core.CustomSqlServer2012Dialect
         format_sql: true
         hbm2ddl:
-          auto: update
+          auto: none
         multiTenancy: SCHEMA
         multi_tenant_connection_provider: kc.database.multitenancy.MsSqlMultiTenantConnectionProviderImpl
         tenant_identifier_resolver: kc.database.multitenancy.MultiTenantIdentifierResolver
@@ -38,14 +46,15 @@ spring:
         event:
           merge:
             entity_copy_observer: allow
-  devtools:
-    restart:
-      enabled: true
   output:
     ansi:
       enabled: DETECT
-  liquibase:
-    enabled: false
+  thymeleaf:
+    cache: false
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+
 logging:
   charset:
     console: UTF-8
@@ -53,20 +62,18 @@ logging:
     charset: UTF-8
   level:
     org.springframework.boot.autoconfigure: ERROR
-swagger:
-  clientId: Y0RiYQ==
-  clientSecret: MmJmNWIyM2Q5ZjY4OWU5YzFmYWVkZTUwNzY2ZWJkNTg=
-  title: 配置管理
-  description: 管理所有应用的配置
+
 GlobalConfig:
   ApplicationId: 9158A492-C6AE-4C50-87A4-7ADB8BB8D36D
+  EncryptKey: KCloudy-Microsoft-EncryptKey
+
+  SSOWebDomain: https://sso.kcloudy.com/
+  ResWebDomain: https://resource.kcloudy.com/
+  AccWebDomain: https://subdomain.acc.kcloudy.com/
 
   ClientId: CFWinAPP
   ClientSecret: app_password
-  TempFilePath: d:\\tmp,
-  WeixinAppKey:
-  WeixinAppSecret:
-  WeixinAppToken:
+  TempFilePath: /tmp,
   UploadConfig:
     ImageMaxSize: 20
     ImageExt: jpg,jpeg,png,gif,bmp
