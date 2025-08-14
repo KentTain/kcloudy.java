@@ -1,4 +1,4 @@
-spring:
+﻿spring:
   jpa:
     show-sql: true
   datasource:
