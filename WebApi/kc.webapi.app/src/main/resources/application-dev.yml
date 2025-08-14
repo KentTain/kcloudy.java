@@ -1,5 +1,5 @@
 spring:
-  datasource: #数据库连接
+  datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: jdbc:sqlserver://127.0.0.1;databaseName=MSSqlKCContext;
@@ -15,4 +15,3 @@ GlobalConfig:
   SSOWebDomain: http://localhost:1001/
   ResWebDomain: http://localhost:9999/
   AppWebDomain: http://subdomain.localhost:1105/
-

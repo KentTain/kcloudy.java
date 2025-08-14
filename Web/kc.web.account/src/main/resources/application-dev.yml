@@ -1,14 +1,12 @@
-#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 server:
   port: 2001
-  #tomcat 请求设置
   tomcat:
     uri-encoding: UTF-8
     max-connections: 3000
     max-threads: 1000
   max-http-header-size: 1024000
 spring:
-  datasource: #数据库连接
+  datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: jdbc:sqlserver://127.0.0.1;databaseName=MSSqlKCContext

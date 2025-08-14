@@ -1,7 +1,7 @@
 spring:
   jpa:
     show-sql: true
-  datasource: #数据库连接
+  datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: jdbc:sqlserver://127.0.0.1;databaseName=MSSqlKCContext

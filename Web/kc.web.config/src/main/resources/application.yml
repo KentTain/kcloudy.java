@@ -1,7 +1,5 @@
-#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 server:
   port: 1101
-  #tomcat 请求设置
   tomcat:
     uri-encoding: UTF-8
     max-connections: 3000
@@ -11,7 +9,7 @@ spring:
   profiles:
     active: dev
   main:
-    allow-bean-definition-overriding: true #当遇到同样的名字时，是否允许覆盖注册
+    allow-bean-definition-overriding: true
   application:
     name: 配置管理
   servlet:
@@ -42,7 +40,6 @@ spring:
   devtools:
     restart:
       enabled: true
-      #exclude: WEB-INF/**
   output:
     ansi:
       enabled: DETECT

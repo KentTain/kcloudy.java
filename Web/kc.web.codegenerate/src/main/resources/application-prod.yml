@@ -1,13 +1,12 @@
-#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 spring:
   jpa:
     show-sql: false
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://121.89.220.143:1433;databaseName=MSSqlKCContext
-    username: sa
-    password: Hcqqkeum+lPvQlPHyHOhM33xffnXWK2P
+    url: jdbc:sqlserver://rm-8vb7ip9632ck1tt4l.mssql.zhangbei.rds.aliyuncs.com:3433;databaseName=MSSqlKCContext;
+    username: sqlserver_admin
+    password: NG6lJCNxSxZHrihmlyXS
 logging:
   level:
     org.springframework.boot.autoconfigure: INFO

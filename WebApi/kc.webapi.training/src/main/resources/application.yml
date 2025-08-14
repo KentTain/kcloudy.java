@@ -1,8 +1,5 @@
-#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
-
 server:
   port: 6002
-  #tomcat 请求设置
   tomcat:
     uri-encoding: UTF-8
     max-connections: 3000
@@ -37,16 +34,13 @@ spring:
         multi_tenant_connection_provider: kc.database.multitenancy.MsSqlMultiTenantConnectionProviderImpl
         tenant_identifier_resolver: kc.database.multitenancy.MultiTenantIdentifierResolver
         globally_quoted_identifiers: true
-        # 解决单元测试中的 LAZY on session 问题
         enable_lazy_load_no_trans: true
-        # 解决hibernate multiple merge问题
         event:
           merge:
             entity_copy_observer: allow
   devtools:
     restart:
       enabled: true
-      #exclude: WEB-INF/**
   output:
     ansi:
       enabled: DETECT

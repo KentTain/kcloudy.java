@@ -60,10 +60,8 @@ public class TenantDataSourceProvider {
         String key = dataSourceMap.containsKey(tenantId) ? tenantId : DEFAULT_POOL_CONFIG;
         DataSource result = dataSourceMap.get(key);
         if (result instanceof HikariDataSource) {
-            // try (HikariDataSource hikariDs = (HikariDataSource) result) {
-            // log.info(String.format("===%s getTenantDataSource dburl：%s", key,
-            // hikariDs.getJdbcUrl()));
-            // }
+            HikariDataSource hikariDs = (HikariDataSource) result;
+            log.info(String.format("===getTenantDataSource==%s==%s==", key, hikariDs.getJdbcUrl()));
         }
 
         return result;
@@ -139,10 +137,9 @@ public class TenantDataSourceProvider {
         if (ObjectUtils.isEmpty(encryptKey))
             encryptKey = EncryptPasswordUtil.DEFAULT_Key;
 
-        log.debug(String.format(
-                "===getDefaultHikariConfig driverClass：%s，dbUrl：%s，dbUserName：%s，dbPassword：%s，encryptKey：%s",
-                driverClass, dbUrl, dbUserName, dbPassword, encryptKey));
         String decryptDbPasswrod = EncryptPasswordUtil.DecryptPassword(dbPassword, encryptKey);
+        log.info(String.format("===getDefaultHikariConfig driverClass：%s，dbUrl：%s，dbUserName：%s，dbPassword：%s",
+                driverClass, dbUrl, dbUserName, decryptDbPasswrod));
 
         HikariConfig config = new HikariConfig();
         config.setPoolName(DEFAULT_POOL_CONFIG);
@@ -192,7 +189,7 @@ public class TenantDataSourceProvider {
             }
         }
 
-        log.debug("===Loading configuration for profile: {}", activeProfile);
+        log.info("===Loading configuration for profile: {}", activeProfile);
 
         // 4. 尝试从 application-{profile}.yml 中获取
         String profileSpecificFile = "application-" + activeProfile + ".yml";

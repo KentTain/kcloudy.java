@@ -35,10 +35,10 @@ class EncryptPasswordUtilTest extends TestBase {
 
     @Test
     void test_default_EncryptPasswordUtil() {
-        // 开发环境
-        String key = "dev-cfwin-EncryptKey";
-        String pwd = "P@ssw0rd";
-        String encrypPwd = "0QVw0yFoX2GuwkMSQyz1tg==";
+        // 生产环境
+        String key = "KCloudy-Microsoft-EncryptKey";
+        String pwd = "NG6lJCNxSxZHrihmlyXS";
+        String encrypPwd = "Hcqqkeum+lPvQlPHyHOhM33xffnXWK2P";
         System.out.println("--test_EncryptPasswordUtil key: " + key);
         System.out.println("--test_EncryptPasswordUtil pwd: " + pwd);
 
@@ -47,6 +47,20 @@ class EncryptPasswordUtilTest extends TestBase {
         assertEquals(encrypPwd, encryptString);
 
         String decryptString = EncryptPasswordUtil.DecryptPassword(encryptString, key);
+        assertEquals(pwd, decryptString);
+
+        // 开发环境
+        key = "dev-cfwin-EncryptKey";
+        pwd = "P@ssw0rd";
+        encrypPwd = "0QVw0yFoX2GuwkMSQyz1tg==";
+        System.out.println("--test_EncryptPasswordUtil key: " + key);
+        System.out.println("--test_EncryptPasswordUtil pwd: " + pwd);
+
+        encryptString = EncryptPasswordUtil.EncryptPassword(pwd, key);
+        System.out.println("--test_EncryptPasswordUtil encryptString: " + encryptString);
+        assertEquals(encrypPwd, encryptString);
+
+        decryptString = EncryptPasswordUtil.DecryptPassword(encryptString, key);
         assertEquals(pwd, decryptString);
     }
 

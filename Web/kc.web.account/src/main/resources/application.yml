@@ -1,19 +1,17 @@
-#  https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 server:
   port: 2001
-  #tomcat 请求设置
   tomcat:
     uri-encoding: UTF-8
     max-connections: 3000
     max-threads: 1000
   max-http-header-size: 1024000
 spring:
+  application:
+    name: 账户管理
   profiles:
     active: dev
   main:
-    allow-bean-definition-overriding: true #当遇到同样的名字时，是否允许覆盖注册
-  application:
-    name: 账户管理
+    allow-bean-definition-overriding: true
   servlet:
     multipart:
       enabled: true
@@ -42,7 +40,6 @@ spring:
   devtools:
     restart:
       enabled: true
-      #exclude: static/**   #静态文件修改刷新页面生效
   output:
     ansi:
       enabled: DETECT
