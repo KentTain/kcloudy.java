@@ -49,8 +49,10 @@ function Get-StandardConfig($appId, $appName, $appPort) {
         $appId = ""
     }
 
+    $apiName = "$appName" + "接口"
     if ([string]::IsNullOrEmpty($appName)) {
         $appName = "默认应用"
+        $apiName = "默认应用接口"
     }
     if ([string]::IsNullOrEmpty($appPort)) {
         $appPort = "80"
@@ -137,6 +139,13 @@ GlobalConfig:
     ImageExt: jpg,jpeg,png,gif,bmp
     FileMaxSize: 20
     FileExt: txt,doc,docx,xls,xlsx,ppt,pptx,pdf
+
+swagger:
+  clientId: Y0RiYQ==
+  clientSecret: MmJmNWIyM2Q5ZjY4OWU5YzFmYWVkZTUwNzY2ZWJkNTg=
+  title: $apiName
+  description: $apiName
+
 "@
 }
 
@@ -213,6 +222,14 @@ foreach ($dir in $directories) {
             # 生成新的标准配置
             Write-Host "Generating standard configuration..."
             $newContent = Get-StandardConfig $appId $appName $appPort
+            
+            # 如果是Web模块，删除swagger配置
+            if ($file.FullName -match '\\Web\\') {
+                Write-Host "Removing swagger configuration for Web module..."
+                $newContent = [regex]::Replace($newContent, '(?m)^swagger:(?:\r?\n(?:\s{2,}.*|\s*#.*|\s*))*(?=\S|$)', [String]::Empty, [System.Text.RegularExpressions.RegexOptions]::Singleline)
+                # 清理多余的空行
+                $newContent = [regex]::Replace($newContent, '(\r?\n){3,}', "`r`n`r`n").Trim()
+            }
             
             # 写入新内容
             Write-Host "Writing changes to file..."

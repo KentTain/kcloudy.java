@@ -79,3 +79,9 @@ GlobalConfig:
     ImageExt: jpg,jpeg,png,gif,bmp
     FileMaxSize: 20
     FileExt: txt,doc,docx,xls,xlsx,ppt,pptx,pdf
+
+swagger:
+  clientId: Y0RiYQ==
+  clientSecret: MmJmNWIyM2Q5ZjY4OWU5YzFmYWVkZTUwNzY2ZWJkNTg=
+  title: 商品管理接口接口
+  description: 商品管理接口接口
