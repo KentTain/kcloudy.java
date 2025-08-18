@@ -137,9 +137,9 @@ public class TenantDataSourceProvider {
         if (ObjectUtils.isEmpty(encryptKey))
             encryptKey = EncryptPasswordUtil.DEFAULT_Key;
 
-        String decryptDbPasswrod = EncryptPasswordUtil.DecryptPassword(dbPassword, encryptKey);
         log.info(String.format("===getDefaultHikariConfig driverClass：%s，dbUrl：%s，dbUserName：%s，dbPassword：%s",
-                driverClass, dbUrl, dbUserName, decryptDbPasswrod));
+                driverClass, dbUrl, dbUserName, encryptKey));
+        String decryptDbPasswrod = EncryptPasswordUtil.DecryptPassword(dbPassword, encryptKey);
 
         HikariConfig config = new HikariConfig();
         config.setPoolName(DEFAULT_POOL_CONFIG);
