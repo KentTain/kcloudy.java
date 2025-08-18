@@ -1,4 +1,4 @@
-package kc.webapi.app;
+package kc.webapi;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -16,24 +16,26 @@ import kc.web.GlobalConfigInitializer;
 
 @SpringBootApplication
 @ServletComponentScan
-@EntityScan({"kc.framework.base", "kc.model.app"})
-@ComponentScan({"kc.mapping.*", "kc.service.*", "kc.service.webapiservice", "kc.web.*", "kc.web.multitenancy", "kc.webapi.*"})
-@EnableJpaRepositories(basePackages = {"kc.dataaccess.*", "kc.database"}, 
-	repositoryFactoryBeanClass = TreeNodeRepositoryFactoryBean.class)
-public class Application extends kc.web.WebApiSecurityConfig  implements  EnvironmentAware {
+@EntityScan({ "kc.framework.base", "kc.model.app" })
+@ComponentScan({ "kc.mapping.*", "kc.service.*", "kc.service.webapiservice", "kc.web.*", "kc.web.multitenancy",
+		"kc.webapi.*" })
+@EnableJpaRepositories(basePackages = { "kc.dataaccess.*",
+		"kc.database" }, repositoryFactoryBeanClass = TreeNodeRepositoryFactoryBean.class)
+public class Application extends kc.web.WebApiSecurityConfig implements EnvironmentAware {
 	@Autowired
 	public static Environment Env;
+
 	@Override
 	public void setEnvironment(Environment environment) {
 		Application.Env = environment;
 	}
-	
+
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(Application.class);
 		app.addListeners(new ApplicationPidFileWriter());
-        app.run(args);
+		app.run(args);
 
-        GlobalConfigInitializer.initWebAfterStarted("kc.webapi.controller", Env);
+		GlobalConfigInitializer.initWebAfterStarted("kc.webapi.controller", Env);
 	}
 
 }
