@@ -1,4 +1,4 @@
-package kc.webapi.account;
+package kc.webapi;
 
 import static springfox.documentation.builders.PathSelectors.ant;
 

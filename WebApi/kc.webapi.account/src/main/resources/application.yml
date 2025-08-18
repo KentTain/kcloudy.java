@@ -10,9 +10,13 @@ spring:
   profiles:
     active: dev
   application:
+    code: kc.webapi.account
     name: 账户管理接口
   main:
     allow-bean-definition-overriding: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   servlet:
     multipart:
       enabled: true

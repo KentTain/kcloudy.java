@@ -1,4 +1,4 @@
-package kc.webapi.account;
+package kc.webapi;
 
 import java.io.IOException;
 

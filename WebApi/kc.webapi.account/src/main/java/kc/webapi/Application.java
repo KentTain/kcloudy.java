@@ -1,4 +1,4 @@
-package kc.webapi.account;
+package kc.webapi;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
