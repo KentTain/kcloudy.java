@@ -1,4 +1,4 @@
-﻿server:
+server:
   port: 1102
   tomcat:
     uri-encoding: UTF-8
@@ -10,7 +10,8 @@ spring:
   profiles:
     active: dev
   application:
-    name: 配置管理接口
+    name: 数据字典接口
+    controller: kc.webapi.controller
   main:
     allow-bean-definition-overriding: true
   servlet:

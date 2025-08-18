@@ -1,4 +1,4 @@
-﻿server:
+server:
   port: 3006
   tomcat:
     uri-encoding: UTF-8
@@ -11,6 +11,7 @@ spring:
     active: dev
   application:
     name: 商品管理接口
+    controller: kc.webapi.controller
   main:
     allow-bean-definition-overriding: true
   servlet:

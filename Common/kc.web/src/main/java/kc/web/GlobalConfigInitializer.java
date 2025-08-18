@@ -1,7 +1,11 @@
 package kc.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import kc.framework.GlobalConfig;
@@ -14,19 +18,32 @@ import kc.service.webapiservice.thridparty.IGlobalConfigApiService;
 import kc.web.annotation.PermissionData;
 
 @Component
-public class GlobalConfigInitializer {
+public class GlobalConfigInitializer implements ApplicationListener<ContextRefreshedEvent> {
 	private static IGlobalConfigApiService globalConfigApiService;
+	private static IAccountApiService accountApiService;
+
+	@Value("${spring.application.controller:kc.web.controller}")
+	private String packageName;
+
+	@Autowired
+	private Environment env;
 
 	@Autowired
 	public void setGlobalConfigApiService(IGlobalConfigApiService globalConfigApiService) {
 		GlobalConfigInitializer.globalConfigApiService = globalConfigApiService;
 	}
 
-	private static IAccountApiService accountApiService;
-
 	@Autowired
 	public void setAccountApiService(IAccountApiService accountApiService) {
 		GlobalConfigInitializer.accountApiService = accountApiService;
+	}
+
+	@Override
+	public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
+		// 确保只初始化一次
+		if (event.getApplicationContext().getParent() == null) {
+			initWebAfterStarted(packageName, env);
+		}
 	}
 
 	public static void initWebAfterStarted(String packageName, Environment env) {

@@ -11,6 +11,7 @@ spring:
     active: dev
   application:
     name: 配置管理
+    controller: kc.web.controller
   main:
     allow-bean-definition-overriding: true
   servlet:

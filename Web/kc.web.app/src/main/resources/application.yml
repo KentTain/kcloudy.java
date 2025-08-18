@@ -1,4 +1,4 @@
-﻿server:
+server:
   port: 1105
   tomcat:
     uri-encoding: UTF-8
@@ -11,6 +11,7 @@ spring:
     active: dev
   application:
     name: 应用管理
+    controller: kc.web.controller
   main:
     allow-bean-definition-overriding: true
   servlet:
