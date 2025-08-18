@@ -1,22 +1,28 @@
-package kc.webapi.offering;
+package kc.webapi;
+
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
 /**
- *过滤swagger相关url
+ * 过滤swagger相关url
  */
-@WebFilter(filterName = "TokenFilter", urlPatterns = {"/*"}, asyncSupported = true)
+@WebFilter(filterName = "TokenFilter", urlPatterns = { "/*" }, asyncSupported = true)
 public class SwaggerTokenFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(SwaggerTokenFilter.class);
 
-    String[] includeUrls = new String[]{"/"};
+    String[] includeUrls = new String[] { "/" };
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -24,36 +30,36 @@ public class SwaggerTokenFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest request = (HttpServletRequest)servletRequest;
-        HttpServletResponse response = (HttpServletResponse)servletResponse;
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         String url = request.getRequestURI();
         logger.info("current_url: {}", url);
         boolean needFilter = isNeedFilter(url);
 
-        //静态资源放行
-        if(url.endsWith(".js")||url.endsWith(".css")||url.endsWith(".jpg")
-                ||url.endsWith(".gif")||url.endsWith(".png")){
+        // 静态资源放行
+        if (url.endsWith(".js") || url.endsWith(".css") || url.endsWith(".jpg") || url.endsWith(".gif")
+                || url.endsWith(".png")) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
-        //swagger
-        if(url.startsWith("/webjars") || url.startsWith("/v2") || url.startsWith("/swagger-resources")
-                || url.startsWith("/csrf")
-                || "/swagger-ui.html".equals(url) ){
+        // swagger
+        if (url.startsWith("/webjars") || url.startsWith("/v2") || url.startsWith("/swagger-resources")
+                || url.startsWith("/csrf") || "/swagger-ui.html".equals(url)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
-        if(!needFilter){
+        if (!needFilter) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             String token = request.getHeader("Authorization");
 
             // TODO 替换项目自己的校验
-            if("token".equals(token)){
+            if ("token".equals(token)) {
                 filterChain.doFilter(servletRequest, servletResponse);
             } else {
                 response.setContentType("text/html;charset=utf-8");
@@ -69,7 +75,7 @@ public class SwaggerTokenFilter implements Filter {
 
     public boolean isNeedFilter(String uri) {
         for (String includeUrl : includeUrls) {
-            if(includeUrl.equals(uri)) {
+            if (includeUrl.equals(uri)) {
                 return false;
             }
         }

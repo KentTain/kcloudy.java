@@ -1,26 +1,39 @@
-package kc.webapi.dict;
+package kc.webapi;
 
+import static springfox.documentation.builders.PathSelectors.ant;
 
-import kc.framework.tenant.ApplicationConstant;
-import kc.service.constants.OpenIdConnectConstants;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import kc.framework.tenant.ApplicationConstant;
+import kc.service.constants.OpenIdConnectConstants;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.OAuthBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.*;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.ApiKey;
+import springfox.documentation.service.AuthorizationCodeGrant;
+import springfox.documentation.service.AuthorizationScope;
+import springfox.documentation.service.GrantType;
+import springfox.documentation.service.SecurityReference;
+import springfox.documentation.service.SecurityScheme;
+import springfox.documentation.service.TokenEndpoint;
+import springfox.documentation.service.TokenRequestEndpoint;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger.web.SecurityConfiguration;
 import springfox.documentation.swagger.web.SecurityConfigurationBuilder;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-import java.util.*;
-
-import static springfox.documentation.builders.PathSelectors.ant;
 
 @Configuration
 @EnableSwagger2
@@ -34,37 +47,27 @@ public class SwaggerConfig {
 
 	@Bean
 	public Docket api() {
-		return new Docket(DocumentationType.SWAGGER_2)
-				.apiInfo(apiInfo())
-				.useDefaultResponseMessages(false)
-				.select()
-				.apis(RequestHandlerSelectors.basePackage("kc.webapi.controller"))
-				.paths(PathSelectors.any())
-				.build()
+		return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).useDefaultResponseMessages(false).select()
+				.apis(RequestHandlerSelectors.basePackage("kc.webapi.controller")).paths(PathSelectors.any()).build()
 				.securitySchemes(Collections.singletonList(oauth()))
-				.securityContexts(Collections.singletonList(securityContext()))
-				;
+				.securityContexts(Collections.singletonList(securityContext()));
 	}
 
 	private ApiInfo apiInfo() {
-		return new ApiInfoBuilder()
-				.title(title)
-				.description(description)
-				.license("Apache 2.0")
-				.licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html")
-				.termsOfServiceUrl("")
-				.version(VERSION)
+		return new ApiInfoBuilder().title(title).description(description).license("Apache 2.0")
+				.licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html").termsOfServiceUrl("").version(VERSION)
 				.build();
 	}
 
 	@Bean
-    SecurityScheme apiKey() {
+	SecurityScheme apiKey() {
 		return new ApiKey("apiKey", "Authorization", "header");
-    }
+	}
 
 	@Bean
 	SecurityContext securityContext() {
-		//AuthorizationScope[] scopes = new AuthorizationScope[] { new AuthorizationScope("userinfo", "用户信息") };
+		// AuthorizationScope[] scopes = new AuthorizationScope[] { new
+		// AuthorizationScope("userinfo", "用户信息") };
 
 		SecurityReference securityReference = SecurityReference.builder().reference("oauth2").scopes(scopes()).build();
 
@@ -81,11 +84,7 @@ public class SwaggerConfig {
 
 	@Bean
 	SecurityScheme oauth() {
-		return new OAuthBuilder()
-				.name("OAuth2")
-				.grantTypes(grantTypes())
-				.scopes(Arrays.asList(scopes()))
-				.build();
+		return new OAuthBuilder().name("OAuth2").grantTypes(grantTypes()).scopes(Arrays.asList(scopes())).build();
 	}
 
 	private AuthorizationScope[] scopes() {
@@ -109,15 +108,9 @@ public class SwaggerConfig {
 	public SecurityConfiguration securityInfo() {
 		Map<String, Object> formParameters = new HashMap<String, Object>();
 		formParameters.put(OpenIdConnectConstants.ClaimTypes_TenantName, "cDba");
-		
-		return SecurityConfigurationBuilder.builder()
-				.clientId(clientId)
-				.clientSecret(clientSecret)
-				.realm(ssoWebDomain)
-				.appName(ApplicationConstant.ConfigAppName)
-				.scopeSeparator(" ")
-				.additionalQueryStringParams(formParameters)
-				.useBasicAuthenticationWithAccessCodeGrant(false)
-				.build();
+
+		return SecurityConfigurationBuilder.builder().clientId(clientId).clientSecret(clientSecret).realm(ssoWebDomain)
+				.appName(ApplicationConstant.ConfigAppName).scopeSeparator(" ")
+				.additionalQueryStringParams(formParameters).useBasicAuthenticationWithAccessCodeGrant(false).build();
 	}
 }
