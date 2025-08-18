@@ -11,7 +11,6 @@ spring:
     active: dev
   application:
     name: 代码生成接口
-    controller: kc.webapi.controller
   main:
     allow-bean-definition-overriding: true
   servlet:

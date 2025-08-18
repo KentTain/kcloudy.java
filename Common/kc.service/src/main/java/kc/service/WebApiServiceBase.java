@@ -5,22 +5,22 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import kc.framework.tenant.Tenant;
-import kc.service.constants.OpenIdConnectConstants;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import kc.framework.GlobalConfig;
-import kc.framework.util.SerializeHelper;
 import kc.framework.extension.StringExtensions;
+import kc.framework.tenant.Tenant;
 import kc.framework.tenant.TenantConstant;
-import kc.service.base.IdSrvAccessTokenResult;
+import kc.framework.util.SerializeHelper;
 import kc.service.base.ErrorInfoResult;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import kc.service.base.IdSrvAccessTokenResult;
+import kc.service.constants.OpenIdConnectConstants;
 
 @Configuration
 @lombok.extern.slf4j.Slf4j
@@ -36,7 +36,7 @@ public abstract class WebApiServiceBase {
     }
 
     /**
-     * 租户信息Api接口地址：http://admin.kcloudy.com/api/  <br/>
+     * 租户信息Api接口地址：http://admin.kcloudy.com/api/ <br/>
      * 本地测试接口地址：http://localhost:1009/api/
      *
      * @return
@@ -45,10 +45,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.AdminWebDomain))
             return null;
 
-        return GlobalConfig.AdminWebDomain
-                .replace("admin.", "adminapi.")
-                .replace(":1003", ":1004")
-                .replace(":1013", ":1014") + "api/";
+        return GlobalConfig.AdminWebDomain.replace("admin.", "adminapi.").replace(":1003", ":1004").replace(":1013",
+                ":1014") + "api/";
     }
 
     /**
@@ -60,7 +58,6 @@ public abstract class WebApiServiceBase {
     protected String SSOServerUrl() {
         return getTenantSSOServerUrl(getOAuth2ClientInfo().getTenantName());
     }
-
 
     /**
      * 租户SSO接口地址：http://ctest.ssoapi.kcloudy.com/api/ <br/>
@@ -82,10 +79,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.SSOWebDomain))
             return null;
 
-        return GlobalConfig.SSOWebDomain
-                .replace("sso.", "ssoapi.")
-                .replace(":1001", ":1002")
-                .replace(":1011", ":1012") + "api/";
+        return GlobalConfig.SSOWebDomain.replace("sso.", "ssoapi.").replace(":1001", ":1002").replace(":1011", ":1012")
+                + "api/";
     }
 
     /**
@@ -106,18 +101,16 @@ public abstract class WebApiServiceBase {
     }
 
     /**
-     * 获取租户信息接口地址：http://blogapi.kcloudy.com/
-     *   本地测试接口地址：http://localhost:1006/api/
+     * 获取租户信息接口地址：http://blogapi.kcloudy.com/ 本地测试接口地址：http://localhost:1006/api/
+     * 
      * @return
      */
     protected String BlogApiUrl() {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.BlogWebDomain))
             return null;
 
-        return GlobalConfig.BlogWebDomain
-                .replace("blog.", "blogapi.")
-                .replace(":1005", ":1006")
-                .replace(":1015", ":1016") + "api/";
+        return GlobalConfig.BlogWebDomain.replace("blog.", "blogapi.").replace(":1005", ":1006").replace(":1015",
+                ":1016") + "api/";
     }
 
     /**
@@ -131,11 +124,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.CfgWebDomain))
             return null;
 
-        return GlobalConfig.CfgWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("cfg.", "cfgapi.")
-                .replace(":1101", ":1102")
-                .replace(":1111", ":1112") + "api/";
+        return GlobalConfig.CfgWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("cfg.", "cfgapi.")
+                .replace(":1101", ":1102").replace(":1111", ":1112") + "api/";
     }
 
     /**
@@ -159,11 +149,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.DicWebDomain))
             return null;
 
-        return GlobalConfig.DicWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("dic.", "dicapi.")
-                .replace(":1103", ":1104")
-                .replace(":1113", ":1114") + "api/";
+        return GlobalConfig.DicWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("dic.", "dicapi.")
+                .replace(":1103", ":1104").replace(":1113", ":1114") + "api/";
     }
 
     /**
@@ -176,7 +163,6 @@ public abstract class WebApiServiceBase {
         return GetDictionaryApiUrl(getOAuth2ClientInfo().getTenantName());
     }
 
-
     /**
      * 获取应用信息接口地址：http://(tenantName).appapi.kcloudy.com/ <br/>
      * 本地测试接口地址：http://(tenantName).localhost:1106/api/
@@ -188,11 +174,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.AppWebDomain))
             return null;
 
-        return GlobalConfig.AppWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("app.", "appapi.")
-                .replace(":1105", ":1106")
-                .replace(":1115", ":1116") + "api/";
+        return GlobalConfig.AppWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("app.", "appapi.")
+                .replace(":1105", ":1106").replace(":1115", ":1116") + "api/";
     }
 
     /**
@@ -216,11 +199,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.MsgWebDomain))
             return null;
 
-        return GlobalConfig.MsgWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("msg.", "msgapi.")
-                .replace(":1109", ":2000")
-                .replace(":1119", ":2010") + "api/";
+        return GlobalConfig.MsgWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("msg.", "msgapi.")
+                .replace(":1109", ":2000").replace(":1119", ":2010") + "api/";
     }
 
     /**
@@ -233,7 +213,6 @@ public abstract class WebApiServiceBase {
         return GetMessageApiUrl(getOAuth2ClientInfo().getTenantName());
     }
 
-
     /**
      * 获取账户信息接口地址：http://(tenantName).accapi.kcloudy.com/api/ <br/>
      * 本地测试接口地址：http://(tenantName).localhost:2002/api/
@@ -245,11 +224,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.AccWebDomain))
             return null;
 
-        return GlobalConfig.AccWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("acc.", "accapi.")
-                .replace(":2001", ":2002")
-                .replace(":2011", ":2012") + "api/";
+        return GlobalConfig.AccWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("acc.", "accapi.")
+                .replace(":2001", ":2002").replace(":2011", ":2012") + "api/";
     }
 
     /**
@@ -273,11 +249,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.EconWebDomain))
             return null;
 
-        return GlobalConfig.EconWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("econ.", "econapi.")
-                .replace(":2003", ":2004")
-                .replace(":2013", ":2014") + "api/";
+        return GlobalConfig.EconWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("econ.", "econapi.")
+                .replace(":2003", ":2004").replace(":2013", ":2014") + "api/";
     }
 
     /**
@@ -291,11 +264,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.DocWebDomain))
             return null;
 
-        return GlobalConfig.DocWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("doc.", "docapi.")
-                .replace(":2005", ":2006")
-                .replace(":2015", ":2016") + "api/";
+        return GlobalConfig.DocWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("doc.", "docapi.")
+                .replace(":2005", ":2006").replace(":2015", ":2016") + "api/";
     }
 
     /**
@@ -319,13 +289,9 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.HrWebDomain))
             return null;
 
-        return GlobalConfig.HrWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("hr.", "hrapi.")
-                .replace(":2007", ":2008")
-                .replace(":2017", ":2018") + "api/";
+        return GlobalConfig.HrWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("hr.", "hrapi.")
+                .replace(":2007", ":2008").replace(":2017", ":2018") + "api/";
     }
-
 
     /**
      * 获取客户信息接口地址：http://(tenantName).crmapi.kcloudy.com/api/ <br/>
@@ -338,11 +304,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.CrmWebDomain))
             return null;
 
-        return GlobalConfig.CrmWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("crm.", "crmapi.")
-                .replace(":3011", ":3012")
-                .replace(":3001", ":3002") + "api/";
+        return GlobalConfig.CrmWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("crm.", "crmapi.")
+                .replace(":3011", ":3012").replace(":3001", ":3002") + "api/";
     }
 
     /**
@@ -366,11 +329,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.SrmWebDomain))
             return null;
 
-        return GlobalConfig.SrmWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("srm.", "srmapi.")
-                .replace(":3003", ":3004")
-                .replace(":3013", ":3014") + "api/";
+        return GlobalConfig.SrmWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("srm.", "srmapi.")
+                .replace(":3003", ":3004").replace(":3013", ":3014") + "api/";
     }
 
     /**
@@ -384,11 +344,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.PrdWebDomain))
             return null;
 
-        return GlobalConfig.PrdWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("prd.", "prdapi.")
-                .replace(":3005", ":3006")
-                .replace(":3015", ":3016") + "api/";
+        return GlobalConfig.PrdWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("prd.", "prdapi.")
+                .replace(":3005", ":3006").replace(":3015", ":3016") + "api/";
     }
 
     /**
@@ -402,13 +359,9 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.PmcWebDomain))
             return null;
 
-        return GlobalConfig.PmcWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("pmc.", "pmcapi.")
-                .replace(":3007", ":3008")
-                .replace(":3017", ":3018") + "api/";
+        return GlobalConfig.PmcWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("pmc.", "pmcapi.")
+                .replace(":3007", ":3008").replace(":3017", ":3018") + "api/";
     }
-
 
     /**
      * 获取采购订单接口地址：http://(tenantName).somapi.cfwin.com/api/ <br/>
@@ -421,11 +374,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.SomWebDomain))
             return null;
 
-        return GlobalConfig.SomWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("som.", "somapi.")
-                .replace(":4003", ":4004")
-                .replace(":4013", ":4014") + "api/";
+        return GlobalConfig.SomWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("som.", "somapi.")
+                .replace(":4003", ":4004").replace(":4013", ":4014") + "api/";
     }
 
     /**
@@ -439,11 +389,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.PomWebDomain))
             return null;
 
-        return GlobalConfig.PomWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("pom.", "pomapi.")
-                .replace(":4005", ":4006")
-                .replace(":4015", ":4016") + "api/";
+        return GlobalConfig.PomWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("pom.", "pomapi.")
+                .replace(":4005", ":4006").replace(":4015", ":4016") + "api/";
     }
 
     /**
@@ -457,11 +404,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.WmsWebDomain))
             return null;
 
-        return GlobalConfig.WmsWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("wms.", "wmsapi.")
-                .replace(":4007", ":4008")
-                .replace(":4017", ":4018") + "api/";
+        return GlobalConfig.WmsWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("wms.", "wmsapi.")
+                .replace(":4007", ":4008").replace(":4017", ":4018") + "api/";
     }
 
     /**
@@ -475,11 +419,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.PortalWebDomain))
             return null;
 
-        return GlobalConfig.PortalWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("shop.", "shopapi.")
-                .replace(":4011", ":4012")
-                .replace(":4001", ":4002") + "api/";
+        return GlobalConfig.PortalWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("shop.", "shopapi.")
+                .replace(":4011", ":4012").replace(":4001", ":4002") + "api/";
     }
 
     /**
@@ -523,11 +464,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.JRWebDomain))
             return null;
 
-        return GlobalConfig.JRWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("jr.", "jrapi.")
-                .replace(":5001", ":5002")
-                .replace(":5011", ":5012") + "api/";
+        return GlobalConfig.JRWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("jr.", "jrapi.")
+                .replace(":5001", ":5002").replace(":5011", ":5012") + "api/";
     }
 
     /**
@@ -541,11 +479,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.WorkflowWebDomain))
             return null;
 
-        return GlobalConfig.WorkflowWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("flow.", "flowapi.")
-                .replace(":7001", ":7002")
-                .replace(":7011", ":7012") + "api/";
+        return GlobalConfig.WorkflowWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("flow.", "flowapi.")
+                .replace(":7001", ":7002").replace(":7011", ":7012") + "api/";
     }
 
     /**
@@ -569,11 +504,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.PayWebDomain))
             return null;
 
-        return GlobalConfig.PayWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("pay.", "payapi.")
-                .replace(":8001", ":8002")
-                .replace(":8011", ":8012") + "api/";
+        return GlobalConfig.PayWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("pay.", "payapi.")
+                .replace(":8001", ":8002").replace(":8011", ":8012") + "api/";
     }
 
     /**
@@ -597,11 +529,8 @@ public abstract class WebApiServiceBase {
         if (StringExtensions.isNullOrEmpty(GlobalConfig.WXWebDomain))
             return null;
 
-        return GlobalConfig.WXWebDomain
-                .replace(TenantConstant.SubDomain, tenantName)
-                .replace("wx.", "wxapi.")
-                .replace(":9001", ":9002")
-                .replace(":9011", ":9012") + "api/";
+        return GlobalConfig.WXWebDomain.replace(TenantConstant.SubDomain, tenantName).replace("wx.", "wxapi.")
+                .replace(":9001", ":9002").replace(":9011", ":9012") + "api/";
     }
 
     /**
@@ -614,7 +543,6 @@ public abstract class WebApiServiceBase {
         return GetWeixinApiUrl(getOAuth2ClientInfo().getTenantName());
     }
 
-
     protected abstract OAuth2ClientInfo getOAuth2ClientInfo();
 
     protected OAuth2ClientInfo getTenantOAuth2ClientInfo(Tenant tenant) {
@@ -623,8 +551,13 @@ public abstract class WebApiServiceBase {
         String clientSecret = TenantConstant.GetClientSecretByTenant(tenant);
         String credential = TenantConstant.Sha256(clientSecret);
 
-        String tokenEndpoint = ssoWebDomain + OpenIdConnectConstants.OAuth2_Token_Action;
-        //String tokenEndpoint = SSOServerUrl() + OpenIdConnectConstants.OAuth2_Token_Action;
+        String ssoUrl = ssoWebDomain;
+        if (StringExtensions.isNullOrEmpty(ssoUrl))
+            ssoUrl = GlobalConfig.SSOWebDomain;
+
+        String tokenEndpoint = ssoUrl + OpenIdConnectConstants.OAuth2_Token_Action;
+        // String tokenEndpoint = SSOServerUrl() +
+        // OpenIdConnectConstants.OAuth2_Token_Action;
         String grantType = "client_credentials";
         return new OAuth2ClientInfo(tenantName, clientId, clientSecret, credential, tokenEndpoint, grantType);
     }
@@ -641,8 +574,8 @@ public abstract class WebApiServiceBase {
      * @param needOAuthAuthenticated WebApi接口是否被OAuth保护
      * @return T 返回序列化后的调用对象
      */
-    protected <T> T WebSendGet(TypeReference<T> clazz, String serviceName, String url, String scope, Function<T, T> callback,
-                               Consumer<ErrorInfoResult> failCallback, boolean needOAuthAuthenticated) {
+    protected <T> T WebSendGet(TypeReference<T> clazz, String serviceName, String url, String scope,
+            Function<T, T> callback, Consumer<ErrorInfoResult> failCallback, boolean needOAuthAuthenticated) {
         return WebSendGet(clazz, serviceName, url, scope, ClientExtensions.DefaultContentType, callback, failCallback,
                 needOAuthAuthenticated);
     }
@@ -661,7 +594,7 @@ public abstract class WebApiServiceBase {
      * @return T 返回序列化后的调用对象
      */
     protected <T> T WebSendGet(TypeReference<T> clazz, String serviceName, String url, String scope, String contentType,
-                               Function<T, T> callback, Consumer<ErrorInfoResult> failCallback, boolean needOAuthAuthenticated) {
+            Function<T, T> callback, Consumer<ErrorInfoResult> failCallback, boolean needOAuthAuthenticated) {
         return WebSendGet(clazz, serviceName, url, scope, contentType, null, callback, failCallback,
                 needOAuthAuthenticated);
     }
@@ -681,8 +614,8 @@ public abstract class WebApiServiceBase {
      * @return T 返回序列化后的调用对象
      */
     protected <T> T WebSendGet(TypeReference<T> clazz, String serviceName, String url, String scope, String contentType,
-                               Map<String, String> headers, Function<T, T> callback, Consumer<ErrorInfoResult> failCallback,
-                               boolean needOAuthAuthenticated) {
+            Map<String, String> headers, Function<T, T> callback, Consumer<ErrorInfoResult> failCallback,
+            boolean needOAuthAuthenticated) {
         log.debug(String.format("开始调用服务[%s]，参数如下：URL=%s", serviceName, url));
 
         if (StringExtensions.isNullOrEmpty(url) && failCallback != null) {
@@ -707,7 +640,7 @@ public abstract class WebApiServiceBase {
                         String.format("[%s] AccessToken is null or empty. ", serviceName)));
                 return null;
             }
-            //System.out.println(accessToken.getAccessToken());
+            // System.out.println(accessToken.getAccessToken());
             headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
         }
 
@@ -719,8 +652,7 @@ public abstract class WebApiServiceBase {
                 if (failCallback != null)
                     failCallback.accept(new ErrorInfoResult(status.getStatusCode(), errorString));
 
-                String error = String.format("调用服务[%s]出现异常，参数如下：URL=%s，错误消息: %s", serviceName, url,
-                        errorString);
+                String error = String.format("调用服务[%s]出现异常，参数如下：URL=%s，错误消息: %s", serviceName, url, errorString);
                 log.error(error);
                 return null;
             }
@@ -764,8 +696,9 @@ public abstract class WebApiServiceBase {
      * @param needOAuthAuthenticated WebApi接口是否被OAuth保护
      * @return T 返回序列化后的调用对象
      */
-    protected <T> T WebSendPost(TypeReference<T> clazz, String serviceName, String url, String scope, String postJsonData,
-                                Function<T, T> callback, Consumer<ErrorInfoResult> failCallback, boolean needOAuthAuthenticated) {
+    protected <T> T WebSendPost(TypeReference<T> clazz, String serviceName, String url, String scope,
+            String postJsonData, Function<T, T> callback, Consumer<ErrorInfoResult> failCallback,
+            boolean needOAuthAuthenticated) {
         return WebSendPost(clazz, serviceName, url, scope, postJsonData, null, callback, failCallback,
                 needOAuthAuthenticated);
     }
@@ -784,9 +717,9 @@ public abstract class WebApiServiceBase {
      * @param needOAuthAuthenticated WebApi接口是否被OAuth保护
      * @return T 返回序列化后的调用对象
      */
-    protected <T> T WebSendPost(TypeReference<T> clazz, String serviceName, String url, String scope, String postJsonData,
-                                Map<String, String> headers, Function<T, T> callback, Consumer<ErrorInfoResult> failCallback,
-                                boolean needOAuthAuthenticated) {
+    protected <T> T WebSendPost(TypeReference<T> clazz, String serviceName, String url, String scope,
+            String postJsonData, Map<String, String> headers, Function<T, T> callback,
+            Consumer<ErrorInfoResult> failCallback, boolean needOAuthAuthenticated) {
         return WebSendPost(clazz, serviceName, url, scope, postJsonData, ClientExtensions.DefaultContentType, headers,
                 callback, failCallback, needOAuthAuthenticated);
     }
@@ -806,9 +739,9 @@ public abstract class WebApiServiceBase {
      * @param needOAuthAuthenticated WebApi接口是否被OAuth保护
      * @return T 返回序列化后的调用对象
      */
-    protected <T> T WebSendPost(TypeReference<T> clazz, String serviceName, String url, String scope, String postJsonData,
-                                String contentType, Map<String, String> headers, Function<T, T> callback,
-                                Consumer<ErrorInfoResult> failCallback, boolean needOAuthAuthenticated) {
+    protected <T> T WebSendPost(TypeReference<T> clazz, String serviceName, String url, String scope,
+            String postJsonData, String contentType, Map<String, String> headers, Function<T, T> callback,
+            Consumer<ErrorInfoResult> failCallback, boolean needOAuthAuthenticated) {
         log.debug(String.format("开始调用服务[%s]，参数如下：URL=%s、postJsonData=%s", serviceName, url, postJsonData));
 
         if (StringExtensions.isNullOrEmpty(url) && failCallback != null) {
@@ -833,7 +766,7 @@ public abstract class WebApiServiceBase {
                         String.format("[%s] AccessToken is null or empty. ", serviceName)));
                 return null;
             }
-            //System.out.println(accessToken.getAccessToken());
+            // System.out.println(accessToken.getAccessToken());
             headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
         }
 
@@ -845,8 +778,7 @@ public abstract class WebApiServiceBase {
                 if (failCallback != null)
                     failCallback.accept(new ErrorInfoResult(status.getStatusCode(), errorString));
 
-                String error = String.format("调用服务[%s]出现异常，参数如下：URL=%s，错误消息: %s", serviceName, url,
-                        errorString);
+                String error = String.format("调用服务[%s]出现异常，参数如下：URL=%s，错误消息: %s", serviceName, url, errorString);
                 log.error(error);
                 return null;
             }
@@ -950,8 +882,8 @@ public abstract class WebApiServiceBase {
         private String tokenEndpoint;
         private String grantType;
 
-        public OAuth2ClientInfo(String tenantName, String clientId, String clientSecret, String
-                clientCredential, String tokenEndpoint, String grantType) {
+        public OAuth2ClientInfo(String tenantName, String clientId, String clientSecret, String clientCredential,
+                String tokenEndpoint, String grantType) {
             this.tenantName = tenantName;
             this.clientId = clientId;
             this.clientSecret = clientSecret;

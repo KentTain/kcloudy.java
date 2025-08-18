@@ -1,4 +1,4 @@
-﻿spring:
+spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -12,6 +12,6 @@ logging:
 GlobalConfig:
   EncryptKey: KCloudy-Microsoft-EncryptKey
 
-  SSOWebDomain: http://sso.kcloudy.com/
-  ResWebDomain: http://resource.kcloudy.com/
-  AccWebDomain: http://subdomain.acc.kcloudy.com/
+  SSOWebDomain: https://sso.kcloudy.com/
+  ResWebDomain: https://resource.kcloudy.com/
+  AccWebDomain: https://subdomain.acc.kcloudy.com/

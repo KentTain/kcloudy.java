@@ -1,4 +1,4 @@
-﻿spring:
+spring:
   jpa:
     show-sql: false
   datasource:
@@ -14,6 +14,6 @@ logging:
 GlobalConfig:
   EncryptKey: KCloudy-Microsoft-EncryptKey
 
-  SSOWebDomain: http://sso.kcloudy.com/
-  ResWebDomain: http://resource.kcloudy.com/
-  AppWebDomain: http://subdomain.app.kcloudy.com/
+  SSOWebDomain: https://sso.kcloudy.com/
+  ResWebDomain: https://resource.kcloudy.com/
+  AppWebDomain: https://subdomain.app.kcloudy.com/
