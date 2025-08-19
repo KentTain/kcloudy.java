@@ -12,9 +12,8 @@ import kc.database.repository.TreeNodeRepositoryFactoryBean;
 
 @SpringBootApplication
 @ServletComponentScan
-@EntityScan({ "kc.framework.base", "kc.model" })
-@ComponentScan({ "kc.mapping.*", "kc.service.*", "kc.service.webapiservice", "kc.web.*", "kc.web.multitenancy",
-		"kc.webapi.*" })
+@EntityScan({ "kc.framework.base", "kc.model.account" })
+@ComponentScan({ "kc.mapping.*", "kc.service.*", "kc.service.webapiservice", "kc.web.*", "kc.web", "kc.webapi.*" })
 @EnableJpaRepositories(basePackages = { "kc.dataaccess.*",
 		"kc.database" }, repositoryFactoryBeanClass = TreeNodeRepositoryFactoryBean.class)
 public class Application extends kc.web.WebApiSecurityConfig {
