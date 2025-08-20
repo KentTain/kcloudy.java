@@ -2,11 +2,8 @@ package kc.service.webapiservice.impl;
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import kc.dto.PaginatedBaseDTO;
 import kc.dto.account.MenuNodeDTO;
 import kc.dto.account.MenuNodeSimpleDTO;
@@ -20,7 +17,8 @@ import kc.framework.util.SerializeHelper;
 import kc.service.base.ServiceResult;
 import kc.service.webapiservice.IAccountApiService;
 
-@Service @lombok.extern.slf4j.Slf4j
+@Service
+@lombok.extern.slf4j.Slf4j
 public class AccountApiService extends IdSrvWebApiServiceBase implements IAccountApiService {
 	private final static String ServiceName = "kc.service.webapi.AccountApiService";
 

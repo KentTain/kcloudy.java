@@ -2,7 +2,6 @@ package kc.web.controller;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import kc.dto.PaginatedBaseDTO;
 import kc.dto.config.ConfigAttributeDTO;
 import kc.dto.config.ConfigEntityDTO;
@@ -30,19 +28,22 @@ import kc.web.base.WebBaseController;
 /**
  * 二级级菜单：配置管理/配置管理
  */
-@Controller @lombok.extern.slf4j.Slf4j @RequestMapping("/ConfigManager") @MenuAnnotation(ParentMenuName = "配置管理",
-		MenuName = "配置管理", Url = "/ConfigManager/Index", Version = TenantConstant.DefaultVersion,
-		TenantType = TenantConstant.DefaultTenantType, SmallIcon = "fa fa-file-code-o",
-		AuthorityId = "7D931A51-18DF-439D-BBE9-173576711980", DefaultRoleId = RoleConstants.AdminRoleId, Order = 1,
-		IsExtPage = false, Level = 2)
+@Controller
+@lombok.extern.slf4j.Slf4j
+@RequestMapping("/ConfigManager")
+@MenuAnnotation(ParentMenuName = "配置管理", MenuName = "配置管理", Url = "/ConfigManager/Index",
+		Version = TenantConstant.DefaultVersion, TenantType = TenantConstant.DefaultTenantType,
+		SmallIcon = "fa fa-file-code-o", AuthorityId = "7D931A51-18DF-439D-BBE9-173576711980",
+		DefaultRoleId = RoleConstants.AdminRoleId, Order = 1, IsExtPage = false, Level = 2)
 public class ConfigManagerController extends WebBaseController {
 	@Autowired
 	private IConfigService ConfigService;
 
-	@PreAuthorize("hasAuthority('7D931A51-18DF-439D-BBE9-173576711980')") @PermissionAnnotation(MenuName = "配置管理",
-			PermissionName = "配置管理", Url = "/ConfigManager/Index", DefaultRoleId = RoleConstants.AdminRoleId, Order = 3,
-			IsPage = true, ResultType = ResultType.ActionResult,
-			AuthorityId = "7D931A51-18DF-439D-BBE9-173576711980") @GetMapping("/index")
+	@PreAuthorize("hasAuthority('7D931A51-18DF-439D-BBE9-173576711980')")
+	@PermissionAnnotation(MenuName = "配置管理", PermissionName = "配置管理", Url = "/ConfigManager/Index",
+			DefaultRoleId = RoleConstants.AdminRoleId, Order = 3, IsPage = true, ResultType = ResultType.ActionResult,
+			AuthorityId = "7D931A51-18DF-439D-BBE9-173576711980")
+	@GetMapping("/index")
 	public String Index(ModelMap model) {
 		model.addAttribute("resWebDomain", GlobalConfig.ResWebDomain);
 		// 配置管理-保存配置属性
@@ -85,20 +86,22 @@ public class ConfigManagerController extends WebBaseController {
 		return "ConfigManager/_configForm";
 	}
 
-	@PreAuthorize("hasAuthority('420BFA23-BAC5-4EA2-88D9-A5D060A0C600')") @PermissionAnnotation(MenuName = "配置管理",
-			PermissionName = "保存配置", Url = "/ConfigManager/SaveConfig", DefaultRoleId = RoleConstants.AdminRoleId,
-			Order = 2, IsPage = false, ResultType = ResultType.JsonResult,
-			AuthorityId = "420BFA23-BAC5-4EA2-88D9-A5D060A0C600") @PostMapping("/SaveConfig")
+	@PreAuthorize("hasAuthority('420BFA23-BAC5-4EA2-88D9-A5D060A0C600')")
+	@PermissionAnnotation(MenuName = "配置管理", PermissionName = "保存配置", Url = "/ConfigManager/SaveConfig",
+			DefaultRoleId = RoleConstants.AdminRoleId, Order = 2, IsPage = false, ResultType = ResultType.JsonResult,
+			AuthorityId = "420BFA23-BAC5-4EA2-88D9-A5D060A0C600")
+	@PostMapping("/SaveConfig")
 	public @ResponseBody ServiceResult<Boolean> SaveConfig(ConfigEntityDTO model) {
 		return GetServiceResult(() -> {
 			return ConfigService.SaveConfig(model);
 		}, log);
 	}
 
-	@PreAuthorize("hasAuthority('51DE1887-5C57-4C17-984D-F23456499652')") @PermissionAnnotation(MenuName = "配置管理",
-			PermissionName = "删除配置", Url = "/ConfigManager/RemoveConfig", DefaultRoleId = RoleConstants.AdminRoleId,
-			Order = 3, IsPage = false, ResultType = ResultType.JsonResult,
-			AuthorityId = "51DE1887-5C57-4C17-984D-F23456499652") @GetMapping("/RemoveConfig")
+	@PreAuthorize("hasAuthority('51DE1887-5C57-4C17-984D-F23456499652')")
+	@PermissionAnnotation(MenuName = "配置管理", PermissionName = "删除配置", Url = "/ConfigManager/RemoveConfig",
+			DefaultRoleId = RoleConstants.AdminRoleId, Order = 3, IsPage = false, ResultType = ResultType.JsonResult,
+			AuthorityId = "51DE1887-5C57-4C17-984D-F23456499652")
+	@GetMapping("/RemoveConfig")
 	public @ResponseBody ServiceResult<Boolean> RemoveConfig(int configId) {
 		return GetServiceResult(() -> {
 			return ConfigService.SoftRemoveConfigEntityById(configId);
@@ -133,17 +136,19 @@ public class ConfigManagerController extends WebBaseController {
 	// @PreAuthorize("hasAuthority('1557E240-6D84-4AB5-ABC6-7F54F3EBC9C2')")
 	@PermissionAnnotation(MenuName = "配置管理", PermissionName = "保存配置属性", Url = "/ConfigManager/SaveConfigAttribute",
 			DefaultRoleId = RoleConstants.AdminRoleId, Order = 4, IsPage = false, ResultType = ResultType.JsonResult,
-			AuthorityId = "1557E240-6D84-4AB5-ABC6-7F54F3EBC9C2") @PostMapping("/SaveConfigAttribute")
+			AuthorityId = "1557E240-6D84-4AB5-ABC6-7F54F3EBC9C2")
+	@PostMapping("/SaveConfigAttribute")
 	public @ResponseBody ServiceResult<Boolean> SaveConfigAttribute(ConfigAttributeDTO model) {
 		return GetServiceResult(() -> {
 			return ConfigService.SaveConfigAttribute(model);
 		}, log);
 	}
 
-	@PreAuthorize("hasAuthority('8542C34A-C616-4534-A17F-615B873C5A46')") @PermissionAnnotation(MenuName = "配置管理",
-			PermissionName = "删除配置属性", Url = "/ConfigManager/RemoveConfigAttribute",
+	@PreAuthorize("hasAuthority('8542C34A-C616-4534-A17F-615B873C5A46')")
+	@PermissionAnnotation(MenuName = "配置管理", PermissionName = "删除配置属性", Url = "/ConfigManager/RemoveConfigAttribute",
 			DefaultRoleId = RoleConstants.AdminRoleId, Order = 5, IsPage = false, ResultType = ResultType.JsonResult,
-			AuthorityId = "8542C34A-C616-4534-A17F-615B873C5A46") @GetMapping("/RemoveConfigAttribute")
+			AuthorityId = "8542C34A-C616-4534-A17F-615B873C5A46")
+	@GetMapping("/RemoveConfigAttribute")
 	public @ResponseBody ServiceResult<Boolean> RemoveConfigAttribute(int configId) {
 		return GetServiceResult(() -> {
 			return ConfigService.SoftRemoveConfigEntityById(configId);

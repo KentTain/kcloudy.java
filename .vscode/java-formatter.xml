@@ -4,18 +4,76 @@
         <!-- 行长度限制（超出会触发换行） -->
         <setting id="org.eclipse.jdt.core.formatter.lineSplit" value="120"/>
         
-        <!-- 1. 注解换行设置 -->
+        <!-- 1. 注解换行设置 - 强制每个注解单独一行 -->
+        <setting id="org.eclipse.jdt.core.formatter.alignment_for_annotations" value="0"/>
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_annotations_on_parameter" value="0"/>
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_annotations_on_type" value="0"/>
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_annotations_on_type_use" value="0"/>
         <setting id="org.eclipse.jdt.core.formatter.wrap_before_annotation_rule" value="true"/>
         <setting id="org.eclipse.jdt.core.formatter.wrap_outer_expressions_when_nested" value="true"/>
+        
+        <!-- 控制注解的换行行为 -->
         <setting id="org.eclipse.jdt.core.formatter.never_indent_line_comments_on_first_column" value="false"/>
         <setting id="org.eclipse.jdt.core.formatter.never_indent_block_comments_on_first_column" value="false"/>
         <setting id="org.eclipse.jdt.core.formatter.never_indent_line_comments_on_column_limit" value="false"/>
-        <setting id="org.eclipse.jdt.core.formatter.alignment_for_annotations_on_parameter" value="0"/>
-        <setting id="org.eclipse.jdt.core.formatter.alignment_for_annotations_on_type" value="0"/>
-        <setting id="org.eclipse.jdt.core.formatter.alignment_for_annotations_on_type_use" value="0"/>
+        
+        <!-- 控制注解的换行和缩进 -->
+        <setting id="org.eclipse.jdt.core.formatter.continuation_indentation" value="1"/>
+        <setting id="org.eclipse.jdt.core.formatter.continuation_indentation_for_annotation_on_member" value="1"/>
+        <setting id="org.eclipse.jdt.core.formatter.continuation_indentation_for_annotation_on_parameter" value="1"/>
+        <setting id="org.eclipse.jdt.core.formatter.continuation_indentation_for_arguments_in_annotation" value="1"/>
+        
+        <!-- 控制注解的空白行 -->
+        <setting id="org.eclipse.jdt.core.formatter.blank_lines_before_first_class_body_declaration" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.blank_lines_before_field" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.blank_lines_before_method" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.blank_lines_before_new_chunk" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.blank_lines_before_package" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.blank_lines_after_imports" value="1"/>
+        <setting id="org.eclipse.jdt.core.formatter.blank_lines_between_import_groups" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.blank_lines_between_type_declarations" value="1"/>
+        
+        <!-- 控制注解的换行行为 -->
+        <setting id="org.eclipse.jdt.core.formatter.comment.insert_new_line_before_root_tags" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_local_variable" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_parameter" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_field" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_method" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_package" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_type" value="insert"/>
+        
+        <!-- 其他换行控制 -->
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_before_else_in_if_statement" value="do not insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_before_catch_in_try_statement" value="do not insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_before_finally_in_try_statement" value="do not insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_in_empty_annotation_declaration" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_in_empty_anonymous_type_declaration" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_in_empty_block" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_in_empty_enum_constant" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_in_empty_enum_declaration" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_in_empty_method_body" value="insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.insert_new_line_in_empty_type_declaration" value="insert"/>
+        
+        <!-- 其他设置 -->
+        <setting id="org.eclipse.jdt.core.formatter.compress_tag_lines" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.number_of_blank_lines_at_beginning_of_method_body" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.number_of_blank_lines_before_field" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.number_of_blank_lines_before_first_class_body_declaration" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.number_of_blank_lines_before_member_type" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.number_of_blank_lines_before_method" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.number_of_blank_lines_before_new_chunk" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.number_of_blank_lines_before_package" value="0"/>
+        <setting id="org.eclipse.jdt.core.formatter.number_of_empty_lines_to_preserve" value="1"/>
+        
+        <!-- 强制每个注解单独一行 -->
+        <setting id="org.eclipse.jdt.core.formatter.wrap_before_annotation_rule" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.wrap_outer_expressions_when_nested" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.wrap_before_binary_operator" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.wrap_before_assignment_operator" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.wrap_before_or_operator_multicatch" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.wrap_before_shift_operator" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.wrap_before_string_concatenation" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.wrap_outer_expressions_when_nested" value="true"/>
         
         <!-- 2. 方法调用参数换行设置 -->
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_arguments_in_allocation_expression" value="16"/>
