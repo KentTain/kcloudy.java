@@ -1,0 +1,131 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "kc.web.account-dev",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "kc.web.Application",
+            "projectName": "kc.web.account",
+            // "preLaunchTask": "Maven: Clean Install kc.web.account",
+            "args": [
+                "--spring.profiles.active=dev"
+            ],
+            "env": {
+                "SERVER_PORT": "2001",
+                "JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8"
+            },
+            "vmArgs": [
+                "-Dfile.encoding=UTF-8",
+                "-Dsun.jnu.encoding=UTF-8",
+                "-Dconsole.encoding=UTF-8"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "kc.web.account-prod",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "kc.web.Application",
+            "projectName": "kc.web.account",
+            // "preLaunchTask": "Maven: Clean Install kc.web.account",
+            "args": [
+                "--spring.profiles.active=prod"
+            ],
+            "env": {
+                "SERVER_PORT": "2001",
+                "JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8"
+            },
+            "vmArgs": [
+                "-Dfile.encoding=UTF-8",
+                "-Dconsole.encoding=UTF-8"
+            ],
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "kc.web.config-dev",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "kc.web.Application",
+            "projectName": "kc.web.config",
+            // "preLaunchTask": "Maven: Clean Install kc.web.config",
+            "args": [
+                "--spring.profiles.active=dev"
+            ],
+            "env": {
+                "SERVER_PORT": "1101",
+                "JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8"
+            },
+            "vmArgs": [
+                "-Dfile.encoding=UTF-8",
+                "-Dconsole.encoding=UTF-8"
+            ],
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "kc.web.config-prod",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "kc.web.Application",
+            "projectName": "kc.web.config",
+            "preLaunchTask": "Maven: Clean Install kc.web.config",
+            "args": [
+                "--spring.profiles.active=prod"
+            ],
+            "env": {
+                "SERVER_PORT": "1101",
+                "JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8"
+            },
+            "vmArgs": [
+                "-Dfile.encoding=UTF-8",
+                "-Dconsole.encoding=UTF-8"
+            ],
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "kc.webapi.account-dev",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "kc.webapi.Application",
+            "projectName": "kc.webapi.account",
+            // "preLaunchTask": "Maven: Clean Install kc.webapi.account",
+            "args": [
+                "--spring.profiles.active=dev"
+            ],
+            "env": {
+                "SERVER_PORT": "2002",
+                "JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8"
+            },
+            "vmArgs": [
+                "-Dfile.encoding=UTF-8",
+                "-Dsun.jnu.encoding=UTF-8",
+                "-Dconsole.encoding=UTF-8"
+            ],
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "kc.webapi.account-prod",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "kc.webapi.Application",
+            "projectName": "kc.webapi.account",
+            // "preLaunchTask": "Maven: Clean Install kc.webapi.account",
+            "args": [
+                "--spring.profiles.active=prod"
+            ],
+            "env": {
+                "SERVER_PORT": "2002",
+                "JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8"
+            },
+            "vmArgs": [
+                "-Dfile.encoding=UTF-8",
+                "-Dconsole.encoding=UTF-8"
+            ],
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

@@ -27,7 +27,10 @@ HELP.md
 /build/
 
 ### VS Code ###
-.vscode/
+.vscode/**
+!.vscode/java-formatter.xml
+!.vscode/launch.json
+!.vscode/tasks.json
 
 # Created by https://www.gitignore.io/api/eclipse
 # Edit at https://www.gitignore.io/?templates=eclipse
@@ -118,7 +121,6 @@ WebApi/kc.webapi.config/target/kc.webapi.config-1.0.0.1.jar.original
 .idea/vcs.xml
 .idea/workspace.xml
 
+logs/
 !packages/**
 application.pid
-
-logs/**

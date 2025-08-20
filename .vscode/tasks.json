@@ -1,0 +1,74 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Maven: Clean Install kc.web.account",
+            "type": "shell",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "chcp 65001 > NUL && mvn.cmd clean install -DskipTests -pl Web/kc.web.account -am"
+            ],
+            "group": "build",
+            "options": {
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": [
+                        "/c"
+                    ]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Maven: Clean Install kc.web.config",
+            "type": "shell",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "chcp 65001 > NUL && mvn.cmd clean install -DskipTests -pl Web/kc.web.config -am"
+            ],
+            "group": "build",
+            "options": {
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": [
+                        "/c"
+                    ]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Maven: Clean Install kc.webapi.account",
+            "type": "shell",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "chcp 65001 > NUL && mvn.cmd clean install -DskipTests -pl WebApi/kc.webapi.account -am"
+            ],
+            "group": "build",
+            "options": {
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": [
+                        "/c"
+                    ]
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
