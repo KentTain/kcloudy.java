@@ -4,15 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import kc.framework.GlobalConfig;
 import kc.framework.extension.StringExtensions;
 import kc.framework.tenant.Tenant;
@@ -659,8 +656,7 @@ public abstract class WebApiServiceBase {
             // 内容
             String responseString = ClientExtensions.toString(response);
             if (callback != null && !StringExtensions.isNullOrEmpty(responseString)) {
-                TypeReference<String> strType = new TypeReference<String>() {
-                };
+                TypeReference<String> strType = new TypeReference<String>() {};
                 if (strType.getType() == clazz.getType()) {
                     @SuppressWarnings("unchecked")
                     T result = (T) responseString;
@@ -744,14 +740,16 @@ public abstract class WebApiServiceBase {
             Consumer<ErrorInfoResult> failCallback, boolean needOAuthAuthenticated) {
         log.debug(String.format("开始调用服务[%s]，参数如下：URL=%s、postJsonData=%s", serviceName, url, postJsonData));
 
-        if (StringExtensions.isNullOrEmpty(url) && failCallback != null) {
-            failCallback.accept(new ErrorInfoResult(HttpStatus.SC_BAD_REQUEST,
-                    String.format("Service's [%s] url is null or empty. ", serviceName)));
+        if (StringExtensions.isNullOrEmpty(url)) {
+            if (failCallback != null)
+                failCallback.accept(new ErrorInfoResult(HttpStatus.SC_BAD_REQUEST,
+                        String.format("Service's [%s] url is null or empty. ", serviceName)));
             return null;
         }
-        if (needOAuthAuthenticated && StringExtensions.isNullOrEmpty(scope) && failCallback != null) {
-            failCallback.accept(new ErrorInfoResult(HttpStatus.SC_BAD_REQUEST,
-                    String.format("Service's [%s] scope is null or empty. ", serviceName)));
+        if (needOAuthAuthenticated && StringExtensions.isNullOrEmpty(scope)) {
+            if (failCallback != null)
+                failCallback.accept(new ErrorInfoResult(HttpStatus.SC_BAD_REQUEST,
+                        String.format("Service's [%s] scope is null or empty. ", serviceName)));
             return null;
         }
 
@@ -785,8 +783,7 @@ public abstract class WebApiServiceBase {
             // 内容
             String responseString = ClientExtensions.toString(response);
             if (callback != null && !StringExtensions.isNullOrEmpty(responseString)) {
-                TypeReference<String> strType = new TypeReference<String>() {
-                };
+                TypeReference<String> strType = new TypeReference<String>() {};
                 if (strType.getType() == clazz.getType()) {
                     @SuppressWarnings("unchecked")
                     T result = (T) responseString;

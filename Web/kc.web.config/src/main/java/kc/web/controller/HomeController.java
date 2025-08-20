@@ -38,11 +38,9 @@ import kc.web.models.SelectUsersViewModel;
 @RequestMapping(value = "")
 public class HomeController extends WebBaseController {
 	@PreAuthorize("hasAuthority('" + ApplicationConstant.DefaultAuthorityId + "')")
-	// @PermissionAnnotation(MenuName = "配置管理首页", PermissionName = "首页页面", Url =
-	// "Home/Index",
-	// DefaultRoleId = RoleConstants.AdminRoleId, Order = 1, IsPage = true,
-	// ResultType = ResultType.ActionResult, AuthorityId =
-	// ApplicationConstant.DefaultAuthorityId)
+	// @PermissionAnnotation(MenuName = "配置管理首页", PermissionName = "首页页面", Url = "Home/Index",
+	// 		DefaultRoleId = RoleConstants.AdminRoleId, Order = 1, IsPage = true, ResultType = ResultType.ActionResult,
+	// 		AuthorityId = ApplicationConstant.DefaultAuthorityId)
 	@RequestMapping("")
 	public String index(Locale locale, ModelMap model) {
 		model.addAttribute("title", GlobalConfig.CurrentApplication.getAppName());
@@ -60,7 +58,7 @@ public class HomeController extends WebBaseController {
 	@MenuAnnotation(ParentMenuName = "配置管理", MenuName = "配置管理", Url = "/Home/Config",
 			Version = TenantConstant.DefaultVersion, TenantType = TenantConstant.DefaultTenantType,
 			SmallIcon = "fa fa-file-code-o", AuthorityId = "A015AC93-7222-4918-8CD8-E73E6720E087",
-			DefaultRoleId = RoleConstants.AdminRoleId, Order = 1, IsExtPage = false, Level = 2)
+			DefaultRoleId = RoleConstants.AdminRoleId, Order = 1, IsExtPage = false, Level = 1)
 	@RequestMapping("/Home/Config")
 	public String Config() {
 		return super.ThrowErrorJsonMessage(true, "菜单-配置管理");

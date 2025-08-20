@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import kc.dto.TreeNodeDTO;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
-
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
+import kc.dto.TreeNodeDTO;
 import kc.dto.account.MenuNodeDTO;
 import kc.dto.account.PermissionDTO;
 import kc.framework.tenant.ApplicationConstant;
@@ -23,40 +26,57 @@ public class AnnotationUtil {
 	 * @param packageName 包名称
 	 */
 	public static void initAnnotationDataByPackageName(String packageName) {
-		Reflections reflections = new Reflections(packageName, new MethodAnnotationsScanner());
-
-		Set<Method> menuMethods = reflections.getMethodsAnnotatedWith(MenuAnnotation.class);
+		ConfigurationBuilder config = new ConfigurationBuilder().setUrls(ClasspathHelper.forPackage(packageName))
+				.setScanners(new MethodAnnotationsScanner(), new TypeAnnotationsScanner(), new SubTypesScanner())
+				.filterInputsBy(new FilterBuilder().includePackage(packageName));
+		Reflections reflections = new Reflections(config);
+		// 1.处理类及方法上的菜单注解
 		List<MenuAnnotation> menuAttrData = new ArrayList<>();
+		Set<Class<?>> menuClasses = reflections.getTypesAnnotatedWith(MenuAnnotation.class);
+		for (Class<?> clazz : menuClasses) {
+			MenuAnnotation menuAttr = clazz.getAnnotation(MenuAnnotation.class);
+			if (null != menuAttr) {
+				menuAttrData.add(menuAttr);
+			}
+		}
+		Set<Method> menuMethods = reflections.getMethodsAnnotatedWith(MenuAnnotation.class);
 		for (Method method : menuMethods) {
 			MenuAnnotation menuAttr = method.getAnnotation(MenuAnnotation.class);
 			if (null != menuAttr) {
 				menuAttrData.add(menuAttr);
 			}
 		}
-		// 一级菜单
+
+		// 1.1.一级菜单
 		for (MenuAnnotation item : menuAttrData.stream().filter(m -> m.Level() == 1).collect(Collectors.toList())) {
 			MenuData.AddResource(item, null);
 		}
-
-		// 二级菜单
+		// 1.2.二级菜单
 		for (MenuAnnotation item : menuAttrData.stream().filter(m -> m.Level() == 2).collect(Collectors.toList())) {
 			Optional<MenuNodeDTO> parentItem = MenuData.AllMenus.stream()
-					.filter(m -> m.getText().equalsIgnoreCase(item.ParentMenuName())).findFirst();
+					.filter(m -> m.getText().equalsIgnoreCase(item.ParentMenuName()) && m.getLevel() == 1).findFirst();
 			parentItem.ifPresent(menuNodeDTO -> MenuData.AddResource(item, menuNodeDTO));
 		}
-
-		// 三级菜单
+		// 1.3.三级菜单
 		for (MenuAnnotation item : menuAttrData.stream().filter(m -> m.Level() == 3).collect(Collectors.toList())) {
 			List<MenuNodeDTO> childMenus = new ArrayList<>();
 			MenuData.AllMenus.stream().map(TreeNodeDTO::getChildren).forEach(childMenus::addAll);
 
 			Optional<MenuNodeDTO> parentItem = childMenus.stream()
-					.filter(m -> m.getText().equalsIgnoreCase(item.ParentMenuName())).findFirst();
+					.filter(m -> m.getText().equalsIgnoreCase(item.ParentMenuName()) && m.getLevel() == 2).findFirst();
 			parentItem.ifPresent(menuNodeDTO -> MenuData.AddResource(item, menuNodeDTO));
 		}
 
-		Set<Method> permissionMethods = reflections.getMethodsAnnotatedWith(PermissionAnnotation.class);
+		// 2.处理类及方法上的权限注解
 		List<PermissionAnnotation> permissionAttrData = new ArrayList<>();
+		Set<Class<?>> permissionClasses = reflections.getTypesAnnotatedWith(PermissionAnnotation.class);
+		for (Class<?> clazz : permissionClasses) {
+			PermissionAnnotation permissionAttr = clazz.getAnnotation(PermissionAnnotation.class);
+			if (null != permissionAttr) {
+				permissionAttrData.add(permissionAttr);
+			}
+		}
+		Set<Method> permissionMethods = reflections.getMethodsAnnotatedWith(PermissionAnnotation.class);
 		for (Method method : permissionMethods) {
 			PermissionAnnotation permissionAttr = method.getAnnotation(PermissionAnnotation.class);
 			if (null != permissionAttr) {
@@ -64,25 +84,23 @@ public class AnnotationUtil {
 			}
 		}
 
-		// 父节点
+		// 2.1.父节点
 		for (PermissionAnnotation item : permissionAttrData.stream().filter(PermissionAnnotation::IsPage)
 				.collect(Collectors.toList())) {
 			PermissionData.AddResource(item, null);
 		}
-
-		// 子节点
+		// 2.2.子节点
 		for (PermissionAnnotation item : permissionAttrData.stream().filter(m -> !m.IsPage())
 				.collect(Collectors.toList())) {
-			
+
 			Optional<PermissionDTO> parentItem = PermissionData.AllPermissions.stream()
-					.filter(m -> m.getLevel() == 1 
-						&& m.getText().endsWith(ApplicationConstant.DefaultAuthoritySplitChar + item.MenuName()))
+					.filter(m -> m.getLevel() == 1
+							&& m.getText().endsWith(ApplicationConstant.DefaultAuthoritySplitChar + item.MenuName()))
 					.findFirst();
-			
-//			Optional<PermissionDTO> parentItem = PermissionData.AllPermissions.stream()
-//					.filter(m -> m.getText().equals(item.MenuName() + ApplicationConstant.DefaultAuthoritySplitChar + item.MenuName())).findFirst();
+
+			//			Optional<PermissionDTO> parentItem = PermissionData.AllPermissions.stream()
+			//					.filter(m -> m.getText().equals(item.MenuName() + ApplicationConstant.DefaultAuthoritySplitChar + item.MenuName())).findFirst();
 			parentItem.ifPresent(permissionDTO -> PermissionData.AddResource(item, permissionDTO));
 		}
-
 	}
 }
