@@ -1,10 +1,8 @@
 package kc.web.controller;
 
 import java.util.Collection;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import kc.service.base.ServiceResult;
 import kc.service.enums.ServiceResultType;
 import kc.service.webapiservice.IAccountApiService;
@@ -36,8 +33,8 @@ public class AccountController extends WebBaseController {
 		if (!IsAuthenticated())
 			return new ServiceResult<Boolean>(ServiceResultType.PurviewLack, "用户未登陆，不能修改邮箱及手机号.");
 
-//        if (!ModelState.IsValid)
-//            return new ServiceResult<Boolean>(ServiceResultType.ParamError, "数据有误,请重新输入." );
+		//        if (!ModelState.IsValid)
+		//            return new ServiceResult<Boolean>(ServiceResultType.ParamError, "数据有误,请重新输入." );
 
 		ServiceResult<Boolean> result = accountService.ChangePassword(CurrentUserId(), model.getOldPassword(),
 				model.getNewPassword());
@@ -52,8 +49,8 @@ public class AccountController extends WebBaseController {
 		if (!IsAuthenticated())
 			return new ServiceResult<Boolean>(ServiceResultType.PurviewLack, "用户未登陆，不能修改邮箱及手机号.");
 
-//        if (!ModelState.IsValid)
-//            return new ServiceResult<Boolean>(ServiceResultType.ParamError, "数据有误,请重新输入." );
+		//        if (!ModelState.IsValid)
+		//            return new ServiceResult<Boolean>(ServiceResultType.ParamError, "数据有误,请重新输入." );
 
 		ServiceResult<Boolean> result = accountService.ChangeMailPhone(CurrentUserId(), model.Email, model.Phone);
 

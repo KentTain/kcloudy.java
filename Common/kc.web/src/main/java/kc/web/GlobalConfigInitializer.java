@@ -7,7 +7,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
-
 import kc.framework.GlobalConfig;
 import kc.framework.GlobalConfigData;
 import kc.framework.tenant.TenantConstant;
@@ -39,7 +38,8 @@ public class GlobalConfigInitializer implements ApplicationListener<ContextRefre
 	}
 
 	@Override
-	public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
+	public void onApplicationEvent(@NonNull
+	ContextRefreshedEvent event) {
 		// 确保只初始化一次
 		if (event.getApplicationContext().getParent() == null) {
 			initWebAfterStarted(packageName, env);

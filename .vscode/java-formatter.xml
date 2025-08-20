@@ -12,10 +12,19 @@
         <setting id="org.eclipse.jdt.core.formatter.wrap_before_annotation_rule" value="true"/>
         <setting id="org.eclipse.jdt.core.formatter.wrap_outer_expressions_when_nested" value="true"/>
         
-        <!-- 控制注解的换行行为 -->
-        <setting id="org.eclipse.jdt.core.formatter.never_indent_line_comments_on_first_column" value="false"/>
-        <setting id="org.eclipse.jdt.core.formatter.never_indent_block_comments_on_first_column" value="false"/>
-        <setting id="org.eclipse.jdt.core.formatter.never_indent_line_comments_on_column_limit" value="false"/>
+        <!-- 控制注释格式 - 保持原始格式不自动换行 -->
+        <setting id="org.eclipse.jdt.core.formatter.comment.format_line_comments" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.format_block_comments" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.format_javadoc_comments" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.preserve_white_space_between_code_and_line_comments" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.indent_parameter_description" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.indent_root_tags" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.insert_new_line_before_root_tags" value="do not insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.insert_new_line_for_parameter" value="do not insert"/>
+        <setting id="org.eclipse.jdt.core.formatter.never_indent_line_comments_on_first_column" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.never_indent_block_comments_on_first_column" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.never_indent_line_comments_on_column_limit" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.line_length" value="1000"/>
         
         <!-- 控制注解的换行和缩进 -->
         <setting id="org.eclipse.jdt.core.formatter.continuation_indentation" value="1"/>

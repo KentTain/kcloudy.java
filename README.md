@@ -149,3 +149,51 @@ docker push registry.cn-zhangjiakou.aliyuncs.com/kcloudy-java/kc.web.demo:1.0.0.
 find /mnt/maven/repository/ -name "*.lastUpdated" -exec grep -q "Could not transfer" {} \; -print -exec rm {} \;
 
 ```
+
+# java代码格式设置规则
+## 1.方法调用参数换行设置：
+* 每个参数单独占一行
+* 参数对齐方式设置为16个空格
+* 在第一个参数前换行
+## 2.注解换行设置：
+* 每个注解单独占一行
+* 注解参数过多时会自动换行
+* 注解参数对齐方式设置为16个空格
+## 3.Lambda 表达式格式设置：
+* Lambda 表达式的大括号不换行
+* Lambda 参数和箭头在同一行
+* Lambda 主体如果是单行则保持单行
+## 4.大括号不换行设置：
+* 匿名类、代码块、构造函数、枚举常量、方法声明、switch语句和类型声明的大括号都不换行
+## 5.逗号后换行：
+* 在逗号后换行
+* 保持参数对齐
+## 6.其他格式设置：
+* 在逗号后添加空格
+* 保持代码整洁和一致性
+* 超长注释不自动换行
+## 7.案例
+```java
+result = WebSendGet(
+		new TypeReference<ServiceResult<Boolean>>() {}, 
+		ServiceName + ".ChangePasswordAsync", 
+		AccountApiUrl() + "AccountApi/ChangePasswordAsync?userId=" + userId + "&currentPassword=" + currentPassword + "&newPassword=" + newPassword, ApplicationConstant.AccScope,
+		callback -> {
+			return callback;
+		}, 
+		failCallback -> {
+			log.error(ServiceName + " throw error: " + failCallback.toString());
+		}, 
+		true);
+
+@lombok.extern.slf4j.Slf4j
+@RequestMapping("/ConfigManager")
+@MenuAnnotation(ParentMenuName = "配置管理", MenuName = "配置管理", Url = "/ConfigManager/Index",
+		Version = TenantConstant.DefaultVersion, TenantType = TenantConstant.DefaultTenantType,
+		SmallIcon = "fa fa-file-code-o", AuthorityId = "7D931A51-18DF-439D-BBE9-173576711980",
+		DefaultRoleId = RoleConstants.AdminRoleId, Order = 1, IsExtPage = false, Level = 2)
+
+		//        if (!ModelState.IsValid)
+		//            return new ServiceResult<Boolean>(ServiceResultType.ParamError, "数据有误,请重新输入." );
+
+```
