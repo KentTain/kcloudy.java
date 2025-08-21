@@ -7,12 +7,12 @@
 $projects = @(
     [PSCustomObject]@{ Name = "kc.web.account";     HttpPort = 2001; HttpsPort = 0; Enabled = $true  },
     [PSCustomObject]@{ Name = "kc.web.app";         HttpPort = 1105; HttpsPort = 0; Enabled = $true },
-    [PSCustomObject]@{ Name = "kc.web.codegenerate";HttpPort = 1007; HttpsPort = 0; Enabled = $true },
+    [PSCustomObject]@{ Name = "kc.web.codegenerate";HttpPort = 1007; HttpsPort = 0; Enabled = $false },
     [PSCustomObject]@{ Name = "kc.web.config";      HttpPort = 1101; HttpsPort = 0; Enabled = $true },
     [PSCustomObject]@{ Name = "kc.web.dict";        HttpPort = 1103; HttpsPort = 0; Enabled = $true },
     [PSCustomObject]@{ Name = "kc.web.offering";    HttpPort = 3005; HttpsPort = 0; Enabled = $true },
-    [PSCustomObject]@{ Name = "kc.web.portal";      HttpPort = 2007; HttpsPort = 0; Enabled = $true },
-    [PSCustomObject]@{ Name = "kc.web.training";    HttpPort = 6001; HttpsPort = 0; Enabled = $true }
+    [PSCustomObject]@{ Name = "kc.web.portal";      HttpPort = 2007; HttpsPort = 0; Enabled = $false },
+    [PSCustomObject]@{ Name = "kc.web.training";    HttpPort = 6001; HttpsPort = 0; Enabled = $false }
 )
 
 # filter enabled projects

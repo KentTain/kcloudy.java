@@ -139,8 +139,8 @@ function Build-Java-Web {
     
     # replace version
     #mvn clean versions:set -DnewVersion=$newVersion
-    Write-Info "Building project: mvn clean package -pl $solutionName -am -DskipTests --no-transfer-progress source:jar"
-    mvn clean package -pl :$solutionName -am -DskipTests --no-transfer-progress source:jar
+    Write-Info "Building project: mvn clean package -DskipTests --projects :$solutionName --also-make --no-transfer-progress --quiet"
+    mvn clean package -DskipTests --projects :$solutionName --also-make --no-transfer-progress --quiet
 
     # copy jar to publish directory
     $targetDir = "$projectRoot\$projectPath\target"
