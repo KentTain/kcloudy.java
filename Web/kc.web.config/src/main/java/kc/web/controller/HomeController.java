@@ -64,6 +64,18 @@ public class HomeController extends WebBaseController {
 		return super.ThrowErrorJsonMessage(true, "菜单-配置管理");
 	}
 
+	/**
+	 * 二级级菜单：配置管理/配置管理
+	 */
+	@MenuAnnotation(ParentMenuName = "配置管理", MenuName = "配置管理", Url = "/Home/ConfigManager",
+			Version = TenantConstant.DefaultVersion, TenantType = TenantConstant.DefaultTenantType,
+			SmallIcon = "fa fa-file-code-o", AuthorityId = "A015AC93-7222-4918-8CD8-E73E6720E087",
+			DefaultRoleId = RoleConstants.AdminRoleId, Order = 1, IsExtPage = false, Level = 2)
+	@RequestMapping("/Home/ConfigManager")
+	public String ConfigManager() {
+		return super.ThrowErrorJsonMessage(true, "菜单-配置管理");
+	}
+
 	/*------------------------------------------主页数据-----------------------------------------------*/
 	@GetMapping("/Home/GetMenuIdByUrl")
 	public @ResponseBody ServiceResult<Integer> GetMenuIdByUrl(String url) {

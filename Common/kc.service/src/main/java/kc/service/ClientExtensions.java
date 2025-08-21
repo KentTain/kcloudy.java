@@ -1,10 +1,20 @@
 package kc.service;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.List;
-
+import java.util.Map;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -25,24 +35,16 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.*;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-
 import kc.framework.extension.StringExtensions;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 @lombok.extern.slf4j.Slf4j
 public class ClientExtensions {
@@ -153,7 +155,7 @@ public class ClientExtensions {
 		String apiUri = uri.getPath() + "?" + uri.getQuery();
 
 		HttpGet httpGet = new HttpGet(baseUri + apiUri);
-		
+
 		// httpGet.addHeader("Authorization", "Bearer " +
 		// "eyJhbGciOiJSUzI1NiIsImtpZCI6IjZmZmE0YjFjMzJjOWJlYzAxNjIyZWU0ZWU3MTE5NTc3IiwidHlwIjoiSldUIn0.eyJuYmYiOjE1NjQzNzk3MTQsImV4cCI6MTU2NDM4MzMxNCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDoxMDAxIiwiYXVkIjpbImh0dHA6Ly9sb2NhbGhvc3Q6MTAwMS9yZXNvdXJjZXMiLCJhY2NhcGkiXSwiY2xpZW50X2lkIjoiWTFSbGMzUT0iLCJzY29wZSI6WyJhY2NhcGkiXX0.k1uQjIB4ehkK35-kpzaM_3DF2TSGS3WrlNj3c36l_5bBxUeMmZ4WUxMBZ2RYF4UEgoXai4MfrI-tRR32f_w1em-y_2hWbrjzpu3-IMkgiPpP4EjNccwQUkNNLjo5WAXFuuY-Vw0S4PmNBZxRtjuM5sJRcavHMsrvaTeUja_cYKQ2s4SJT1DorVRmzm9wsoYJ1x9KbLZjoW34IWmpnRa3IS2d4kRd50Jp5-pROORN7j9Yb9aeiNCCY4Vr0fdMGFLWIVv6XaSBJaL4DcFAlXMgTajKsshFSHJAY1Yl-sxkVdJ5huKP2qRdQQq7-V718mJr-w7Kez3FT_J9DbFoJnJjkA");
 		if (StringExtensions.isNullOrEmpty(contentType)) {
@@ -280,15 +282,18 @@ public class ClientExtensions {
 	 * @return String
 	 */
 	public static String toString(CloseableHttpResponse httpResponse) {
-		if(httpResponse == null)
+		if (httpResponse == null)
 			return null;
-		
+
 		// 获取响应消息实体
 		String result = null;
 		try {
 			HttpEntity entity = httpResponse.getEntity();
 			if (entity != null) {
 				result = EntityUtils.toString(entity, Consts.UTF_8);
+			}
+			if (StringExtensions.isNullOrEmpty(result)) {
+				result = httpResponse.toString();
 			}
 		} catch (Exception e) {
 			log.error("ClientExtensions toString throw error: " + e.getMessage());
