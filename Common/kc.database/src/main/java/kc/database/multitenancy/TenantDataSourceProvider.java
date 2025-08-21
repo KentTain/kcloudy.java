@@ -3,9 +3,7 @@ package kc.database.multitenancy;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.sql.DataSource;
-
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
@@ -13,10 +11,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
 import kc.database.TenantConnection;
 import kc.framework.security.EncryptPasswordUtil;
 import kc.framework.tenant.Tenant;
@@ -59,10 +55,10 @@ public class TenantDataSourceProvider {
     static DataSource getTenantDataSource(String tenantId) {
         String key = dataSourceMap.containsKey(tenantId) ? tenantId : DEFAULT_POOL_CONFIG;
         DataSource result = dataSourceMap.get(key);
-        if (result instanceof HikariDataSource) {
-            HikariDataSource hikariDs = (HikariDataSource) result;
-            log.info(String.format("===getTenantDataSource==%s==%s==", key, hikariDs.getJdbcUrl()));
-        }
+        // if (result instanceof HikariDataSource) {
+        //     HikariDataSource hikariDs = (HikariDataSource) result;
+        //     log.debug(String.format("===getTenantDataSource==%s==%s==", key, hikariDs.getJdbcUrl()));
+        // }
 
         return result;
     }
@@ -137,8 +133,8 @@ public class TenantDataSourceProvider {
         if (ObjectUtils.isEmpty(encryptKey))
             encryptKey = EncryptPasswordUtil.DEFAULT_Key;
 
-        log.info(String.format("===getDefaultHikariConfig driverClass：%s，dbUrl：%s，dbUserName：%s，dbPassword：%s",
-                driverClass, dbUrl, dbUserName, encryptKey));
+        log.debug(String.format("===getDefaultHikariConfig driverClass：%s，dbUrl：%s，dbUserName：%s，dbPassword：%s",
+                driverClass, dbUrl, dbUserName, dbPassword));
         String decryptDbPasswrod = EncryptPasswordUtil.DecryptPassword(dbPassword, encryptKey);
 
         HikariConfig config = new HikariConfig();
@@ -189,7 +185,7 @@ public class TenantDataSourceProvider {
             }
         }
 
-        log.info("===Loading configuration for profile: {}", activeProfile);
+        log.debug("===Loading configuration for profile: {}", activeProfile);
 
         // 4. 尝试从 application-{profile}.yml 中获取
         String profileSpecificFile = "application-" + activeProfile + ".yml";
