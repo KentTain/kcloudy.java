@@ -8,10 +8,11 @@
 logging:
   level:
     org.springframework.boot.autoconfigure: INFO
-    
+
 GlobalConfig:
   EncryptKey: dev-cfwin-EncryptKey
 
   SSOWebDomain: http://localhost:1001/
   ResWebDomain: http://localhost:9999/
+  # AccWebDomain: http://subdomain.localhost:2002/
   CfgWebDomain: http://subdomain.localhost:1101/

@@ -8,10 +8,11 @@ spring:
 logging:
   level:
     org.springframework.boot.autoconfigure: ERROR
-    
+
 GlobalConfig:
   EncryptKey: KCloudy-Microsoft-EncryptKey
 
   SSOWebDomain: https://sso.kcloudy.com/
   ResWebDomain: https://resource.kcloudy.com/
+  AccWebDomain: https://subdomain.acc.kcloudy.com/
   CfgWebDomain: https://subdomain.cfg.kcloudy.com/
