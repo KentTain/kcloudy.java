@@ -252,8 +252,8 @@ function Build-Java-Web {
 
     # Log the command and run it
     $commandString = "docker " + ($dockerRunCmd -join " ")
-    Write-Info "Running container: $commandString"
-    & docker $dockerRunCmd
+    # Write-Info "Running container: $commandString"
+    # & docker $dockerRunCmd
 
     # Show container logs
     #docker logs $containerName

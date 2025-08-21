@@ -66,6 +66,7 @@ kcloudy.business
 | k8s-worker02  | kc.web.offering | 商品管理 | *.off.kcloudy.com        | 3005  | 3015  | 
 | k8s-worker02  | kc.web.account | 用户权限应用 | *.acc.kcloudy.com      | 2001  | 2011  | 
 | k8s-worker02  | kc.web.portal | 网站应用 | *.portal.kcloudy.com      | 2007  | 2017  | 
+| k8s-worker02  | kc.web.training | 培训应用 | *.training.kcloudy.com      | 6001  | 6011  | 
 
 ###	 2.3 相关Api应用的部署如下：
 | 部署服务器   | 应用编码   |应用名称   | 域名/泛域名              | 80端口   | 443端口   | 
@@ -76,7 +77,7 @@ kcloudy.business
 | k8s-worker02  | kc.webapi.offering | 商品管理Api | *.offapi.kcloudy.com        | 3006  | 3016  | 
 | k8s-worker02  | kc.webapi.account | 用户权限Api | *.accapi.kcloudy.com      | 2002  | 2012  | 
 | k8s-worker02  | kc.webapi.portal | 网站管理Api | *.portalapi.kcloudy.com      | 2007  | 2017  | 
-
+| k8s-worker02  | kc.webapi.training | 培训管理Api | *.trainingapi.kcloudy.com      | 6002  | 6012  | 
 
 ### 2.4 生成package并推送至阿里云仓库
 将Java项目（项目编码）以版本号（版本号）打包至发布目录（D:\Publish\Java\{项目编码}\v-{版本号}），生成Docker镜像并推送到阿里云仓库，具体步骤如下：
