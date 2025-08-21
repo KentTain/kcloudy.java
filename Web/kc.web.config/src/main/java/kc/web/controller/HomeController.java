@@ -69,7 +69,7 @@ public class HomeController extends WebBaseController {
 	 */
 	@MenuAnnotation(ParentMenuName = "配置管理", MenuName = "配置管理", Url = "/Home/ConfigManager",
 			Version = TenantConstant.DefaultVersion, TenantType = TenantConstant.DefaultTenantType,
-			SmallIcon = "fa fa-file-code-o", AuthorityId = "A015AC93-7222-4918-8CD8-E73E6720E087",
+			SmallIcon = "fa fa-file-code-o", AuthorityId = "84D32599-A545-43E1-9A00-3E091DBCB1E7",
 			DefaultRoleId = RoleConstants.AdminRoleId, Order = 1, IsExtPage = false, Level = 2)
 	@RequestMapping("/Home/ConfigManager")
 	public String ConfigManager() {
