@@ -3,13 +3,75 @@
 ```bash
 kcloudy.java
 |-- Shell
+|   |-- update-application-config.ps1       # 统一管理项目application.yml配置文件
+|   |-- update-db-config.ps1       # 更新application.yml中数据库配置文件
 |   |-- update-files.ps1       # 统一管理项目标准配置文件，包括：Dockerfile、logback.xml
+|   |-- build-all-webs.ps1     # 构建所有 Java Web 应用并部署到 Docker 容器
 |   |-- build-java-web.ps1     # 构建 Java Web 应用并部署到 Docker 容器
 |   |-- clear-lastupdated.bat  # 清理 Maven 本地仓库中的临时文件
 |   |-- jenkins-build.sh       # Jenkins 持续集成/持续部署脚本
 ```
 ## 2. 脚本说明
-### 2.1 update-files.ps1
+### 2.1 update-application-config.ps1
+#### 功能说明
+统一管理项目中的 application.yml 配置文件，自动生成或更新标准化的 Spring Boot 应用配置。
+
+#### 功能特点
+- 自动生成唯一的 ApplicationId（如果不存在）
+- 统一配置服务器端口、Spring 相关设置、Swagger 文档配置等
+- 支持自定义应用名称、API 名称和端口号
+- 自动处理多租户数据库配置
+
+#### 使用说明
+```powershell
+# 直接运行脚本，会自动处理所有 Web 和 WebApi 目录下的 application.yml 文件
+.\update-application-config.ps1
+```
+
+### 2.2 update-db-config.ps1
+#### 功能说明
+批量更新指定环境(dev/prod)下的数据库连接配置，包括数据库URL、用户名和密码。
+
+#### 参数说明
+* `-Environment`：指定要更新的环境，有效值为 'dev' 或 'prod'（必填）
+
+#### 使用示例
+```powershell
+# 更新开发环境数据库配置
+.\update-db-config.ps1 -Environment dev
+
+# 更新生产环境数据库配置
+.\update-db-config.ps1 -Environment prod
+```
+
+### 2.3 build-all-webs.ps1
+#### 功能说明
+批量构建并部署所有启用的 Java Web 应用到 Docker 容器。该脚本会自动遍历预定义的项目列表，并为每个启用的项目调用 build-java-web.ps1 脚本进行构建和部署。
+
+#### 功能特点
+- 支持配置多个项目的构建参数（项目名称、HTTP/HTTPS 端口等）
+- 可以单独控制每个项目的启用/禁用状态
+- 自动处理构建过程中的异常，确保一个项目构建失败不会影响其他项目
+- 提供清晰的构建状态反馈（成功/失败）
+
+#### 预定义项目列表
+脚本中预定义了以下项目及其默认端口：
+- kc.web.account (2001)
+- kc.web.app (1105)
+- kc.web.codegenerate (1007, 默认禁用)
+- kc.web.config (1101)
+- kc.web.dict (1103)
+- kc.web.offering (3005)
+- kc.web.portal (2007, 默认禁用)
+- kc.web.training (6001, 默认禁用)
+
+#### 使用说明
+```powershell
+# 直接运行脚本，将构建所有启用的项目
+.\build-all-webs.ps1
+```
+
+### 2.4 update-files.ps1
 #### 功能说明
 将标准文件（如 Dockerfile、logback.xml 等）从模板项目（Web目录下的 kc.web.account 项目）复制到其他项目
 
@@ -31,7 +93,7 @@ Update-Files -solutionType "Web" -solutionName "kc.web.account" -fileFullPath "s
 .\update-files.ps1
 ```
 
-### 2.2 build-java-web.ps1
+### 2.5 build-java-web.ps1
 #### 功能说明
 构建和部署 Java Web 应用到 Docker 容器
 
@@ -49,7 +111,7 @@ Update-Files -solutionType "Web" -solutionName "kc.web.account" -fileFullPath "s
 build-java-web.ps1 -solutionType "Web" -solutionName "kc.web.account" -versionNum 1 -httpPort 2001 -httpsPort 0 -env "prod"
 ```
 
-### 2.3 clear-lastupdated.bat
+### 2.6 clear-lastupdated.bat
 #### 功能说明
 清除 Maven 本地仓库中的 .lastUpdated 文件，解决 Maven 依赖更新问题
 
@@ -68,7 +130,7 @@ rem 搜索完毕
 pause
 ```
 
-### 2.4 jenkins-build.sh
+### 2.7 jenkins-build.sh
 
 #### 功能说明
 Jenkins 构建脚本，用于自动化构建和部署项目
